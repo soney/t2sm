@@ -1,0 +1,19 @@
+{
+  "name": "t2sm",
+  "version": "0.0.1",
+  "description": "Trace 2 State Machine",
+  "main": "built/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soney/t2sm.git"
+  },
+  "author": "Steve Oney",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/soney/t2sm/issues"
+  },
+  "homepage": "https://github.com/soney/t2sm#readme"
+}

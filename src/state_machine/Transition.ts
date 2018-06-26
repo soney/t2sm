@@ -8,4 +8,6 @@ export class Transition {
     };
     public getFromState():AbstractState { return this.fromState; };
     public getToState():AbstractState { return this.toState; };
+    public fire(event?:any, source?:any):void {
+    };
 };

@@ -40,6 +40,10 @@ export abstract class AbstractState {
         return false;
     };
     public isActive():boolean { return this.active; };
+    protected _setIsActive(active:boolean):this {
+        this.active = active;
+        return this;
+    };
 };
 
 export class StartState extends AbstractState {
@@ -50,13 +54,8 @@ export class StartState extends AbstractState {
 };
 
 export class State extends AbstractState {
-    private subStates:AbstractState[] = [];
     constructor(label?:string) {
         super(label);
     };
     public isStartState():boolean { return false; };
-    public addSubState(...states:AbstractState[]):this {
-        this.subStates.push(...states);
-        return this;
-    };
 }; 

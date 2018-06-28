@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Transition_1 = require("./Transition");
 const events_1 = require("events");
 class AbstractState extends events_1.EventEmitter {
-    constructor(label) {
+    constructor(payload) {
         super();
-        this.label = label;
+        this.payload = payload;
         this.active = false;
         this.outgoingTransitions = [];
         this.incomingTransitions = [];
@@ -21,49 +20,52 @@ class AbstractState extends events_1.EventEmitter {
         };
     }
     ;
-    getLabel() {
-        return this.label;
+    getPayload() {
+        return this.payload;
     }
     ;
-    setLabel(label) {
-        this.label = label;
+    _getOutgoingTransitions() {
+        return this.outgoingTransitions;
     }
     ;
-    addOutgoingTransition(toState) {
-        const transition = new Transition_1.Transition(this, toState);
+    _getIncomingTransitions() {
+        return this.incomingTransitions;
+    }
+    ;
+    _addOutgoingTransition(transition) {
         this.outgoingTransitions.push(transition);
-        toState._addIncomingTransition(transition);
         if (this.isActive()) {
             transition.addListener('fire', this.onOutgoingTransitionFired);
         }
-        return transition;
     }
     ;
     _addIncomingTransition(transition) {
         this.incomingTransitions.push(transition);
     }
     ;
-    removeOutgoingTransition(transition) {
-        for (let i = 0; i < this.outgoingTransitions.length; i++) {
-            if (this.outgoingTransitions[i] === transition) {
-                if (transition.getToState()._removeIncomingTransition(transition)) {
-                    this.outgoingTransitions.splice(i, 1);
-                    transition.removeListener('fire', this.onOutgoingTransitionFired);
-                    break;
-                }
+    _removeOutgoingTransition(transition) {
+        const index = this.outgoingTransitions.indexOf(transition);
+        if (index >= 0) {
+            this.outgoingTransitions.splice(index, 1);
+            if (this.isActive()) {
+                transition.removeListener('fire', this.onOutgoingTransitionFired);
             }
+            return true;
         }
-        return this;
+        else {
+            return false;
+        }
     }
     ;
     _removeIncomingTransition(transition) {
-        for (let i = 0; i < this.incomingTransitions.length; i++) {
-            if (this.incomingTransitions[i] === transition) {
-                this.incomingTransitions.splice(i, 1);
-                return true;
-            }
+        const index = this.incomingTransitions.indexOf(transition);
+        if (index >= 0) {
+            this.incomingTransitions.splice(index, 1);
+            return true;
         }
-        return false;
+        else {
+            return false;
+        }
     }
     ;
     isActive() { return this.active; }
@@ -100,8 +102,8 @@ class AbstractState extends events_1.EventEmitter {
 exports.AbstractState = AbstractState;
 ;
 class StartState extends AbstractState {
-    constructor(label) {
-        super(label);
+    constructor(payload) {
+        super(payload);
     }
     ;
     isStartState() { return true; }
@@ -110,8 +112,8 @@ class StartState extends AbstractState {
 exports.StartState = StartState;
 ;
 class State extends AbstractState {
-    constructor(label) {
-        super(label);
+    constructor(payload) {
+        super(payload);
     }
     ;
     isStartState() { return false; }

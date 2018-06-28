@@ -1,55 +1,53 @@
 import {Transition} from './Transition';
 import { EventEmitter } from 'events';
 
-export abstract class AbstractState extends EventEmitter {
+export abstract class AbstractState<S, T> extends EventEmitter {
     private active:boolean = false;
-    private outgoingTransitions:Transition[] = [];
-    private incomingTransitions:Transition[] = [];
+    private outgoingTransitions:Transition<S,T>[] = [];
+    private incomingTransitions:Transition<S,T>[] = [];
     public abstract isStartState():boolean;
-    constructor(private label:string) {
+    constructor(private payload?:S) {
         super();
     };
-    public getLabel():string {
-        return this.label;
+    public getPayload():S {
+        return this.payload;
     };
-    public setLabel(label:string):void {
-        this.label = label;
+    public _getOutgoingTransitions():Transition<S,T>[] {
+        return this.outgoingTransitions;
     };
-    public addOutgoingTransition(toState:AbstractState):Transition {
-        const transition = new Transition(this, toState);
+    public _getIncomingTransitions():Transition<S,T>[] {
+        return this.incomingTransitions;
+    };
+    public _addOutgoingTransition(transition:Transition<S,T>):void {
         this.outgoingTransitions.push(transition);
-        toState._addIncomingTransition(transition);
 
         if(this.isActive()) {
             transition.addListener('fire', this.onOutgoingTransitionFired);
         }
-
-        return transition;
     };
-    protected _addIncomingTransition(transition:Transition):void {
+    public _addIncomingTransition(transition:Transition<S,T>):void {
         this.incomingTransitions.push(transition);
     };
-
-    public removeOutgoingTransition(transition:Transition):this {
-        for(let i:number = 0; i<this.outgoingTransitions.length; i++) {
-            if(this.outgoingTransitions[i] === transition) {
-                if(transition.getToState()._removeIncomingTransition(transition)) {
-                    this.outgoingTransitions.splice(i, 1);
-                    transition.removeListener('fire', this.onOutgoingTransitionFired);
-                    break;
-                }
+    public _removeOutgoingTransition(transition:Transition<S,T>):boolean {
+        const index = this.outgoingTransitions.indexOf(transition);
+        if(index>=0) {
+            this.outgoingTransitions.splice(index, 1);
+            if(this.isActive()) {
+                transition.removeListener('fire', this.onOutgoingTransitionFired);
             }
+            return true;
+        } else {
+            return false;
         }
-        return this;
     };
-    protected _removeIncomingTransition(transition:Transition):boolean {
-        for(let i:number = 0; i<this.incomingTransitions.length; i++) {
-            if(this.incomingTransitions[i] === transition) {
-                this.incomingTransitions.splice(i, 1);
-                return true;
-            }
+    public _removeIncomingTransition(transition:Transition<S,T>):boolean {
+        const index = this.incomingTransitions.indexOf(transition);
+        if(index>=0) {
+            this.incomingTransitions.splice(index, 1);
+            return true;
+        } else {
+            return false;
         }
-        return false;
     };
     public isActive():boolean { return this.active; };
     public setIsActive(active:boolean):void {
@@ -73,7 +71,7 @@ export abstract class AbstractState extends EventEmitter {
         });
     };
 
-    private onOutgoingTransitionFired = (transition:Transition, event:any, source:any) => {
+    private onOutgoingTransitionFired = (transition:Transition<S,T>, event:any, source:any) => {
         if(this.isActive()) {
             const toState = transition.getToState();
             this.setIsActive(false);
@@ -88,16 +86,16 @@ export abstract class AbstractState extends EventEmitter {
     };
 };
 
-export class StartState extends AbstractState {
-    constructor(label:string) {
-        super(label);
+export class StartState<S,T> extends AbstractState<S,T> {
+    constructor(payload?:S) {
+        super(payload);
     };
     public isStartState():boolean { return true; };
 };
 
-export class State extends AbstractState {
-    constructor(label:string) {
-        super(label);
+export class State<S,T> extends AbstractState<S,T> {
+    constructor(payload?:S) {
+        super(payload);
     };
     public isStartState():boolean { return false; };
-}; 
+};

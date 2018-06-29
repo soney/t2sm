@@ -237,6 +237,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
 
         const transition = new Transition(fromState, toState, payload);
         this.transitions.set(label, transition);
+        this.transitionLabels.set(transition, label);
 
         return label;
     };
@@ -393,6 +394,44 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     };
 
     /**
+     * Convert this state machine into a printable representation
+     */
+    public toString():string {
+        const dividierWidth = 40;
+        const divider = '~'.repeat(dividierWidth);
+        const stateWidth = 10;
+        const tabWidth = 4;
+        const spaceOut = (word:string):string => {
+            const wordLength = word.length;
+            const spacesBefore = Math.round((dividierWidth - wordLength)/2);
+            return ' '.repeat(spacesBefore) + word;
+        };
+        const pad = (word:string, width:number):string => {
+            const toAdd = width - word.length;
+            if(toAdd > 0) {
+                return word + ' '.repeat(toAdd);
+            } else {
+                return word;
+            }
+        };
+        let rv:string = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
+        this.getStates().forEach((state) => {
+            rv += `${pad(state+':', stateWidth)} ${this.getStatePayload(state)}\n`;
+
+            const outgoingTransitions = this.getOutgoingTransitions(state);
+            if(outgoingTransitions.length > 0) {
+                outgoingTransitions.forEach((t) => {
+                    const payload = this.getTransitionPayload(t);
+                    rv += pad(`${' '.repeat(tabWidth)} --(${t})--> ${this.getTransitionTo(t)}`, 30);
+                    rv += `: ${this.getTransitionPayload(t)}\n`;
+                });
+            }
+        });
+
+        return rv;
+    };
+
+    /**
      * Clean up all of the objects stored in this container
      */
     public destroy():void {
@@ -405,9 +444,10 @@ export abstract class StateContainer<S,T> extends EventEmitter {
 
 type Pair<E> = [E,E];
 export type EqualityCheck<E> = (i1:E, i2:E) => boolean;
+const default_equality_check:EqualityCheck<any> = (a:any, b:any) => a===b;
 
 export class MergableFSM<S,T> extends StateContainer<S,T> {
-    constructor(private transitionsEqual:EqualityCheck<T>=()=>false, startStateName?:string) {
+    constructor(private transitionsEqual:EqualityCheck<T>=default_equality_check, startStateName?:string) {
         super(startStateName);
     };
     /**
@@ -448,7 +488,7 @@ export class MergableFSM<S,T> extends StateContainer<S,T> {
         for(let i:number = 0; i<transitionSet1.length; i++) {
             const t1 = transitionSet1[i];
             for(let j:number = 0; j<transitionSet2.length; j++) {
-                const t2 = transitionSet2[i];
+                const t2 = transitionSet2[j];
                 if(this.transitionsEqual(t1.getPayload(), t2.getPayload())) {
                     rv.push([t1, t2]);
                     break;

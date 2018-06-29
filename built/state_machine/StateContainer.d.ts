@@ -197,6 +197,10 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      */
     setTransitionFrom(label: string, fromState: string): this;
     /**
+     * Convert this state machine into a printable representation
+     */
+    toString(): string;
+    /**
      * Clean up all of the objects stored in this container
      */
     destroy(): void;

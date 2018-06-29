@@ -254,6 +254,7 @@ class StateContainer extends events_1.EventEmitter {
         const toState = this.getState(toLabel);
         const transition = new Transition_1.Transition(fromState, toState, payload);
         this.transitions.set(label, transition);
+        this.transitionLabels.set(transition, label);
         return label;
     }
     ;
@@ -433,6 +434,43 @@ class StateContainer extends events_1.EventEmitter {
     }
     ;
     /**
+     * Convert this state machine into a printable representation
+     */
+    toString() {
+        const dividierWidth = 40;
+        const divider = '~'.repeat(dividierWidth);
+        const stateWidth = 10;
+        const tabWidth = 4;
+        const spaceOut = (word) => {
+            const wordLength = word.length;
+            const spacesBefore = Math.round((dividierWidth - wordLength) / 2);
+            return ' '.repeat(spacesBefore) + word;
+        };
+        const pad = (word, width) => {
+            const toAdd = width - word.length;
+            if (toAdd > 0) {
+                return word + ' '.repeat(toAdd);
+            }
+            else {
+                return word;
+            }
+        };
+        let rv = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
+        this.getStates().forEach((state) => {
+            rv += `${pad(state + ':', stateWidth)} ${this.getStatePayload(state)}\n`;
+            const outgoingTransitions = this.getOutgoingTransitions(state);
+            if (outgoingTransitions.length > 0) {
+                outgoingTransitions.forEach((t) => {
+                    const payload = this.getTransitionPayload(t);
+                    rv += pad(`${' '.repeat(tabWidth)} --(${t})--> ${this.getTransitionTo(t)}`, 30);
+                    rv += `: ${this.getTransitionPayload(t)}\n`;
+                });
+            }
+        });
+        return rv;
+    }
+    ;
+    /**
      * Clean up all of the objects stored in this container
      */
     destroy() {
@@ -445,8 +483,9 @@ class StateContainer extends events_1.EventEmitter {
 }
 exports.StateContainer = StateContainer;
 ;
+const default_equality_check = (a, b) => a === b;
 class MergableFSM extends StateContainer {
-    constructor(transitionsEqual = () => false, startStateName) {
+    constructor(transitionsEqual = default_equality_check, startStateName) {
         super(startStateName);
         this.transitionsEqual = transitionsEqual;
     }
@@ -488,7 +527,7 @@ class MergableFSM extends StateContainer {
         for (let i = 0; i < transitionSet1.length; i++) {
             const t1 = transitionSet1[i];
             for (let j = 0; j < transitionSet2.length; j++) {
-                const t2 = transitionSet2[i];
+                const t2 = transitionSet2[j];
                 if (this.transitionsEqual(t1.getPayload(), t2.getPayload())) {
                     rv.push([t1, t2]);
                     break;

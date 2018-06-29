@@ -4,7 +4,9 @@
   "description": "Trace 2 State Machine",
   "main": "built/index.js",
   "scripts": {
-    "build": "npx tsc"
+    "build": "npx tsc",
+    "watch": "npx tsc --watch",
+    "test": "npx mocha -r ts-node/register tests/**/test.ts"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,12 @@
   },
   "homepage": "https://github.com/soney/t2sm#readme",
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.3",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.0",
+    "typedoc": "^0.11.1",
     "typescript": "^2.9.2"
   },
   "dependencies": {

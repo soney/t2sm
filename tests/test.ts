@@ -50,16 +50,17 @@ describe('Traces to FSM', () => {
                 'begin',
                 'click next',
                 'click next',
-                'click next',
+                'click prev',
                 'click ok'
             ], [
                 'begin',
                 'click next',
                 'click next',
+                'click prev',
+                'click x',
                 'click next',
-                'click next',
-                'click next',
-                'click ok'
+                'click prev',
+                'click okay'
             ], [
                 'begin',
                 'click ok'
@@ -67,6 +68,14 @@ describe('Traces to FSM', () => {
         ];
         const fsmTraces = example_traces.map((et) => (et.map((s) => [s, null]) as [string, null][]));
         fsmTraces.forEach((t) => fsm.addTrace(t));
+        console.log(fsm.toString());
+        fsm.iterateMerge();
+        console.log(fsm.toString());
+        fsm.iterateMerge();
+        console.log(fsm.toString());
+        fsm.iterateMerge();
+        console.log(fsm.toString());
+        fsm.iterateMerge();
         console.log(fsm.toString());
         fsm.iterateMerge();
         console.log(fsm.toString());

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const State_1 = require("./State");
 const Transition_1 = require("./Transition");
 const events_1 = require("events");
+const HashMap_1 = require("../utils/HashMap");
 class StateContainer extends events_1.EventEmitter {
     /**
      * Create a new StateContainer
@@ -483,11 +484,14 @@ class StateContainer extends events_1.EventEmitter {
 }
 exports.StateContainer = StateContainer;
 ;
-const default_equality_check = (a, b) => a === b;
+const defaultEqualityCheck = (a, b) => a === b;
+const defaultSimilarityScore = (a, b) => a === b ? 1 : 0;
 class MergableFSM extends StateContainer {
-    constructor(transitionsEqual = default_equality_check, startStateName) {
+    constructor(transitionsEqual = defaultEqualityCheck, transitionSimilarityScore = defaultSimilarityScore, stateSimilarityScore = defaultSimilarityScore, startStateName) {
         super(startStateName);
         this.transitionsEqual = transitionsEqual;
+        this.transitionSimilarityScore = transitionSimilarityScore;
+        this.stateSimilarityScore = stateSimilarityScore;
     }
     ;
     /**
@@ -496,23 +500,53 @@ class MergableFSM extends StateContainer {
     iterateMerge() {
         const similarityScores = this.computeSimilarityScores();
         const sortedStates = Array.from(similarityScores.entries()).sort((a, b) => a[1] - b[1]);
-        const [toMergeS1, toMergeS2] = sortedStates[0][0];
-        this.mergeStates(toMergeS1, toMergeS2);
+        if (sortedStates.length > 0) {
+            const [toMergeS1, toMergeS2] = sortedStates[0][0];
+            this.mergeStates(toMergeS1, toMergeS2);
+        }
+    }
+    ;
+    /**
+     * @returns every possible pairing of states
+     */
+    getStatePairs() {
+        const rv = [];
+        const states = Array.from(this.states.values());
+        for (let i = 0; i < states.length; i++) {
+            const si = states[i];
+            for (let j = i + 1; j < states.length; j++) {
+                const sj = states[j];
+                rv.push([si, sj]);
+            }
+        }
+        return rv;
     }
     ;
     /**
      * Compute a similarity score of every pair of states
      */
     computeSimilarityScores() {
+        const numCommonTransitions = new HashMap_1.HashMap((p1, p2) => { return p1[0] === p2[0] && p1[1] === p2[1]; }, (p) => { return this.getStateLabel(p[0]) + this.getStateLabel(p[1]); });
+        const statePairs = this.getStatePairs();
+        const equivalentOutgoingTransitions = new Map();
+        statePairs.forEach((p) => {
+            const [state1, state2] = p;
+            const et = this.equivalentTransitions(state1._getOutgoingTransitions(), state2._getOutgoingTransitions());
+            equivalentOutgoingTransitions.set(p, et);
+            numCommonTransitions.set(p, et.length);
+        });
         const rv = new Map();
-        const states = Array.from(this.states.values());
-        for (let i = 0; i < states.length; i++) {
-            const si = states[i];
-            for (let j = i + 1; j < states.length; j++) {
-                const sj = states[j];
-                this.getSimilarityScore(si, sj, rv);
-            }
-        }
+        statePairs.forEach((p) => {
+            const equivalentTransitions = equivalentOutgoingTransitions.get(p);
+            equivalentTransitions.forEach((et) => {
+                const [t1, t2] = et;
+                const t1Dest = t1.getToState();
+                const t2Dest = t2.getToState();
+                const similarityScore = numCommonTransitions.get([t1Dest, t2Dest]) || numCommonTransitions.get([t2Dest, t1Dest]);
+                rv.set(p, numCommonTransitions.get(p) + similarityScore);
+            });
+        });
+        numCommonTransitions.clear();
         return rv;
     }
     ;
@@ -535,31 +569,6 @@ class MergableFSM extends StateContainer {
             }
         }
         return rv;
-    }
-    ;
-    /**
-     *
-     * @param state1 First state
-     * @param state2 Second state
-     * @param scoreMap The scores so far
-     */
-    getSimilarityScore(state1, state2, scoreMap = new Map()) {
-        let score = 0;
-        const equivalentOutgoingTransitions = this.equivalentTransitions(state1._getOutgoingTransitions(), state2._getOutgoingTransitions());
-        equivalentOutgoingTransitions.forEach((pair) => {
-            score++;
-            scoreMap.set([state1, state2], score);
-            const [t1, t2] = pair;
-            const t1Dest = t1.getToState();
-            const t2Dest = t2.getToState();
-            if (scoreMap.has([t1Dest, t2Dest])) {
-                score += scoreMap.get([t1Dest, t2Dest]);
-            }
-            else {
-                score += this.getSimilarityScore(t1Dest, t2Dest, scoreMap);
-            }
-        });
-        return score;
     }
     ;
     /**
@@ -594,30 +603,52 @@ class MergableFSM extends StateContainer {
     /**
      * Merge two states together
      */
-    mergeStates(removeState, mergeInto) {
+    mergeStates(removeState, mergeInto, removeStaleStates = true) {
         const mergeIntoOutgoingTransitions = mergeInto._getOutgoingTransitions();
-        removeState._getOutgoingTransitions().forEach((t) => {
-            const tPayload = t.getPayload();
-            let hasConflict = false;
-            for (let i in mergeIntoOutgoingTransitions) {
-                const t2 = mergeIntoOutgoingTransitions[i];
-                const t2Payload = t2.getPayload();
-                if (this.transitionsEqual(tPayload, t2Payload)) {
-                    hasConflict = true;
-                    break;
+        const outgoingTransitionTargets = new Set();
+        let outgoingTransitions;
+        do {
+            outgoingTransitions = removeState._getOutgoingTransitions();
+            const t = outgoingTransitions[0];
+            if (t) {
+                const tPayload = t.getPayload();
+                let hasConflict = false;
+                for (let i in mergeIntoOutgoingTransitions) {
+                    const t2 = mergeIntoOutgoingTransitions[i];
+                    const t2Payload = t2.getPayload();
+                    if (this.transitionsEqual(tPayload, t2Payload)) {
+                        hasConflict = true;
+                        break;
+                    }
+                }
+                if (hasConflict) {
+                    if (removeStaleStates) {
+                        outgoingTransitionTargets.add(t.getToState());
+                    }
+                    t.remove();
+                }
+                else {
+                    t.setFromState(mergeInto);
                 }
             }
-            if (hasConflict) {
-                t.remove();
+        } while (outgoingTransitions.length > 0);
+        let incomingTransitions;
+        do {
+            incomingTransitions = removeState._getIncomingTransitions();
+            const t = incomingTransitions[0];
+            if (t) {
+                t.setToState(mergeInto);
             }
-            else {
-                t.setFromState(mergeInto);
-            }
-        });
-        removeState._getIncomingTransitions().forEach((t) => {
-            t.setToState(mergeInto);
-        });
+        } while (incomingTransitions.length > 0);
         this.removeState(this.getStateLabel(removeState));
+        if (removeStaleStates) {
+            outgoingTransitionTargets.forEach((state) => {
+                if (state._getIncomingTransitions().length === 0) {
+                    state.remove();
+                    this.removeState(this.getStateLabel(state));
+                }
+            });
+        }
     }
     ;
 }

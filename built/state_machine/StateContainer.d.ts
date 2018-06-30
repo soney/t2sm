@@ -206,13 +206,20 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
     destroy(): void;
 }
 export declare type EqualityCheck<E> = (i1: E, i2: E) => boolean;
+export declare type SimilarityScore<E> = (i1: E, i2: E) => number;
 export declare class MergableFSM<S, T> extends StateContainer<S, T> {
     private transitionsEqual;
-    constructor(transitionsEqual?: EqualityCheck<T>, startStateName?: string);
+    private transitionSimilarityScore;
+    private stateSimilarityScore;
+    constructor(transitionsEqual?: EqualityCheck<T>, transitionSimilarityScore?: SimilarityScore<T>, stateSimilarityScore?: SimilarityScore<S>, startStateName?: string);
     /**
      * Iterate and merge the best candidates
      */
     iterateMerge(): void;
+    /**
+     * @returns every possible pairing of states
+     */
+    private getStatePairs;
     /**
      * Compute a similarity score of every pair of states
      */
@@ -224,13 +231,6 @@ export declare class MergableFSM<S, T> extends StateContainer<S, T> {
      * @returns A list of pairs of transitions that are common between transitionSet1 and transitionSet2
      */
     private equivalentTransitions;
-    /**
-     *
-     * @param state1 First state
-     * @param state2 Second state
-     * @param scoreMap The scores so far
-     */
-    private getSimilarityScore;
     /**
      * Add a new "trace" through a program
      */

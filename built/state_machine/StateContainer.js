@@ -20,6 +20,7 @@ class StateContainer extends events_1.EventEmitter {
          */
         this.onStateActive = (state) => {
             this.activeState = state;
+            this.emit('activeStateChanged', { state: this.getStateLabel(state) });
         };
         this.startState = this.activeState = new State_1.StartState();
         this.states.set(startStateName, this.startState);
@@ -71,6 +72,7 @@ class StateContainer extends events_1.EventEmitter {
     setStatePayload(label, payload) {
         if (this.hasState(label)) {
             this.getState(label).setPayload(payload);
+            this.emit('statePayloadChanged', { state: label, payload });
             return this;
         }
         else {
@@ -122,6 +124,7 @@ class StateContainer extends events_1.EventEmitter {
     setTransitionPayload(label, payload) {
         if (this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
+            this.emit('transitionPayloadChanged', { transition: label, payload });
             return this;
         }
         else {
@@ -170,6 +173,7 @@ class StateContainer extends events_1.EventEmitter {
             this.states.set(label, state);
             this.stateLabels.set(state, label);
             state.addListener('active', this.onStateActive);
+            this.emit('stateAdded', { state: label, payload });
             return label;
         }
     }
@@ -185,6 +189,7 @@ class StateContainer extends events_1.EventEmitter {
             this.states.delete(label);
             this.stateLabels.delete(state);
             state.removeListener('active', this.onStateActive);
+            this.emit('stateRemoved', { state: label });
             return this;
         }
         else {
@@ -208,6 +213,7 @@ class StateContainer extends events_1.EventEmitter {
         this.states.delete(fromLabel);
         this.states.set(toLabel, fromState);
         this.stateLabels.set(fromState, toLabel);
+        this.emit('stateRenamed', { fromName: fromLabel, toName: toLabel });
         return this;
     }
     ;
@@ -227,6 +233,7 @@ class StateContainer extends events_1.EventEmitter {
         this.transitions.delete(fromLabel);
         this.transitions.set(toLabel, transition);
         this.transitionLabels.set(transition, toLabel);
+        this.emit('transitionRenamed', { fromName: fromLabel, toName: toLabel });
         return this;
     }
     ;
@@ -256,6 +263,7 @@ class StateContainer extends events_1.EventEmitter {
         const transition = new Transition_1.Transition(fromState, toState, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
+        this.emit('transitionAdded', { transition: label, from: fromLabel, to: toLabel, payload });
         return label;
     }
     ;
@@ -269,6 +277,7 @@ class StateContainer extends events_1.EventEmitter {
             transition.remove();
             this.transitions.delete(label);
             this.transitionLabels.delete(transition);
+            this.emit('transitionRemoved', { transition: label });
             return this;
         }
         else {
@@ -479,6 +488,7 @@ class StateContainer extends events_1.EventEmitter {
         this.stateLabels.clear();
         this.transitions.clear();
         this.transitionLabels.clear();
+        this.emit('destroyed');
     }
     ;
 }

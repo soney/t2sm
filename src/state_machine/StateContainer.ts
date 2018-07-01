@@ -63,6 +63,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public setStatePayload(label:string, payload:S):this {
         if(this.hasState(label)) {
             this.getState(label).setPayload(payload);
+            this.emit('statePayloadChanged', {state:label, payload});
             return this;
         } else {
             throw new Error(`Could not find state with label ${label}`);
@@ -112,6 +113,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public setTransitionPayload(label:string, payload:T):this {
         if(this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
+            this.emit('transitionPayloadChanged', {transition:label, payload});
             return this;
         } else {
             throw new Error(`Could not find transition ${label}`);
@@ -157,6 +159,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             this.states.set(label, state);
             this.stateLabels.set(state, label);
             state.addListener('active', this.onStateActive);
+            this.emit('stateAdded', {state:label, payload});
             return label;
         }
     };
@@ -166,6 +169,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
      */
     private onStateActive = (state) => {
         this.activeState = state;
+        this.emit('activeStateChanged', {state:this.getStateLabel(state)});
     };
 
     /**
@@ -179,6 +183,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             this.states.delete(label);
             this.stateLabels.delete(state);
             state.removeListener('active', this.onStateActive);
+            this.emit('stateRemoved', {state:label});
             return this;
         } else {
             throw new Error(`State container does not have a state with label ${label}`);
@@ -198,6 +203,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.states.delete(fromLabel);
         this.states.set(toLabel, fromState);
         this.stateLabels.set(fromState, toLabel);
+        this.emit('stateRenamed', {fromName:fromLabel, toName:toLabel});
         return this;
     };
 
@@ -214,6 +220,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.transitions.delete(fromLabel);
         this.transitions.set(toLabel, transition);
         this.transitionLabels.set(transition, toLabel);
+        this.emit('transitionRenamed', {fromName:fromLabel, toName:toLabel});
         return this;
     };
 
@@ -239,6 +246,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const transition = new Transition(fromState, toState, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
+        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, payload});
 
         return label;
     };
@@ -253,6 +261,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             transition.remove();
             this.transitions.delete(label);
             this.transitionLabels.delete(transition);
+            this.emit('transitionRemoved', {transition:label});
             return this;
         } else {
             throw new Error('Could not find transition');
@@ -440,6 +449,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.stateLabels.clear();
         this.transitions.clear();
         this.transitionLabels.clear();
+        this.emit('destroyed');
     };
 };
 

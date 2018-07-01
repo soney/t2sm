@@ -25,10 +25,6 @@ A class representing a state in a state machine
 
 ### Properties
 
-* [active](_state_machine_state_.abstractstate.md#active)
-* [incomingTransitions](_state_machine_state_.abstractstate.md#incomingtransitions)
-* [outgoingTransitions](_state_machine_state_.abstractstate.md#outgoingtransitions)
-* [payload](_state_machine_state_.abstractstate.md#payload)
 * [defaultMaxListeners](_state_machine_state_.abstractstate.md#defaultmaxlisteners)
 
 ### Methods
@@ -40,7 +36,6 @@ A class representing a state in a state machine
 * [_removeIncomingTransition](_state_machine_state_.abstractstate.md#_removeincomingtransition)
 * [_removeOutgoingTransition](_state_machine_state_.abstractstate.md#_removeoutgoingtransition)
 * [addListener](_state_machine_state_.abstractstate.md#addlistener)
-* [addOutgoingTransitionListeners](_state_machine_state_.abstractstate.md#addoutgoingtransitionlisteners)
 * [emit](_state_machine_state_.abstractstate.md#emit)
 * [eventNames](_state_machine_state_.abstractstate.md#eventnames)
 * [getMaxListeners](_state_machine_state_.abstractstate.md#getmaxlisteners)
@@ -51,7 +46,6 @@ A class representing a state in a state machine
 * [listeners](_state_machine_state_.abstractstate.md#listeners)
 * [off](_state_machine_state_.abstractstate.md#off)
 * [on](_state_machine_state_.abstractstate.md#on)
-* [onOutgoingTransitionFired](_state_machine_state_.abstractstate.md#onoutgoingtransitionfired)
 * [once](_state_machine_state_.abstractstate.md#once)
 * [prependListener](_state_machine_state_.abstractstate.md#prependlistener)
 * [prependOnceListener](_state_machine_state_.abstractstate.md#prependoncelistener)
@@ -59,7 +53,6 @@ A class representing a state in a state machine
 * [remove](_state_machine_state_.abstractstate.md#remove)
 * [removeAllListeners](_state_machine_state_.abstractstate.md#removealllisteners)
 * [removeListener](_state_machine_state_.abstractstate.md#removelistener)
-* [removeOutgoingTransitionListeners](_state_machine_state_.abstractstate.md#removeoutgoingtransitionlisteners)
 * [setIsActive](_state_machine_state_.abstractstate.md#setisactive)
 * [setMaxListeners](_state_machine_state_.abstractstate.md#setmaxlisteners)
 * [setPayload](_state_machine_state_.abstractstate.md#setpayload)
@@ -75,7 +68,7 @@ A class representing a state in a state machine
 
 ⊕ **new AbstractState**(payload?: *`S`*): [AbstractState](_state_machine_state_.abstractstate.md)
 
-*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L11)*
+*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L11)*
 
 **Parameters:**
 
@@ -89,42 +82,6 @@ ___
 
 ## Properties
 
-<a id="active"></a>
-
-### `<Private>` active
-
-**● active**: *`boolean`* = false
-
-*Defined in [state_machine/State.ts:8](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L8)*
-
-___
-<a id="incomingtransitions"></a>
-
-### `<Private>` incomingTransitions
-
-**● incomingTransitions**: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]* =  []
-
-*Defined in [state_machine/State.ts:10](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L10)*
-
-___
-<a id="outgoingtransitions"></a>
-
-### `<Private>` outgoingTransitions
-
-**● outgoingTransitions**: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]* =  []
-
-*Defined in [state_machine/State.ts:9](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L9)*
-
-___
-<a id="payload"></a>
-
-### `<Private>``<Optional>` payload
-
-**● payload**: *`S`*
-
-*Defined in [state_machine/State.ts:12](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L12)*
-
-___
 <a id="defaultmaxlisteners"></a>
 
 ### `<Static>` defaultMaxListeners
@@ -145,7 +102,7 @@ ___
 
 ▸ **_addIncomingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/State.ts:74](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L74)*
+*Defined in [state_machine/State.ts:74](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L74)*
 
 Mark a new transition as going to this state (should only be used internally)
 
@@ -164,7 +121,7 @@ ___
 
 ▸ **_addOutgoingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/State.ts:40](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L40)*
+*Defined in [state_machine/State.ts:40](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L40)*
 
 Mark a new transition as leaving from this state (should only be used internally)
 
@@ -183,7 +140,7 @@ ___
 
 ▸ **_getIncomingTransitions**(): [Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]
 
-*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L34)*
+*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L34)*
 
 Get all of the transitions entering this state (should only be used internally)
 
@@ -196,7 +153,7 @@ ___
 
 ▸ **_getOutgoingTransitions**(): [Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]
 
-*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L30)*
+*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L30)*
 
 Get all of the transitions leaving this state (should only be used internally)
 
@@ -209,7 +166,7 @@ ___
 
 ▸ **_removeIncomingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `boolean`
 
-*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L83)*
+*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L83)*
 
 Remove a transition from the list of incoming transitions
 
@@ -229,7 +186,7 @@ ___
 
 ▸ **_removeOutgoingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `boolean`
 
-*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L56)*
+*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L56)*
 
 Remove a transition from the list of outgoing transitions
 
@@ -263,19 +220,6 @@ ___
 | listener | `function` |
 
 **Returns:** `this`
-
-___
-<a id="addoutgoingtransitionlisteners"></a>
-
-### `<Private>` addOutgoingTransitionListeners
-
-▸ **addOutgoingTransitionListeners**(): `void`
-
-*Defined in [state_machine/State.ts:116](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L116)*
-
-Enable outgoing transition listeners for when this state is active
-
-**Returns:** `void`
 
 ___
 <a id="emit"></a>
@@ -336,7 +280,7 @@ ___
 
 ▸ **getPayload**(): `S`
 
-*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L19)*
+*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L19)*
 
 Get the data attached to this state
 
@@ -349,7 +293,7 @@ ___
 
 ▸ **isActive**(): `boolean`
 
-*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L96)*
+*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L96)*
 
 **Returns:** `boolean`
 true if this state is active and false otherwise
@@ -361,7 +305,7 @@ ___
 
 ▸ **isStartState**(): `boolean`
 
-*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L11)*
+*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L11)*
 
 **Returns:** `boolean`
 
@@ -450,27 +394,6 @@ ___
 | listener | `function` |
 
 **Returns:** `this`
-
-___
-<a id="onoutgoingtransitionfired"></a>
-
-### `<Private>` onOutgoingTransitionFired
-
-▸ **onOutgoingTransitionFired**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*, event: *`any`*, source: *`any`*): `void`
-
-*Defined in [state_machine/State.ts:135](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L135)*
-
-Called when a transition leaving this state was fired
-
-**Parameters:**
-
-| Param | Type |
-| ------ | ------ |
-| transition | [Transition](_state_machine_transition_.transition.md)<`S`, `T`> |
-| event | `any` |
-| source | `any` |
-
-**Returns:** `void`
 
 ___
 <a id="once"></a>
@@ -566,7 +489,7 @@ ___
 
 ▸ **remove**(): `void`
 
-*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L151)*
+*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L151)*
 
 Remove this state
 
@@ -616,26 +539,13 @@ ___
 **Returns:** `this`
 
 ___
-<a id="removeoutgoingtransitionlisteners"></a>
-
-### `<Private>` removeOutgoingTransitionListeners
-
-▸ **removeOutgoingTransitionListeners**(): `void`
-
-*Defined in [state_machine/State.ts:125](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L125)*
-
-Disable outgoing transition listeners for when this state is inactive
-
-**Returns:** `void`
-
-___
 <a id="setisactive"></a>
 
 ###  setIsActive
 
 ▸ **setIsActive**(active: *`boolean`*): `void`
 
-*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L102)*
+*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L102)*
 
 Change whether this state is active or not
 
@@ -675,7 +585,7 @@ ___
 
 ▸ **setPayload**(payload: *`S`*): `void`
 
-*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/676b519/src/state_machine/State.ts#L25)*
+*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L25)*
 
 Set the data attached to this state
 

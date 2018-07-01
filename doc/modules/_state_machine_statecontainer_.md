@@ -30,7 +30,7 @@
 
 **ΤEqualityCheck**: *`function`*
 
-*Defined in [state_machine/StateContainer.ts:457](https://github.com/soney/t2sm/blob/676b519/src/state_machine/StateContainer.ts#L457)*
+*Defined in [state_machine/StateContainer.ts:457](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L457)*
 
 #### Type declaration
 ▸(i1: *`E`*, i2: *`E`*): `boolean`
@@ -51,7 +51,7 @@ ___
 
 **ΤPair**: *[`E`, `E`]*
 
-*Defined in [state_machine/StateContainer.ts:456](https://github.com/soney/t2sm/blob/676b519/src/state_machine/StateContainer.ts#L456)*
+*Defined in [state_machine/StateContainer.ts:456](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L456)*
 
 ___
 <a id="similarityscore"></a>
@@ -60,7 +60,7 @@ ___
 
 **ΤSimilarityScore**: *`function`*
 
-*Defined in [state_machine/StateContainer.ts:458](https://github.com/soney/t2sm/blob/676b519/src/state_machine/StateContainer.ts#L458)*
+*Defined in [state_machine/StateContainer.ts:458](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L458)*
 
 #### Type declaration
 ▸(i1: *`E`*, i2: *`E`*): `number`
@@ -84,7 +84,7 @@ ___
 
 ▸ **defaultEqualityCheck**(a: *`any`*, b: *`any`*): `boolean`
 
-*Defined in [state_machine/StateContainer.ts:459](https://github.com/soney/t2sm/blob/676b519/src/state_machine/StateContainer.ts#L459)*
+*Defined in [state_machine/StateContainer.ts:459](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L459)*
 
 **Parameters:**
 
@@ -102,7 +102,7 @@ ___
 
 ▸ **defaultSimilarityScore**(a: *`any`*, b: *`any`*):  `1` &#124; `0`
 
-*Defined in [state_machine/StateContainer.ts:460](https://github.com/soney/t2sm/blob/676b519/src/state_machine/StateContainer.ts#L460)*
+*Defined in [state_machine/StateContainer.ts:460](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L460)*
 
 **Parameters:**
 

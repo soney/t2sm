@@ -21,10 +21,6 @@ A class representing a transition in a state machine
 
 ### Properties
 
-* [eligible](_state_machine_transition_.transition.md#eligible)
-* [fromState](_state_machine_transition_.transition.md#fromstate)
-* [payload](_state_machine_transition_.transition.md#payload)
-* [toState](_state_machine_transition_.transition.md#tostate)
 * [defaultMaxListeners](_state_machine_transition_.transition.md#defaultmaxlisteners)
 
 ### Methods
@@ -66,7 +62,7 @@ A class representing a transition in a state machine
 
 ⊕ **new Transition**(fromState: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*, toState: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*, payload?: *`T`*): [Transition](_state_machine_transition_.transition.md)
 
-*Defined in [state_machine/Transition.ts:8](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L8)*
+*Defined in [state_machine/Transition.ts:8](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L8)*
 
 Constructor
 
@@ -84,48 +80,6 @@ ___
 
 ## Properties
 
-<a id="eligible"></a>
-
-### `<Private>` eligible
-
-**● eligible**: *`boolean`*
-
-*Defined in [state_machine/Transition.ts:8](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L8)*
-
-___
-<a id="fromstate"></a>
-
-### `<Private>` fromState
-
-**● fromState**: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*
-
-*Defined in [state_machine/Transition.ts:15](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L15)*
-
-The state that this transition leaves from
-
-___
-<a id="payload"></a>
-
-### `<Private>``<Optional>` payload
-
-**● payload**: *`T`*
-
-*Defined in [state_machine/Transition.ts:15](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L15)*
-
-The information stored in this transition
-
-___
-<a id="tostate"></a>
-
-### `<Private>` toState
-
-**● toState**: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*
-
-*Defined in [state_machine/Transition.ts:15](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L15)*
-
-The state that this transition goes to
-
-___
 <a id="defaultmaxlisteners"></a>
 
 ### `<Static>` defaultMaxListeners
@@ -205,7 +159,7 @@ ___
 
 ▸ **fire**(event?: *`any`*, source?: *`any`*): `void`
 
-*Defined in [state_machine/Transition.ts:53](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L53)*
+*Defined in [state_machine/Transition.ts:53](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L53)*
 
 Tell the transition to fire (if the "from" state is active, move to the "to" state)
 
@@ -225,7 +179,7 @@ ___
 
 ▸ **getFromState**(): [AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>
 
-*Defined in [state_machine/Transition.ts:43](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L43)*
+*Defined in [state_machine/Transition.ts:43](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L43)*
 
 Get the state that this transition leaves from
 
@@ -253,7 +207,7 @@ ___
 
 ▸ **getPayload**(): `T`
 
-*Defined in [state_machine/Transition.ts:79](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L79)*
+*Defined in [state_machine/Transition.ts:79](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L79)*
 
 Get this transition's content payload
 
@@ -266,7 +220,7 @@ ___
 
 ▸ **getToState**(): [AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>
 
-*Defined in [state_machine/Transition.ts:48](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L48)*
+*Defined in [state_machine/Transition.ts:48](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L48)*
 
 Get the state that this transition goes to
 
@@ -279,7 +233,7 @@ ___
 
 ▸ **isEligible**(): `boolean`
 
-*Defined in [state_machine/Transition.ts:24](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L24)*
+*Defined in [state_machine/Transition.ts:24](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L24)*
 
 **Returns:** `boolean`
 whether this transition is eligible to fire
@@ -464,7 +418,7 @@ ___
 
 ▸ **remove**(): `void`
 
-*Defined in [state_machine/Transition.ts:35](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L35)*
+*Defined in [state_machine/Transition.ts:35](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L35)*
 
 Remove this transition
 
@@ -520,7 +474,7 @@ ___
 
 ▸ **setEligible**(eligible: *`boolean`*): `void`
 
-*Defined in [state_machine/Transition.ts:30](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L30)*
+*Defined in [state_machine/Transition.ts:30](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L30)*
 
 Change whether this transition is eligible
 
@@ -539,7 +493,7 @@ ___
 
 ▸ **setFromState**(state: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/Transition.ts:61](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L61)*
+*Defined in [state_machine/Transition.ts:61](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L61)*
 
 Change which state this transition leaves from
 
@@ -579,7 +533,7 @@ ___
 
 ▸ **setPayload**(payload: *`T`*): `void`
 
-*Defined in [state_machine/Transition.ts:84](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L84)*
+*Defined in [state_machine/Transition.ts:84](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L84)*
 
 Set this transition's payload
 
@@ -598,7 +552,7 @@ ___
 
 ▸ **setToState**(state: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/Transition.ts:70](https://github.com/soney/t2sm/blob/676b519/src/state_machine/Transition.ts#L70)*
+*Defined in [state_machine/Transition.ts:70](https://github.com/soney/t2sm/blob/9786338/src/state_machine/Transition.ts#L70)*
 
 Change which state this transition goes to
 

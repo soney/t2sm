@@ -407,13 +407,13 @@ export abstract class StateContainer<S,T> extends EventEmitter {
      * Convert this state machine into a printable representation
      */
     public toString():string {
-        const dividierWidth = 40;
-        const divider = '~'.repeat(dividierWidth);
+        const dividerWidth = 40;
+        const divider = '~'.repeat(dividerWidth);
         const stateWidth = 10;
         const tabWidth = 4;
         const spaceOut = (word:string):string => {
             const wordLength = word.length;
-            const spacesBefore = Math.round((dividierWidth - wordLength)/2);
+            const spacesBefore = Math.round((dividerWidth - wordLength)/2);
             return ' '.repeat(spacesBefore) + word;
         };
         const pad = (word:string, width:number):string => {

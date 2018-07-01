@@ -15,13 +15,6 @@
 
 * [constructor](_utils_hashmap_.hashmap.md#constructor)
 
-### Properties
-
-* [equals](_utils_hashmap_.hashmap.md#equals)
-* [hash](_utils_hashmap_.hashmap.md#hash)
-* [map](_utils_hashmap_.hashmap.md#map)
-* [size](_utils_hashmap_.hashmap.md#size)
-
 ### Methods
 
 * [clear](_utils_hashmap_.hashmap.md#clear)
@@ -41,7 +34,7 @@
 
 ⊕ **new HashMap**(equals?: *[EqualityCheck](../modules/_utils_hashmap_.md#equalitycheck)<`K`>*, hash?: *[Hash](../modules/_utils_hashmap_.md#hash)<`K`>*): [HashMap](_utils_hashmap_.hashmap.md)
 
-*Defined in [utils/HashMap.ts:6](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L6)*
+*Defined in [utils/HashMap.ts:6](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L6)*
 
 **Parameters:**
 
@@ -54,45 +47,6 @@
 
 ___
 
-## Properties
-
-<a id="equals"></a>
-
-### `<Private>` equals
-
-**● equals**: *[EqualityCheck](../modules/_utils_hashmap_.md#equalitycheck)<`K`>*
-
-*Defined in [utils/HashMap.ts:8](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L8)*
-
-___
-<a id="hash"></a>
-
-### `<Private>` hash
-
-**● hash**: *[Hash](../modules/_utils_hashmap_.md#hash)<`K`>*
-
-*Defined in [utils/HashMap.ts:9](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L9)*
-
-___
-<a id="map"></a>
-
-### `<Private>` map
-
-**● map**: *`Map`<`any`, [`K`, `V`][]>* =  new Map<any, [K,V][]>()
-
-*Defined in [utils/HashMap.ts:5](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L5)*
-
-___
-<a id="size"></a>
-
-### `<Private>` size
-
-**● size**: *`number`* = 0
-
-*Defined in [utils/HashMap.ts:6](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L6)*
-
-___
-
 ## Methods
 
 <a id="clear"></a>
@@ -101,7 +55,7 @@ ___
 
 ▸ **clear**(): `this`
 
-*Defined in [utils/HashMap.ts:79](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L79)*
+*Defined in [utils/HashMap.ts:79](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L79)*
 
 **Returns:** `this`
 
@@ -112,7 +66,7 @@ ___
 
 ▸ **delete**(key: *`K`*): `this`
 
-*Defined in [utils/HashMap.ts:59](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L59)*
+*Defined in [utils/HashMap.ts:59](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L59)*
 
 **Parameters:**
 
@@ -129,7 +83,7 @@ ___
 
 ▸ **get**(key: *`K`*): `V`
 
-*Defined in [utils/HashMap.ts:35](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L35)*
+*Defined in [utils/HashMap.ts:35](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L35)*
 
 **Parameters:**
 
@@ -146,7 +100,7 @@ ___
 
 ▸ **getSize**(): `number`
 
-*Defined in [utils/HashMap.ts:76](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L76)*
+*Defined in [utils/HashMap.ts:76](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L76)*
 
 **Returns:** `number`
 
@@ -157,7 +111,7 @@ ___
 
 ▸ **has**(key: *`K`*): `boolean`
 
-*Defined in [utils/HashMap.ts:47](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L47)*
+*Defined in [utils/HashMap.ts:47](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L47)*
 
 **Parameters:**
 
@@ -174,7 +128,7 @@ ___
 
 ▸ **set**(key: *`K`*, value: *`V`*): `this`
 
-*Defined in [utils/HashMap.ts:13](https://github.com/soney/t2sm/blob/676b519/src/utils/HashMap.ts#L13)*
+*Defined in [utils/HashMap.ts:13](https://github.com/soney/t2sm/blob/9786338/src/utils/HashMap.ts#L13)*
 
 **Parameters:**
 

@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "watch": "npx tsc --watch",
     "test": "npx mocha -r ts-node/register tests/**/test.ts",
-    "doc": "npx typedoc --theme markdown --out ./doc src/index.ts"
+    "doc": "npx typedoc --excludePrivate --theme markdown --out ./doc src/index.ts"
   },
   "repository": {
     "type": "git",

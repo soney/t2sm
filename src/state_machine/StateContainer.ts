@@ -1,6 +1,7 @@
 import {AbstractState, StartState, State} from './State';
 import {Transition} from './Transition';
 import { EventEmitter } from 'events';
+import { HashMap } from '../utils/HashMap';
 
 export abstract class StateContainer<S,T> extends EventEmitter {
     protected startState:StartState<S,T>; // The state that will be active on create
@@ -62,6 +63,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public setStatePayload(label:string, payload:S):this {
         if(this.hasState(label)) {
             this.getState(label).setPayload(payload);
+            this.emit('statePayloadChanged', {state:label, payload});
             return this;
         } else {
             throw new Error(`Could not find state with label ${label}`);
@@ -111,6 +113,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public setTransitionPayload(label:string, payload:T):this {
         if(this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
+            this.emit('transitionPayloadChanged', {transition:label, payload});
             return this;
         } else {
             throw new Error(`Could not find transition ${label}`);
@@ -156,6 +159,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             this.states.set(label, state);
             this.stateLabels.set(state, label);
             state.addListener('active', this.onStateActive);
+            this.emit('stateAdded', {state:label, payload});
             return label;
         }
     };
@@ -165,6 +169,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
      */
     private onStateActive = (state) => {
         this.activeState = state;
+        this.emit('activeStateChanged', {state:this.getStateLabel(state)});
     };
 
     /**
@@ -178,6 +183,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             this.states.delete(label);
             this.stateLabels.delete(state);
             state.removeListener('active', this.onStateActive);
+            this.emit('stateRemoved', {state:label});
             return this;
         } else {
             throw new Error(`State container does not have a state with label ${label}`);
@@ -197,6 +203,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.states.delete(fromLabel);
         this.states.set(toLabel, fromState);
         this.stateLabels.set(fromState, toLabel);
+        this.emit('stateRenamed', {fromName:fromLabel, toName:toLabel});
         return this;
     };
 
@@ -213,6 +220,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.transitions.delete(fromLabel);
         this.transitions.set(toLabel, transition);
         this.transitionLabels.set(transition, toLabel);
+        this.emit('transitionRenamed', {fromName:fromLabel, toName:toLabel});
         return this;
     };
 
@@ -238,6 +246,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const transition = new Transition(fromState, toState, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
+        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, payload});
 
         return label;
     };
@@ -252,6 +261,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             transition.remove();
             this.transitions.delete(label);
             this.transitionLabels.delete(transition);
+            this.emit('transitionRemoved', {transition:label});
             return this;
         } else {
             throw new Error('Could not find transition');
@@ -439,15 +449,21 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.stateLabels.clear();
         this.transitions.clear();
         this.transitionLabels.clear();
+        this.emit('destroyed');
     };
 };
 
 type Pair<E> = [E,E];
 export type EqualityCheck<E> = (i1:E, i2:E) => boolean;
-const default_equality_check:EqualityCheck<any> = (a:any, b:any) => a===b;
+export type SimilarityScore<E> = (i1:E, i2:E) => number;
+const defaultEqualityCheck:EqualityCheck<any> = (a:any, b:any) => a===b;
+const defaultSimilarityScore:SimilarityScore<any> = (a:any, b:any) => a===b ? 1 : 0;
 
 export class MergableFSM<S,T> extends StateContainer<S,T> {
-    constructor(private transitionsEqual:EqualityCheck<T>=default_equality_check, startStateName?:string) {
+    constructor(private transitionsEqual:EqualityCheck<T>=defaultEqualityCheck,
+                private transitionSimilarityScore:SimilarityScore<T>=defaultSimilarityScore,
+                private stateSimilarityScore:SimilarityScore<S>=defaultSimilarityScore,
+                startStateName?:string) {
         super(startStateName);
     };
     /**
@@ -458,24 +474,54 @@ export class MergableFSM<S,T> extends StateContainer<S,T> {
         const sortedStates = Array.from(similarityScores.entries()).sort((a, b) => b[1]-a[1]);
         console.log(sortedStates);
 
-        const [toMergeS1, toMergeS2] = sortedStates[0][0];
-        console.log(`Merging ${this.getStateLabel(toMergeS1)} and ${this.getStateLabel(toMergeS2)}`);
-        this.mergeStates(toMergeS1, toMergeS2);
+        if(sortedStates.length > 0) {
+            const [toMergeS1, toMergeS2] = sortedStates[0][0];
+            this.mergeStates(toMergeS1, toMergeS2);
+        }
+    };
+
+    /**
+     * @returns every possible pairing of states
+     */
+    private getStatePairs():Pair<AbstractState<S,T>>[] {
+        const rv:Pair<AbstractState<S,T>>[] = [];
+        const states = Array.from(this.states.values());
+        for(let i:number = 0; i<states.length; i++) {
+            const si = states[i];
+            for(let j:number = i+1; j<states.length; j++) {
+                const sj = states[j];
+                rv.push([si, sj]);
+            }
+        }
+        return rv;
     };
 
     /**
      * Compute a similarity score of every pair of states
      */
     private computeSimilarityScores():Map<Pair<AbstractState<S,T>>, number> {
+        const numCommonTransitions = new HashMap<Pair<AbstractState<S,T>>, number>((p1, p2) => { return p1[0]===p2[0] && p1[1]===p2[1]; }, (p)=>{ return this.getStateLabel(p[0]) + this.getStateLabel(p[1]); });
+        const statePairs = this.getStatePairs();
+        const equivalentOutgoingTransitions:Map<Pair<AbstractState<S,T>>, Pair<Transition<S,T>>[]> = new Map<Pair<AbstractState<S,T>>, Pair<Transition<S,T>>[]>();
+        statePairs.forEach((p) => {
+            const [state1, state2] = p;
+            const et:Pair<Transition<S,T>>[] = this.equivalentTransitions(state1._getOutgoingTransitions(), state2._getOutgoingTransitions());
+            equivalentOutgoingTransitions.set(p, et);
+            numCommonTransitions.set(p, et.length);
+        });
         const rv = new Map<Pair<AbstractState<S,T>>, number>();
-        const states = Array.from(this.states.values());
-        for(let i:number = 0; i<states.length; i++) {
-            const si = states[i];
-            for(let j:number = i+1; j<states.length; j++) {
-                const sj = states[j];
-                this.getSimilarityScore(si, sj, rv);
-            }
-        }
+        statePairs.forEach((p) => {
+            const equivalentTransitions = equivalentOutgoingTransitions.get(p);
+            equivalentTransitions.forEach((et) => {
+                const [t1, t2] = et;
+
+                const t1Dest = t1.getToState();
+                const t2Dest = t2.getToState();
+                const similarityScore:number = numCommonTransitions.get([t1Dest, t2Dest]) || numCommonTransitions.get([t2Dest, t1Dest]);
+                rv.set(p, numCommonTransitions.get(p) + similarityScore);
+            });
+        });
+        numCommonTransitions.clear();
         return rv;
     };
 
@@ -498,34 +544,6 @@ export class MergableFSM<S,T> extends StateContainer<S,T> {
             }
         }
         return rv;
-    };
-
-    /**
-     * 
-     * @param state1 First state
-     * @param state2 Second state
-     * @param scoreMap The scores so far
-     */
-    private getSimilarityScore(state1:AbstractState<S,T>, state2:AbstractState<S,T>, scoreMap:Map<Pair<AbstractState<S,T>>, number> = new Map<Pair<AbstractState<S,T>>, number>()):number {
-        let score:number = 0;
-        const equivalentOutgoingTransitions:Pair<Transition<S,T>>[] = this.equivalentTransitions(state1._getOutgoingTransitions(), state2._getOutgoingTransitions());
-
-        equivalentOutgoingTransitions.forEach((pair) => {
-            score++;
-            scoreMap.set([state1, state2], score);
-
-            const [t1, t2] = pair;
-
-            const t1Dest = t1.getToState();
-            const t2Dest = t2.getToState();
-            if(scoreMap.has([t1Dest, t2Dest])) {
-                score += scoreMap.get([t1Dest, t2Dest]);
-            } else {
-                score += this.getSimilarityScore(t1Dest, t2Dest, scoreMap);
-            }
-        });
-
-        return score;
     };
 
     /**
@@ -561,29 +579,54 @@ export class MergableFSM<S,T> extends StateContainer<S,T> {
     /**
      * Merge two states together
      */
-    private mergeStates(removeState:AbstractState<S,T>, mergeInto:AbstractState<S,T>):void {
+    private mergeStates(removeState:AbstractState<S,T>, mergeInto:AbstractState<S,T>, removeStaleStates:boolean=true):void {
         const mergeIntoOutgoingTransitions = mergeInto._getOutgoingTransitions();
+        const outgoingTransitionTargets:Set<AbstractState<S,T>> = new Set<AbstractState<S,T>>();
 
-        removeState._getOutgoingTransitions().forEach((t) => {
-            const tPayload = t.getPayload();
-            let hasConflict:boolean = false;
-            for(let i in mergeIntoOutgoingTransitions) {
-                const t2 = mergeIntoOutgoingTransitions[i];
-                const t2Payload = t2.getPayload();
-                if(this.transitionsEqual(tPayload, t2Payload)) {
-                    hasConflict = true;
-                    break;
+        let outgoingTransitions:Transition<S,T>[];
+        do {
+            outgoingTransitions = removeState._getOutgoingTransitions();
+            const t = outgoingTransitions[0];
+            if(t) {
+                const tPayload = t.getPayload();
+                let hasConflict:boolean = false;
+                for(let i in mergeIntoOutgoingTransitions) {
+                    const t2 = mergeIntoOutgoingTransitions[i];
+                    const t2Payload = t2.getPayload();
+                    if(this.transitionsEqual(tPayload, t2Payload)) {
+                        hasConflict = true;
+                        break;
+                    }
+                }
+                if(hasConflict) {
+                    if(removeStaleStates) {
+                        outgoingTransitionTargets.add(t.getToState());
+                    }
+                    t.remove();
+                } else {
+                    t.setFromState(mergeInto);
                 }
             }
-            if(hasConflict) {
-                t.remove();
-            } else {
-                t.setFromState(mergeInto);
+        } while(outgoingTransitions.length > 0);
+
+        let incomingTransitions:Transition<S,T>[];
+        do {
+            incomingTransitions = removeState._getIncomingTransitions();
+            const t = incomingTransitions[0];
+            if(t) {
+                t.setToState(mergeInto);
             }
-        });
-        removeState._getIncomingTransitions().forEach((t) => {
-            t.setToState(mergeInto);
-        });
+        } while(incomingTransitions.length > 0);
+
         this.removeState(this.getStateLabel(removeState));
+
+        if(removeStaleStates) {
+            outgoingTransitionTargets.forEach((state) => {
+                if(state._getIncomingTransitions().length === 0) {
+                    state.remove();
+                    this.removeState(this.getStateLabel(state));
+                }
+            });
+        }
     };
 };

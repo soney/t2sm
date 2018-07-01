@@ -66,7 +66,7 @@ A class representing a starting state
 
 *Overrides [AbstractState](_state_machine_state_.abstractstate.md).[constructor](_state_machine_state_.abstractstate.md#constructor)*
 
-*Defined in [state_machine/State.ts:161](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L161)*
+*Defined in [state_machine/State.ts:161](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L161)*
 
 **Parameters:**
 
@@ -102,7 +102,7 @@ ___
 
 *Overrides [AbstractState](_state_machine_state_.abstractstate.md).[_addIncomingTransition](_state_machine_state_.abstractstate.md#_addincomingtransition)*
 
-*Defined in [state_machine/State.ts:179](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L179)*
+*Defined in [state_machine/State.ts:179](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L179)*
 
 Throws an exception; start states cannot have incoming transitions
 
@@ -123,7 +123,7 @@ ___
 
 *Overrides [AbstractState](_state_machine_state_.abstractstate.md).[_addOutgoingTransition](_state_machine_state_.abstractstate.md#_addoutgoingtransition)*
 
-*Defined in [state_machine/State.ts:169](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L169)*
+*Defined in [state_machine/State.ts:169](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L169)*
 
 Adds an outgoing transition (only one allowed)
 
@@ -144,7 +144,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[_getIncomingTransitions](_state_machine_state_.abstractstate.md#_getincomingtransitions)*
 
-*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L34)*
+*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L34)*
 
 Get all of the transitions entering this state (should only be used internally)
 
@@ -159,7 +159,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[_getOutgoingTransitions](_state_machine_state_.abstractstate.md#_getoutgoingtransitions)*
 
-*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L30)*
+*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L30)*
 
 Get all of the transitions leaving this state (should only be used internally)
 
@@ -174,7 +174,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[_removeIncomingTransition](_state_machine_state_.abstractstate.md#_removeincomingtransition)*
 
-*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L83)*
+*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L83)*
 
 Remove a transition from the list of incoming transitions
 
@@ -196,7 +196,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[_removeOutgoingTransition](_state_machine_state_.abstractstate.md#_removeoutgoingtransition)*
 
-*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L56)*
+*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L56)*
 
 Remove a transition from the list of outgoing transitions
 
@@ -292,7 +292,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[getPayload](_state_machine_state_.abstractstate.md#getpayload)*
 
-*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L19)*
+*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L19)*
 
 Get the data attached to this state
 
@@ -307,7 +307,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[isActive](_state_machine_state_.abstractstate.md#isactive)*
 
-*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L96)*
+*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L96)*
 
 **Returns:** `boolean`
 true if this state is active and false otherwise
@@ -321,7 +321,7 @@ ___
 
 *Overrides [AbstractState](_state_machine_state_.abstractstate.md).[isStartState](_state_machine_state_.abstractstate.md#isstartstate)*
 
-*Defined in [state_machine/State.ts:185](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L185)*
+*Defined in [state_machine/State.ts:185](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L185)*
 
 **Returns:** `boolean`
 true (to represent that this is a start state)
@@ -508,7 +508,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[remove](_state_machine_state_.abstractstate.md#remove)*
 
-*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L151)*
+*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L151)*
 
 Remove this state
 
@@ -566,7 +566,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[setIsActive](_state_machine_state_.abstractstate.md#setisactive)*
 
-*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L102)*
+*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L102)*
 
 Change whether this state is active or not
 
@@ -608,7 +608,7 @@ ___
 
 *Inherited from [AbstractState](_state_machine_state_.abstractstate.md).[setPayload](_state_machine_state_.abstractstate.md#setpayload)*
 
-*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L25)*
+*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L25)*
 
 Set the data attached to this state
 

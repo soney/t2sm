@@ -11,7 +11,7 @@
 
 **↳ StateContainer**
 
-↳  [MergableFSM](_state_machine_statecontainer_.mergablefsm.md)
+↳  [FSM](_state_machine_statecontainer_.fsm.md)
 
 ## Index
 
@@ -90,7 +90,7 @@
 
 ⊕ **new StateContainer**(startStateName?: *`string`*): [StateContainer](_state_machine_statecontainer_.statecontainer.md)
 
-*Defined in [state_machine/StateContainer.ts:12](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L12)*
+*Defined in [state_machine/StateContainer.ts:12](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L12)*
 
 Create a new StateContainer
 
@@ -112,7 +112,7 @@ ___
 
 **● startState**: *[StartState](_state_machine_state_.startstate.md)<`S`, `T`>*
 
-*Defined in [state_machine/StateContainer.ts:7](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L7)*
+*Defined in [state_machine/StateContainer.ts:7](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L7)*
 
 ___
 <a id="statelabels"></a>
@@ -121,7 +121,7 @@ ___
 
 **● stateLabels**: *`Map`<[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>, `string`>* =  new Map<AbstractState<S,T>, string>()
 
-*Defined in [state_machine/StateContainer.ts:10](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L10)*
+*Defined in [state_machine/StateContainer.ts:10](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L10)*
 
 ___
 <a id="states"></a>
@@ -130,7 +130,7 @@ ___
 
 **● states**: *`Map`<`string`, [AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>>* =  new Map<string, AbstractState<S,T>>()
 
-*Defined in [state_machine/StateContainer.ts:9](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L9)*
+*Defined in [state_machine/StateContainer.ts:9](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L9)*
 
 ___
 <a id="transitionlabels"></a>
@@ -139,7 +139,7 @@ ___
 
 **● transitionLabels**: *`Map`<[Transition](_state_machine_transition_.transition.md)<`S`, `T`>, `string`>* =  new Map<Transition<S,T>, string>()
 
-*Defined in [state_machine/StateContainer.ts:12](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L12)*
+*Defined in [state_machine/StateContainer.ts:12](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L12)*
 
 ___
 <a id="transitions"></a>
@@ -148,7 +148,7 @@ ___
 
 **● transitions**: *`Map`<`string`, [Transition](_state_machine_transition_.transition.md)<`S`, `T`>>* =  new Map<string, Transition<S,T>>()
 
-*Defined in [state_machine/StateContainer.ts:11](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L11)*
+*Defined in [state_machine/StateContainer.ts:11](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L11)*
 
 ___
 <a id="defaultmaxlisteners"></a>
@@ -193,7 +193,7 @@ ___
 
 ▸ **addState**(payload?: *`S`*, label?: *`string`*): `string`
 
-*Defined in [state_machine/StateContainer.ts:154](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L154)*
+*Defined in [state_machine/StateContainer.ts:154](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L154)*
 
 Add a new state to this container
 
@@ -214,7 +214,7 @@ ___
 
 ▸ **addTransition**(fromLabel: *`string`*, toLabel: *`string`*, payload?: *`any`*, label?: *`string`*): `string`
 
-*Defined in [state_machine/StateContainer.ts:237](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L237)*
+*Defined in [state_machine/StateContainer.ts:237](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L237)*
 
 Add a new transition
 
@@ -237,7 +237,7 @@ ___
 
 ▸ **destroy**(): `void`
 
-*Defined in [state_machine/StateContainer.ts:447](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L447)*
+*Defined in [state_machine/StateContainer.ts:447](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L447)*
 
 Clean up all of the objects stored in this container
 
@@ -287,7 +287,7 @@ ___
 
 ▸ **fireTransition**(label: *`string`*, event?: *`any`*, source?: *`any`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:129](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L129)*
+*Defined in [state_machine/StateContainer.ts:129](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L129)*
 
 Fire a transition by its label
 
@@ -308,7 +308,7 @@ ___
 
 ▸ **getActiveState**(): `string`
 
-*Defined in [state_machine/StateContainer.ts:275](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L275)*
+*Defined in [state_machine/StateContainer.ts:275](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L275)*
 
 Get the label of the active state
 
@@ -322,7 +322,7 @@ ___
 
 ▸ **getFireFunction**(label: *`string`*): `Function`
 
-*Defined in [state_machine/StateContainer.ts:144](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L144)*
+*Defined in [state_machine/StateContainer.ts:144](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L144)*
 
 Creates a function that will fire a given transition when called
 
@@ -342,7 +342,7 @@ ___
 
 ▸ **getIncomingTransitions**(label: *`string`*): `string`[]
 
-*Defined in [state_machine/StateContainer.ts:351](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L351)*
+*Defined in [state_machine/StateContainer.ts:351](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L351)*
 
 Get the list of transitions entering a state
 
@@ -376,7 +376,7 @@ ___
 
 ▸ **getOutgoingTransitions**(label: *`string`*): `string`[]
 
-*Defined in [state_machine/StateContainer.ts:340](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L340)*
+*Defined in [state_machine/StateContainer.ts:340](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L340)*
 
 Get the list of transitions leaving a state
 
@@ -395,7 +395,7 @@ ___
 
 ▸ **getStartState**(): `string`
 
-*Defined in [state_machine/StateContainer.ts:322](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L322)*
+*Defined in [state_machine/StateContainer.ts:322](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L322)*
 
 **Returns:** `string`
 the name of the start state
@@ -407,7 +407,7 @@ ___
 
 ▸ **getState**(label: *`string`*): [AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>
 
-*Defined in [state_machine/StateContainer.ts:43](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L43)*
+*Defined in [state_machine/StateContainer.ts:43](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L43)*
 
 Get the state object representing a given state
 
@@ -427,7 +427,7 @@ ___
 
 ▸ **getStateLabel**(state: *[AbstractState](_state_machine_state_.abstractstate.md)<`S`, `T`>*): `string`
 
-*Defined in [state_machine/StateContainer.ts:29](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L29)*
+*Defined in [state_machine/StateContainer.ts:29](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L29)*
 
 Get the label of a state
 
@@ -446,7 +446,7 @@ ___
 
 ▸ **getStatePayload**(label: *`string`*): `S`
 
-*Defined in [state_machine/StateContainer.ts:50](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L50)*
+*Defined in [state_machine/StateContainer.ts:50](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L50)*
 
 Get the payload of a given state
 
@@ -466,7 +466,7 @@ ___
 
 ▸ **getStates**(): `string`[]
 
-*Defined in [state_machine/StateContainer.ts:295](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L295)*
+*Defined in [state_machine/StateContainer.ts:295](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L295)*
 
 Get the label of every state in this container
 
@@ -480,7 +480,7 @@ ___
 
 ▸ **getTransition**(label: *`string`*): [Transition](_state_machine_transition_.transition.md)<`S`, `T`>
 
-*Defined in [state_machine/StateContainer.ts:78](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L78)*
+*Defined in [state_machine/StateContainer.ts:78](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L78)*
 
 Get a transition from its label
 
@@ -500,7 +500,7 @@ ___
 
 ▸ **getTransitionFrom**(label: *`string`*): `string`
 
-*Defined in [state_machine/StateContainer.ts:374](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L374)*
+*Defined in [state_machine/StateContainer.ts:374](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L374)*
 
 Get he state that a transition leaves from
 
@@ -520,7 +520,7 @@ ___
 
 ▸ **getTransitionLabel**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `string`
 
-*Defined in [state_machine/StateContainer.ts:91](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L91)*
+*Defined in [state_machine/StateContainer.ts:91](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L91)*
 
 Get the label of a transition
 
@@ -539,7 +539,7 @@ ___
 
 ▸ **getTransitionPayload**(label: *`string`*): `T`
 
-*Defined in [state_machine/StateContainer.ts:100](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L100)*
+*Defined in [state_machine/StateContainer.ts:100](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L100)*
 
 Get the payload of a given transition
 
@@ -559,7 +559,7 @@ ___
 
 ▸ **getTransitionTo**(label: *`string`*): `string`
 
-*Defined in [state_machine/StateContainer.ts:363](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L363)*
+*Defined in [state_machine/StateContainer.ts:363](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L363)*
 
 Get the state that a transition goes to
 
@@ -579,7 +579,7 @@ ___
 
 ▸ **getUniqueStateLabel**(): `string`
 
-*Defined in [state_machine/StateContainer.ts:302](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L302)*
+*Defined in [state_machine/StateContainer.ts:302](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L302)*
 
 **Returns:** `string`
 a state name that will be unique for this container
@@ -591,7 +591,7 @@ ___
 
 ▸ **getUniqueTransitionLabel**(): `string`
 
-*Defined in [state_machine/StateContainer.ts:312](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L312)*
+*Defined in [state_machine/StateContainer.ts:312](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L312)*
 
 **Returns:** `string`
 a transition name that will be unique for this container
@@ -603,7 +603,7 @@ ___
 
 ▸ **hasState**(label: *`string`*): `boolean`
 
-*Defined in [state_machine/StateContainer.ts:37](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L37)*
+*Defined in [state_machine/StateContainer.ts:37](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L37)*
 
 Check if a state is in this container
 
@@ -623,7 +623,7 @@ ___
 
 ▸ **hasTransition**(label: *`string`*): `boolean`
 
-*Defined in [state_machine/StateContainer.ts:85](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L85)*
+*Defined in [state_machine/StateContainer.ts:85](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L85)*
 
 Check if this container has a given transition
 
@@ -643,7 +643,7 @@ ___
 
 ▸ **isStartState**(label: *`string`*): `boolean`
 
-*Defined in [state_machine/StateContainer.ts:331](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L331)*
+*Defined in [state_machine/StateContainer.ts:331](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L331)*
 
 Check if a given state is a start state
 
@@ -879,7 +879,7 @@ ___
 
 ▸ **removeState**(label: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:179](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L179)*
+*Defined in [state_machine/StateContainer.ts:179](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L179)*
 
 Remove a state from the list of states
 
@@ -898,7 +898,7 @@ ___
 
 ▸ **removeTransition**(label: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:258](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L258)*
+*Defined in [state_machine/StateContainer.ts:258](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L258)*
 
 Remove a transition by label
 
@@ -917,7 +917,7 @@ ___
 
 ▸ **renameState**(fromLabel: *`string`*, toLabel: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:198](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L198)*
+*Defined in [state_machine/StateContainer.ts:198](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L198)*
 
 Change the name of a state
 
@@ -937,7 +937,7 @@ ___
 
 ▸ **renameTransition**(fromLabel: *`string`*, toLabel: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:215](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L215)*
+*Defined in [state_machine/StateContainer.ts:215](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L215)*
 
 Change the name of a transition
 
@@ -957,7 +957,7 @@ ___
 
 ▸ **setActiveState**(label: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:281](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L281)*
+*Defined in [state_machine/StateContainer.ts:281](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L281)*
 
 Changes which state is active in this container
 
@@ -997,7 +997,7 @@ ___
 
 ▸ **setStatePayload**(label: *`string`*, payload: *`S`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:63](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L63)*
+*Defined in [state_machine/StateContainer.ts:63](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L63)*
 
 Set the payload of a given state
 
@@ -1017,7 +1017,7 @@ ___
 
 ▸ **setTransitionFrom**(label: *`string`*, fromState: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:398](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L398)*
+*Defined in [state_machine/StateContainer.ts:398](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L398)*
 
 Change the state that a transition leaves from
 
@@ -1037,7 +1037,7 @@ ___
 
 ▸ **setTransitionPayload**(label: *`string`*, payload: *`T`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:113](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L113)*
+*Defined in [state_machine/StateContainer.ts:113](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L113)*
 
 Set the payload of a given transition
 
@@ -1057,7 +1057,7 @@ ___
 
 ▸ **setTransitionTo**(label: *`string`*, toState: *`string`*): `this`
 
-*Defined in [state_machine/StateContainer.ts:385](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L385)*
+*Defined in [state_machine/StateContainer.ts:385](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L385)*
 
 Change the state that a transition goes to
 
@@ -1077,7 +1077,7 @@ ___
 
 ▸ **toString**(): `string`
 
-*Defined in [state_machine/StateContainer.ts:409](https://github.com/soney/t2sm/blob/9786338/src/state_machine/StateContainer.ts#L409)*
+*Defined in [state_machine/StateContainer.ts:409](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L409)*
 
 Convert this state machine into a printable representation
 

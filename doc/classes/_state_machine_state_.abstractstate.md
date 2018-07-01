@@ -68,7 +68,7 @@ A class representing a state in a state machine
 
 ⊕ **new AbstractState**(payload?: *`S`*): [AbstractState](_state_machine_state_.abstractstate.md)
 
-*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L11)*
+*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L11)*
 
 **Parameters:**
 
@@ -102,7 +102,7 @@ ___
 
 ▸ **_addIncomingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/State.ts:74](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L74)*
+*Defined in [state_machine/State.ts:74](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L74)*
 
 Mark a new transition as going to this state (should only be used internally)
 
@@ -121,7 +121,7 @@ ___
 
 ▸ **_addOutgoingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `void`
 
-*Defined in [state_machine/State.ts:40](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L40)*
+*Defined in [state_machine/State.ts:40](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L40)*
 
 Mark a new transition as leaving from this state (should only be used internally)
 
@@ -140,7 +140,7 @@ ___
 
 ▸ **_getIncomingTransitions**(): [Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]
 
-*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L34)*
+*Defined in [state_machine/State.ts:34](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L34)*
 
 Get all of the transitions entering this state (should only be used internally)
 
@@ -153,7 +153,7 @@ ___
 
 ▸ **_getOutgoingTransitions**(): [Transition](_state_machine_transition_.transition.md)<`S`, `T`>[]
 
-*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L30)*
+*Defined in [state_machine/State.ts:30](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L30)*
 
 Get all of the transitions leaving this state (should only be used internally)
 
@@ -166,7 +166,7 @@ ___
 
 ▸ **_removeIncomingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `boolean`
 
-*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L83)*
+*Defined in [state_machine/State.ts:83](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L83)*
 
 Remove a transition from the list of incoming transitions
 
@@ -186,7 +186,7 @@ ___
 
 ▸ **_removeOutgoingTransition**(transition: *[Transition](_state_machine_transition_.transition.md)<`S`, `T`>*): `boolean`
 
-*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L56)*
+*Defined in [state_machine/State.ts:56](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L56)*
 
 Remove a transition from the list of outgoing transitions
 
@@ -280,7 +280,7 @@ ___
 
 ▸ **getPayload**(): `S`
 
-*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L19)*
+*Defined in [state_machine/State.ts:19](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L19)*
 
 Get the data attached to this state
 
@@ -293,7 +293,7 @@ ___
 
 ▸ **isActive**(): `boolean`
 
-*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L96)*
+*Defined in [state_machine/State.ts:96](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L96)*
 
 **Returns:** `boolean`
 true if this state is active and false otherwise
@@ -305,7 +305,7 @@ ___
 
 ▸ **isStartState**(): `boolean`
 
-*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L11)*
+*Defined in [state_machine/State.ts:11](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L11)*
 
 **Returns:** `boolean`
 
@@ -489,7 +489,7 @@ ___
 
 ▸ **remove**(): `void`
 
-*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L151)*
+*Defined in [state_machine/State.ts:151](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L151)*
 
 Remove this state
 
@@ -545,7 +545,7 @@ ___
 
 ▸ **setIsActive**(active: *`boolean`*): `void`
 
-*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L102)*
+*Defined in [state_machine/State.ts:102](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L102)*
 
 Change whether this state is active or not
 
@@ -585,7 +585,7 @@ ___
 
 ▸ **setPayload**(payload: *`S`*): `void`
 
-*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/9786338/src/state_machine/State.ts#L25)*
+*Defined in [state_machine/State.ts:25](https://github.com/soney/t2sm/blob/9787686/src/state_machine/State.ts#L25)*
 
 Set the data attached to this state
 

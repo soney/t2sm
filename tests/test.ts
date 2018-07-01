@@ -1,8 +1,8 @@
-import {MergableFSM} from '../built/index';
+import {FSM} from '../built/index';
 import {expect} from 'chai';
 
 describe('Create a basic FSM', () => {
-    const fsm = new MergableFSM<null, null>();
+    const fsm = new FSM<null, null>();
     it('Create an FSM with one state', () => {
         expect(fsm.getStates()).to.eql(['start'])
         expect(fsm.getActiveState()).to.equal('start')
@@ -43,7 +43,7 @@ describe('Create a basic FSM', () => {
 });
 
 describe('Traces to FSM', () => {
-    const fsm = new MergableFSM<null, string>();
+    const fsm = new FSM<null, string>();
     it('Add basic traces', () => {
         const example_traces = [
             [

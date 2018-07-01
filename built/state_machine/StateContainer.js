@@ -496,7 +496,7 @@ exports.StateContainer = StateContainer;
 ;
 const defaultEqualityCheck = (a, b) => a === b;
 const defaultSimilarityScore = (a, b) => a === b ? 1 : 0;
-class MergableFSM extends StateContainer {
+class FSM extends StateContainer {
     constructor(transitionsEqual = defaultEqualityCheck, transitionSimilarityScore = defaultSimilarityScore, stateSimilarityScore = defaultSimilarityScore, startStateName) {
         super(startStateName);
         this.transitionsEqual = transitionsEqual;
@@ -663,6 +663,6 @@ class MergableFSM extends StateContainer {
     }
     ;
 }
-exports.MergableFSM = MergableFSM;
+exports.FSM = FSM;
 ;
 //# sourceMappingURL=StateContainer.js.map

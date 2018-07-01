@@ -1,3 +1,3 @@
-import {MergableFSM} from './state_machine/StateContainer';
+import {FSM} from './state_machine/StateContainer';
 
-export {MergableFSM};
+export {FSM};

@@ -459,7 +459,7 @@ export type SimilarityScore<E> = (i1:E, i2:E) => number;
 const defaultEqualityCheck:EqualityCheck<any> = (a:any, b:any) => a===b;
 const defaultSimilarityScore:SimilarityScore<any> = (a:any, b:any) => a===b ? 1 : 0;
 
-export class MergableFSM<S,T> extends StateContainer<S,T> {
+export class FSM<S,T> extends StateContainer<S,T> {
     constructor(private transitionsEqual:EqualityCheck<T>=defaultEqualityCheck,
                 private transitionSimilarityScore:SimilarityScore<T>=defaultSimilarityScore,
                 private stateSimilarityScore:SimilarityScore<S>=defaultSimilarityScore,

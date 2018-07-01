@@ -455,9 +455,11 @@ export class MergableFSM<S,T> extends StateContainer<S,T> {
      */
     public iterateMerge():void {
         const similarityScores = this.computeSimilarityScores();
-        const sortedStates = Array.from(similarityScores.entries()).sort((a, b) => a[1]-b[1]);
+        const sortedStates = Array.from(similarityScores.entries()).sort((a, b) => b[1]-a[1]);
+        console.log(sortedStates);
 
         const [toMergeS1, toMergeS2] = sortedStates[0][0];
+        console.log(`Merging ${this.getStateLabel(toMergeS1)} and ${this.getStateLabel(toMergeS2)}`);
         this.mergeStates(toMergeS1, toMergeS2);
     };
 

@@ -123,7 +123,7 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      *
      * @returns The label of the new transition
      */
-    addTransition(fromLabel: string, toLabel: string, payload?: any, label?: string): string;
+    addTransition(fromLabel: string, toLabel: string, alias?: string, payload?: any, label?: string): string;
     /**
      * Remove a transition by label
      * @param label The label of the transition to remove

@@ -32,15 +32,15 @@ describe('Create a basic FSM', () => {
         expect(fsm.getActiveState()).to.equal(secondStateName);
     });
 
-//     it(`Remove state1`, () => {
-//         fsm.removeState('state1');
-//         expect(fsm.getStates()).to.eql(['start', secondStateName])
-//     });
+    it(`Remove state1`, () => {
+        fsm.removeState('state1');
+        expect(fsm.getStates()).to.eql(['start', secondStateName])
+    });
 
-//     it('Destroy the FSM', () => {
-//         fsm.destroy();
-//     });
-// });
+    it('Destroy the FSM', () => {
+        fsm.destroy();
+    });
+});
 
 // describe('Traces to FSM', () => {
 //     const fsm = new FSM<null, string>();
@@ -80,4 +80,17 @@ describe('Create a basic FSM', () => {
 //         fsm.iterateMerge();
 //         console.log(fsm.toString());
 //     });
+// });
+
+describe('Load from JSON', () => {
+    it('Create an FSM from JSON', () => {
+        const str = '{"initial":"start","states":{"start":{"on":{"Search":"searching","Filter":"filtering","Navigate":"itemList"}},"searching":{"on":{"Search_success":"itemList","Cancel_search":"itemList","Filter":"filtering"}},"itemList":{"on":{"Serach":"searching","Select_item":"item","Filter":"filtering","Open_cart":"cart_checking"}},"item":{"on":{"Navigate":"itemList"}},"filtering":{"on":{"Filter_success":"itemList","Cancel_filter":"itemList","Search":"searching"}},"cart_checking":{"on":{"Save":"itemList","Unsave":"itemList"}}}}'
+        const fsm = FSM.fromJSON(JSON.parse(str));
+        fsm.fireTransition('start');
+        expect(fsm.getActiveState()).to.equal('start');
+        fsm.fireTransition('Search');
+        expect(fsm.getActiveState()).to.equal('searching');
+        fsm.fireTransition('Filter');
+        expect(fsm.getActiveState()).to.equal('filtering');
+    });
 });

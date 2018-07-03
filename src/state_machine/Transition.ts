@@ -10,12 +10,20 @@ export class Transition<S, T> extends EventEmitter {
      * Constructor
      * @param fromState The state that this transition leaves from
      * @param toState The state that this transition goes to
+     * @param alias The shorthand name for this transition
      * @param payload The information stored in this transition
      */
-    constructor(private fromState:AbstractState<S,T>, private toState:AbstractState<S,T>, private payload?:T) {
+    constructor(private fromState:AbstractState<S,T>, private toState:AbstractState<S,T>, private alias:string, private payload?:T) {
         super();
         this.fromState._addOutgoingTransition(this);
         this.toState._addIncomingTransition(this);
+    };
+
+    /**
+     * @returns the alias for this transition (typically the event name)
+     */
+    public getAlias():string {
+        return this.alias;
     };
 
     /**

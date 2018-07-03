@@ -7,15 +7,21 @@ import { EventEmitter } from 'events';
 export declare class Transition<S, T> extends EventEmitter {
     private fromState;
     private toState;
+    private alias;
     private payload?;
     private eligible;
     /**
      * Constructor
      * @param fromState The state that this transition leaves from
      * @param toState The state that this transition goes to
+     * @param alias The shorthand name for this transition
      * @param payload The information stored in this transition
      */
-    constructor(fromState: AbstractState<S, T>, toState: AbstractState<S, T>, payload?: T);
+    constructor(fromState: AbstractState<S, T>, toState: AbstractState<S, T>, alias: string, payload?: T);
+    /**
+     * @returns the alias for this transition (typically the event name)
+     */
+    getAlias(): string;
     /**
      * @returns whether this transition is eligible to fire
      */

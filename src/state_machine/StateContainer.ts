@@ -132,8 +132,15 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             const transition = this.getTransition(label);
             transition.fire(event, source);
             return this;
-        } else {
-            throw new Error(`Could not find transition ${label}`);
+        }
+        const transitions = this.activeState._getOutgoingTransitions();
+        for(let i = 0; i<transitions.length; i++) {
+            const transition = transitions[i];
+            const alias = transition.getAlias();
+            if(alias && alias === label) {
+                transition.fire(event, source);
+                break;
+            }
         }
     };
 
@@ -235,7 +242,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
      * 
      * @returns The label of the new transition
      */
-    public addTransition(fromLabel:string, toLabel:string, payload?:any, label:string=this.getUniqueTransitionLabel()):string {
+    public addTransition(fromLabel:string, toLabel:string, alias?:string, payload?:any, label:string=this.getUniqueTransitionLabel()):string {
         if(!this.hasState(fromLabel)) { throw new Error(`State container does not have a state with label ${fromLabel}`); }
         if(!this.hasState(toLabel)) { throw new Error(`State container does not have a state with label ${toLabel}`); }
 
@@ -244,10 +251,10 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const fromState = this.getState(fromLabel);
         const toState = this.getState(toLabel);
 
-        const transition = new Transition(fromState, toState, payload);
+        const transition = new Transition(fromState, toState, alias, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
-        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, payload});
+        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, alias, payload});
 
         return label;
     };
@@ -412,6 +419,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const divider = '~'.repeat(dividerWidth);
         const stateWidth = 10;
         const tabWidth = 4;
+        const activeState = this.getActiveState();
         const spaceOut = (word:string):string => {
             const wordLength = word.length;
             const spacesBefore = Math.round((dividerWidth - wordLength)/2);
@@ -427,7 +435,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         };
         let rv:string = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
         this.getStates().forEach((state) => {
-            rv += `${pad(state+':', stateWidth)} ${this.getStatePayload(state)}\n`;
+            rv += `${activeState===state?'*':' '}${pad(state+':', stateWidth)} ${this.getStatePayload(state)}\n`;
 
             const outgoingTransitions = this.getOutgoingTransitions(state);
             if(outgoingTransitions.length > 0) {
@@ -496,7 +504,7 @@ export class FSM<S,T> extends StateContainer<S,T> {
                 rv.addState('', stateName);
             }
         });
-        rv.addTransition('(init)', jsonObj.initial);
+        rv.addTransition('(init)', jsonObj.initial, 'start');
         forEach(jsonObj.states, (stateInfo, stateName) => {
             forEach(stateInfo.on, (toStateInfo, eventName) => {
                 let toStateName:string;
@@ -506,14 +514,7 @@ export class FSM<S,T> extends StateContainer<S,T> {
                     toStateName = keys(toStateInfo)[0];
                 }
 
-                let transitionID:string = eventName;
-                let i:number = 1;
-                while(rv.hasTransition(transitionID)) {
-                    i++;
-                    transitionID = `eventName_${i}`;
-                }
-
-                rv.addTransition(stateName, toStateName, eventName, transitionID);
+                rv.addTransition(stateName, toStateName, eventName, eventName);
             });
         });
         return rv;
@@ -645,7 +646,7 @@ export class FSM<S,T> extends StateContainer<S,T> {
                 currentState = this.getStateLabel(existingState);
             } else {
                 const newState = this.addState(s);
-                this.addTransition(currentState, newState, t);
+                this.addTransition(currentState, newState, `${t}`, t);
                 currentState = newState;
             }
         });

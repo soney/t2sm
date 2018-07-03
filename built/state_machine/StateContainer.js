@@ -145,8 +145,14 @@ class StateContainer extends events_1.EventEmitter {
             transition.fire(event, source);
             return this;
         }
-        else {
-            throw new Error(`Could not find transition ${label}`);
+        const transitions = this.activeState._getOutgoingTransitions();
+        for (let i = 0; i < transitions.length; i++) {
+            const transition = transitions[i];
+            const alias = transition.getAlias();
+            if (alias && alias === label) {
+                transition.fire(event, source);
+                break;
+            }
         }
     }
     ;
@@ -248,7 +254,7 @@ class StateContainer extends events_1.EventEmitter {
      *
      * @returns The label of the new transition
      */
-    addTransition(fromLabel, toLabel, payload, label = this.getUniqueTransitionLabel()) {
+    addTransition(fromLabel, toLabel, alias, payload, label = this.getUniqueTransitionLabel()) {
         if (!this.hasState(fromLabel)) {
             throw new Error(`State container does not have a state with label ${fromLabel}`);
         }
@@ -261,10 +267,10 @@ class StateContainer extends events_1.EventEmitter {
         ;
         const fromState = this.getState(fromLabel);
         const toState = this.getState(toLabel);
-        const transition = new Transition_1.Transition(fromState, toState, payload);
+        const transition = new Transition_1.Transition(fromState, toState, alias, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
-        this.emit('transitionAdded', { transition: label, from: fromLabel, to: toLabel, payload });
+        this.emit('transitionAdded', { transition: label, from: fromLabel, to: toLabel, alias, payload });
         return label;
     }
     ;
@@ -452,6 +458,7 @@ class StateContainer extends events_1.EventEmitter {
         const divider = '~'.repeat(dividerWidth);
         const stateWidth = 10;
         const tabWidth = 4;
+        const activeState = this.getActiveState();
         const spaceOut = (word) => {
             const wordLength = word.length;
             const spacesBefore = Math.round((dividerWidth - wordLength) / 2);
@@ -468,7 +475,7 @@ class StateContainer extends events_1.EventEmitter {
         };
         let rv = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
         this.getStates().forEach((state) => {
-            rv += `${pad(state + ':', stateWidth)} ${this.getStatePayload(state)}\n`;
+            rv += `${activeState === state ? '*' : ' '}${pad(state + ':', stateWidth)} ${this.getStatePayload(state)}\n`;
             const outgoingTransitions = this.getOutgoingTransitions(state);
             if (outgoingTransitions.length > 0) {
                 outgoingTransitions.forEach((t) => {
@@ -517,7 +524,7 @@ class FSM extends StateContainer {
                 rv.addState('', stateName);
             }
         });
-        rv.addTransition('(init)', jsonObj.initial);
+        rv.addTransition('(init)', jsonObj.initial, 'start');
         lodash_1.forEach(jsonObj.states, (stateInfo, stateName) => {
             lodash_1.forEach(stateInfo.on, (toStateInfo, eventName) => {
                 let toStateName;
@@ -527,13 +534,7 @@ class FSM extends StateContainer {
                 else {
                     toStateName = lodash_1.keys(toStateInfo)[0];
                 }
-                let transitionID = eventName;
-                let i = 1;
-                while (rv.hasTransition(transitionID)) {
-                    i++;
-                    transitionID = `eventName_${i}`;
-                }
-                rv.addTransition(stateName, toStateName, eventName, transitionID);
+                rv.addTransition(stateName, toStateName, eventName, eventName);
             });
         });
         return rv;
@@ -661,7 +662,7 @@ class FSM extends StateContainer {
             }
             else {
                 const newState = this.addState(s);
-                this.addTransition(currentState, newState, t);
+                this.addTransition(currentState, newState, `${t}`, t);
                 currentState = newState;
             }
         });

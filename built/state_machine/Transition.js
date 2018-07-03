@@ -9,15 +9,24 @@ class Transition extends events_1.EventEmitter {
      * Constructor
      * @param fromState The state that this transition leaves from
      * @param toState The state that this transition goes to
+     * @param alias The shorthand name for this transition
      * @param payload The information stored in this transition
      */
-    constructor(fromState, toState, payload) {
+    constructor(fromState, toState, alias, payload) {
         super();
         this.fromState = fromState;
         this.toState = toState;
+        this.alias = alias;
         this.payload = payload;
         this.fromState._addOutgoingTransition(this);
         this.toState._addIncomingTransition(this);
+    }
+    ;
+    /**
+     * @returns the alias for this transition (typically the event name)
+     */
+    getAlias() {
+        return this.alias;
     }
     ;
     /**

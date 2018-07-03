@@ -23,7 +23,7 @@
 
 **ΤEqualityCheck**: *`function`*
 
-*Defined in [utils/HashMap.ts:1](https://github.com/soney/t2sm/blob/9787686/src/utils/HashMap.ts#L1)*
+*Defined in [utils/HashMap.ts:1](https://github.com/soney/t2sm/blob/7b549e1/src/utils/HashMap.ts#L1)*
 
 #### Type declaration
 ▸(t1: *`T`*, t2: *`T`*): `boolean`
@@ -44,7 +44,7 @@ ___
 
 **ΤHash**: *`function`*
 
-*Defined in [utils/HashMap.ts:2](https://github.com/soney/t2sm/blob/9787686/src/utils/HashMap.ts#L2)*
+*Defined in [utils/HashMap.ts:2](https://github.com/soney/t2sm/blob/7b549e1/src/utils/HashMap.ts#L2)*
 
 #### Type declaration
 ▸(t: *`T`*): `string`

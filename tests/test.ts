@@ -32,52 +32,52 @@ describe('Create a basic FSM', () => {
         expect(fsm.getActiveState()).to.equal(secondStateName);
     });
 
-    it(`Remove state1`, () => {
-        fsm.removeState('state1');
-        expect(fsm.getStates()).to.eql(['start', secondStateName])
-    });
+//     it(`Remove state1`, () => {
+//         fsm.removeState('state1');
+//         expect(fsm.getStates()).to.eql(['start', secondStateName])
+//     });
 
-    it('Destroy the FSM', () => {
-        fsm.destroy();
-    });
-});
+//     it('Destroy the FSM', () => {
+//         fsm.destroy();
+//     });
+// });
 
-describe('Traces to FSM', () => {
-    const fsm = new FSM<null, string>();
-    it('Add basic traces', () => {
-        const example_traces = [
-            [
-                'begin',
-                'click next',
-                'click next',
-                'click prev',
-                'click ok'
-            ], [
-                'begin',
-                'click next',
-                'click next',
-                'click prev',
-                'click x',
-                'click next',
-                'click prev',
-                'click okay'
-            ], [
-                'begin',
-                'click ok'
-            ]
-        ];
-        const fsmTraces = example_traces.map((et) => (et.map((s) => [s, null]) as [string, null][]));
-        fsmTraces.forEach((t) => fsm.addTrace(t));
-        console.log(fsm.toString());
-        fsm.iterateMerge();
-        console.log(fsm.toString());
-        fsm.iterateMerge();
-        console.log(fsm.toString());
-        fsm.iterateMerge();
-        console.log(fsm.toString());
-        fsm.iterateMerge();
-        console.log(fsm.toString());
-        fsm.iterateMerge();
-        console.log(fsm.toString());
-    });
+// describe('Traces to FSM', () => {
+//     const fsm = new FSM<null, string>();
+//     it('Add basic traces', () => {
+//         const example_traces = [
+//             [
+//                 'begin',
+//                 'click next',
+//                 'click next',
+//                 'click prev',
+//                 'click ok'
+//             ], [
+//                 'begin',
+//                 'click next',
+//                 'click next',
+//                 'click prev',
+//                 'click x',
+//                 'click next',
+//                 'click prev',
+//                 'click okay'
+//             ], [
+//                 'begin',
+//                 'click ok'
+//             ]
+//         ];
+//         const fsmTraces = example_traces.map((et) => (et.map((s) => [s, null]) as [string, null][]));
+//         fsmTraces.forEach((t) => fsm.addTrace(t));
+//         console.log(fsm.toString());
+//         fsm.iterateMerge();
+//         console.log(fsm.toString());
+//         fsm.iterateMerge();
+//         console.log(fsm.toString());
+//         fsm.iterateMerge();
+//         console.log(fsm.toString());
+//         fsm.iterateMerge();
+//         console.log(fsm.toString());
+//         fsm.iterateMerge();
+//         console.log(fsm.toString());
+//     });
 });

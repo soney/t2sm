@@ -2,6 +2,7 @@ import {AbstractState, StartState, State} from './State';
 import {Transition} from './Transition';
 import { EventEmitter } from 'events';
 import { HashMap } from '../utils/HashMap';
+import {keys, forEach, isString} from 'lodash';
 
 export abstract class StateContainer<S,T> extends EventEmitter {
     protected startState:StartState<S,T>; // The state that will be active on create
@@ -459,6 +460,22 @@ export type SimilarityScore<E> = (i1:E, i2:E) => number;
 const defaultEqualityCheck:EqualityCheck<any> = (a:any, b:any) => a===b;
 const defaultSimilarityScore:SimilarityScore<any> = (a:any, b:any) => a===b ? 1 : 0;
 
+export type JSONFSM = {
+    initial:string,
+    states: {
+        [stateName:string]: {
+            on: {
+                [eventName:string]: string | {
+                    [stateName:string]:{
+                        actions: string[]
+                    }
+                }
+            },
+            onEntry?: string[]
+        }
+    }
+};
+
 export class FSM<S,T> extends StateContainer<S,T> {
     constructor(private transitionsEqual:EqualityCheck<T>=defaultEqualityCheck,
                 private transitionSimilarityScore:SimilarityScore<T>=defaultSimilarityScore,
@@ -466,6 +483,64 @@ export class FSM<S,T> extends StateContainer<S,T> {
                 startStateName?:string) {
         super(startStateName);
     };
+
+    /**
+     * Converts a JSON object (such as that exported by https://musing-rosalind-2ce8e7.netlify.com) to an FSM
+     * @param jsonObj The JSON object
+     */
+    public static fromJSON(jsonObj:JSONFSM):FSM<string, string> {
+        const rv = new FSM<string, string>(undefined, undefined, undefined, '(init)');
+        rv.addState(jsonObj.initial, jsonObj.initial)
+        keys(jsonObj.states).forEach((stateName) => {
+            if(stateName !== jsonObj.initial) {
+                rv.addState('', stateName);
+            }
+        });
+        rv.addTransition('(init)', jsonObj.initial);
+        forEach(jsonObj.states, (stateInfo, stateName) => {
+            forEach(stateInfo.on, (toStateInfo, eventName) => {
+                let toStateName:string;
+                if(isString(toStateInfo)) {
+                    toStateName = toStateInfo;
+                } else {
+                    toStateName = keys(toStateInfo)[0];
+                }
+
+                let transitionID:string = eventName;
+                let i:number = 1;
+                while(rv.hasTransition(transitionID)) {
+                    i++;
+                    transitionID = `eventName_${i}`;
+                }
+
+                rv.addTransition(stateName, toStateName, eventName, transitionID);
+            });
+        });
+        return rv;
+    };
+
+    /**
+     * Converts the current FSM into a JSON object readable by https://musing-rosalind-2ce8e7.netlify.com
+     */
+    public toJSON():JSONFSM {
+        const result:JSONFSM = {
+            initial: this.getTransitionTo(this.getOutgoingTransitions(this.getStartState())[0]),
+            states: {
+            }
+        };
+        const {states} = result;
+        this.getStates().forEach((stateName) => {
+            if(stateName !== this.getStartState()) {
+                result.states[stateName] = { on: { }};
+                this.getOutgoingTransitions(stateName).forEach((transition) => {
+                    const transitionData = this.getTransitionPayload(transition) + '';
+                    result.states[stateName].on[transitionData] = this.getTransitionTo(transition);
+                });
+            }
+        });
+        return result;
+    };
+
     /**
      * Iterate and merge the best candidates
      */

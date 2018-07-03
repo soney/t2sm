@@ -4,6 +4,7 @@ const State_1 = require("./State");
 const Transition_1 = require("./Transition");
 const events_1 = require("events");
 const HashMap_1 = require("../utils/HashMap");
+const lodash_1 = require("lodash");
 class StateContainer extends events_1.EventEmitter {
     /**
      * Create a new StateContainer
@@ -502,6 +503,61 @@ class FSM extends StateContainer {
         this.transitionsEqual = transitionsEqual;
         this.transitionSimilarityScore = transitionSimilarityScore;
         this.stateSimilarityScore = stateSimilarityScore;
+    }
+    ;
+    /**
+     * Converts a JSON object (such as that exported by https://musing-rosalind-2ce8e7.netlify.com) to an FSM
+     * @param jsonObj The JSON object
+     */
+    static fromJSON(jsonObj) {
+        const rv = new FSM(undefined, undefined, undefined, '(init)');
+        rv.addState(jsonObj.initial, jsonObj.initial);
+        lodash_1.keys(jsonObj.states).forEach((stateName) => {
+            if (stateName !== jsonObj.initial) {
+                rv.addState('', stateName);
+            }
+        });
+        rv.addTransition('(init)', jsonObj.initial);
+        lodash_1.forEach(jsonObj.states, (stateInfo, stateName) => {
+            lodash_1.forEach(stateInfo.on, (toStateInfo, eventName) => {
+                let toStateName;
+                if (lodash_1.isString(toStateInfo)) {
+                    toStateName = toStateInfo;
+                }
+                else {
+                    toStateName = lodash_1.keys(toStateInfo)[0];
+                }
+                let transitionID = eventName;
+                let i = 1;
+                while (rv.hasTransition(transitionID)) {
+                    i++;
+                    transitionID = `eventName_${i}`;
+                }
+                rv.addTransition(stateName, toStateName, eventName, transitionID);
+            });
+        });
+        return rv;
+    }
+    ;
+    /**
+     * Converts the current FSM into a JSON object readable by https://musing-rosalind-2ce8e7.netlify.com
+     */
+    toJSON() {
+        const result = {
+            initial: this.getTransitionTo(this.getOutgoingTransitions(this.getStartState())[0]),
+            states: {}
+        };
+        const { states } = result;
+        this.getStates().forEach((stateName) => {
+            if (stateName !== this.getStartState()) {
+                result.states[stateName] = { on: {} };
+                this.getOutgoingTransitions(stateName).forEach((transition) => {
+                    const transitionData = this.getTransitionPayload(transition) + '';
+                    result.states[stateName].on[transitionData] = this.getTransitionTo(transition);
+                });
+            }
+        });
+        return result;
     }
     ;
     /**

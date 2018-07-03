@@ -207,11 +207,35 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
 }
 export declare type EqualityCheck<E> = (i1: E, i2: E) => boolean;
 export declare type SimilarityScore<E> = (i1: E, i2: E) => number;
+export declare type JSONFSM = {
+    initial: string;
+    states: {
+        [stateName: string]: {
+            on: {
+                [eventName: string]: string | {
+                    [stateName: string]: {
+                        actions: string[];
+                    };
+                };
+            };
+            onEntry?: string[];
+        };
+    };
+};
 export declare class FSM<S, T> extends StateContainer<S, T> {
     private transitionsEqual;
     private transitionSimilarityScore;
     private stateSimilarityScore;
     constructor(transitionsEqual?: EqualityCheck<T>, transitionSimilarityScore?: SimilarityScore<T>, stateSimilarityScore?: SimilarityScore<S>, startStateName?: string);
+    /**
+     * Converts a JSON object (such as that exported by https://musing-rosalind-2ce8e7.netlify.com) to an FSM
+     * @param jsonObj The JSON object
+     */
+    static fromJSON(jsonObj: JSONFSM): FSM<string, string>;
+    /**
+     * Converts the current FSM into a JSON object readable by https://musing-rosalind-2ce8e7.netlify.com
+     */
+    toJSON(): JSONFSM;
     /**
      * Iterate and merge the best candidates
      */

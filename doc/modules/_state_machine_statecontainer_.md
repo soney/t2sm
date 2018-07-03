@@ -12,6 +12,7 @@
 ### Type aliases
 
 * [EqualityCheck](_state_machine_statecontainer_.md#equalitycheck)
+* [JSONFSM](_state_machine_statecontainer_.md#jsonfsm)
 * [Pair](_state_machine_statecontainer_.md#pair)
 * [SimilarityScore](_state_machine_statecontainer_.md#similarityscore)
 
@@ -30,7 +31,7 @@
 
 **ΤEqualityCheck**: *`function`*
 
-*Defined in [state_machine/StateContainer.ts:457](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L457)*
+*Defined in [state_machine/StateContainer.ts:458](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L458)*
 
 #### Type declaration
 ▸(i1: *`E`*, i2: *`E`*): `boolean`
@@ -45,13 +46,36 @@
 **Returns:** `boolean`
 
 ___
+<a id="jsonfsm"></a>
+
+###  JSONFSM
+
+**ΤJSONFSM**: *`object`*
+
+*Defined in [state_machine/StateContainer.ts:463](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L463)*
+
+#### Type declaration
+
+ initial: `string`
+
+ states: `object`
+
+[stateName: `string`]: `object`
+
+ on: `object`
+
+[eventName: `string`]:  `string` &#124; `object`
+
+`Optional`  onEntry: `string`[]
+
+___
 <a id="pair"></a>
 
 ###  Pair
 
 **ΤPair**: *[`E`, `E`]*
 
-*Defined in [state_machine/StateContainer.ts:456](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L456)*
+*Defined in [state_machine/StateContainer.ts:457](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L457)*
 
 ___
 <a id="similarityscore"></a>
@@ -60,7 +84,7 @@ ___
 
 **ΤSimilarityScore**: *`function`*
 
-*Defined in [state_machine/StateContainer.ts:458](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L458)*
+*Defined in [state_machine/StateContainer.ts:459](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L459)*
 
 #### Type declaration
 ▸(i1: *`E`*, i2: *`E`*): `number`
@@ -84,7 +108,7 @@ ___
 
 ▸ **defaultEqualityCheck**(a: *`any`*, b: *`any`*): `boolean`
 
-*Defined in [state_machine/StateContainer.ts:459](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L459)*
+*Defined in [state_machine/StateContainer.ts:460](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L460)*
 
 **Parameters:**
 
@@ -102,7 +126,7 @@ ___
 
 ▸ **defaultSimilarityScore**(a: *`any`*, b: *`any`*):  `1` &#124; `0`
 
-*Defined in [state_machine/StateContainer.ts:460](https://github.com/soney/t2sm/blob/9787686/src/state_machine/StateContainer.ts#L460)*
+*Defined in [state_machine/StateContainer.ts:461](https://github.com/soney/t2sm/blob/7b549e1/src/state_machine/StateContainer.ts#L461)*
 
 **Parameters:**
 

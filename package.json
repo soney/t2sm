@@ -37,9 +37,11 @@
     "@types/event-emitter": "^0.3.2",
     "@types/events": "^1.2.0",
     "@types/lodash": "^4.14.110",
+    "dagre": "^0.8.2",
     "event-emitter": "^0.3.5",
     "events": "^3.0.0",
     "lodash": "^4.17.10",
+    "sdb-ts": "git+https://github.com/soney/sdb-ts.git",
     "strict-event-emitter-types": "^1.2.0"
   }
 }

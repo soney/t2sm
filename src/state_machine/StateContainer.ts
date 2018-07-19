@@ -1,8 +1,61 @@
-import {AbstractState, StartState, State} from './State';
-import {Transition} from './Transition';
+import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent} from './State';
+import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent} from './Transition';
 import { EventEmitter } from 'events';
 import { HashMap } from '../utils/HashMap';
 import {keys, forEach, isString} from 'lodash';
+
+export interface StateAddedEvent {
+    state: string,
+    payload: any
+};
+
+export interface StateRemovedEvent {
+    state: string
+};
+
+// export interface StateRenamedEvent {
+//     fromName: string,
+//     toName: string
+// };
+
+export interface TransitionAddedEvent {
+    transition: string,
+    from: string,
+    to: string,
+    alias?: string,
+    payload: any
+};
+
+export interface TransitionRemovedEvent {
+    transition: string
+};
+
+export interface TransitionToStateChangedEvent {
+    transition: string,
+    state: string,
+    oldTo: string
+};
+
+export interface TransitionFromStateChangedEvent {
+    transition: string,
+    state: string,
+    oldFrom: string
+};
+
+export interface TransitionPayloadChangedEvent {
+    transition: string,
+    payload: any
+};
+
+export interface StatePayloadChangedEvent {
+    state: string,
+    payload: any
+};
+
+export interface TransitionFiredEvent {
+    transition: string,
+    event: any
+};
 
 export abstract class StateContainer<S,T> extends EventEmitter {
     protected startState:StartState<S,T>; // The state that will be active on create
@@ -166,8 +219,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             const state = new State<S,T>(payload);
             this.states.set(label, state);
             this.stateLabels.set(state, label);
-            state.addListener('active', this.onStateActive);
-            this.emit('stateAdded', {state:label, payload});
+            this.emit('stateAdded', {state:label, payload} as StateAddedEvent);
             return label;
         }
     };
@@ -175,10 +227,6 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     /**
      * Called whenever a state is active
      */
-    private onStateActive = (state) => {
-        this.activeState = state;
-        this.emit('activeStateChanged', {state:this.getStateLabel(state)});
-    };
 
     /**
      * Remove a state from the list of states
@@ -190,29 +238,11 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             state.remove();
             this.states.delete(label);
             this.stateLabels.delete(state);
-            state.removeListener('active', this.onStateActive);
-            this.emit('stateRemoved', {state:label});
+            this.emit('stateRemoved', {state:label} as StateRemovedEvent);
             return this;
         } else {
             throw new Error(`State container does not have a state with label ${label}`);
         }
-    };
-
-    /**
-     * Change the name of a state
-     * @param fromLabel The old state label
-     * @param toLabel The new state label
-     */
-    public renameState(fromLabel:string, toLabel:string):this {
-        if(!this.hasState(fromLabel)) { throw new Error(`State container does not have a state with label ${fromLabel}`); }
-        if(this.hasState(toLabel)) { throw new Error(`State container already has a state with label ${toLabel}`); }
-
-        const fromState = this.getState(fromLabel);
-        this.states.delete(fromLabel);
-        this.states.set(toLabel, fromState);
-        this.stateLabels.set(fromState, toLabel);
-        this.emit('stateRenamed', {fromName:fromLabel, toName:toLabel});
-        return this;
     };
 
     /**
@@ -254,7 +284,8 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const transition = new Transition(fromState, toState, alias, payload);
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
-        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, alias, payload});
+        this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, alias, payload} as TransitionAddedEvent);
+        this.addTransitionListeners(transition);
 
         return label;
     };
@@ -269,7 +300,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             transition.remove();
             this.transitions.delete(label);
             this.transitionLabels.delete(transition);
-            this.emit('transitionRemoved', {transition:label});
+            this.emit('transitionRemoved', {transition:label} as TransitionRemovedEvent);
             return this;
         } else {
             throw new Error('Could not find transition');
@@ -303,6 +334,15 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public getStates():string[] {
         return Array.from(this.states.keys());
     };
+
+    /**
+     * Get the label of every transition in this container
+     * @returns a list of transitions in this container
+     */
+    public getTransitions():string[] {
+        return Array.from(this.transitions.keys());
+    };
+
 
     /**
      * @returns a state name that will be unique for this container
@@ -459,6 +499,59 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.transitions.clear();
         this.transitionLabels.clear();
         this.emit('destroyed');
+    };
+
+    private addStateListeners(state: State<S, T>): void {
+        const stateLabel = this.getStateLabel(state);
+        state.on('active', (event: ActiveEvent) => {
+            this.activeState = state;
+            this.emit('activeStateChanged', {state: stateLabel});
+        });
+        state.on('not_active', (event: NotActiveEvent) => {
+        });
+        state.on('payloadChanged', (event: SPayloadChangedEvent):void => {
+            const {payload} = event;
+            this.emit('stateloadChanged', {
+                state: stateLabel,
+                payload
+            } as StatePayloadChangedEvent);
+        });
+    };
+
+    private addTransitionListeners(transition: Transition<S, T>):void {
+        const transitionLabel = this.getTransitionLabel(transition);
+        transition.on('fromStateChanged', (event: FromStateChangedEvent):void => {
+            const {oldFrom, state} = event;
+            this.emit('transitionFromStateChanged', {
+                transition: transitionLabel,
+                oldFrom: this.getStateLabel(oldFrom),
+                state: this.getStateLabel(state)
+            } as TransitionFromStateChangedEvent);
+        });
+
+        transition.on('toStateChanged', (event: ToStateChangedEvent):void => {
+            const {oldTo, state} = event;
+            this.emit('transitionToStateChanged', {
+                transition: transitionLabel,
+                oldTo: this.getStateLabel(oldTo),
+                state: this.getStateLabel(state)
+            } as TransitionToStateChangedEvent);
+        });
+
+        transition.on('payloadChanged', (event: TPayloadChangedEvent):void => {
+            const {payload} = event;
+            this.emit('transitionPayloadChanged', {
+                transition: transitionLabel,
+                payload
+            } as TransitionPayloadChangedEvent);
+        });
+
+        transition.on('fire', (event: FireEvent):void => {
+            this.emit('transitionFiredEvent', {
+                transition: transitionLabel,
+                event: event.event
+            } as TransitionFiredEvent);
+        });
     };
 };
 

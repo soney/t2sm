@@ -1,6 +1,12 @@
 import {Transition} from './Transition';
 import { EventEmitter } from 'events';
 
+export interface ActiveEvent {};
+export interface NotActiveEvent {};
+export interface SPayloadChangedEvent {
+    payload: any
+};
+
 /**
  * A class representing a state in a state machine
  */
@@ -22,7 +28,10 @@ export abstract class AbstractState<S, T> extends EventEmitter {
      * Set the data attached to this state
      * @param payload The new payload
      */
-    public setPayload(payload:S):void { this.payload = payload; };
+    public setPayload(payload:S):void {
+        this.payload = payload;
+        this.emit('payloadChanged', { payload } as SPayloadChangedEvent);
+    };
 
     /**
      * Get all of the transitions leaving this state (should only be used internally)
@@ -103,10 +112,10 @@ export abstract class AbstractState<S, T> extends EventEmitter {
         this.active = active;
         if(this.isActive()) {
             this.addOutgoingTransitionListeners();
-            this.emit('active', this);
+            this.emit('active', {} as ActiveEvent);
         } else {
             this.removeOutgoingTransitionListeners();
-            this.emit('not_active', this);
+            this.emit('not_active', {} as NotActiveEvent);
         }
     };
 

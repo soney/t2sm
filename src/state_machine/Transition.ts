@@ -1,6 +1,24 @@
 import {AbstractState} from './State';
 import { EventEmitter } from 'events';
 
+export interface TPayloadChangedEvent {
+    payload: any
+};
+
+export interface FromStateChangedEvent {
+    oldFrom: AbstractState<any, any>,
+    state: AbstractState<any, any>
+};
+
+export interface ToStateChangedEvent {
+    oldTo: AbstractState<any, any>,
+    state: AbstractState<any, any>
+};
+
+export interface FireEvent {
+    event: any
+};
+
 /**
  * A class representing a transition in a state machine
  */
@@ -59,7 +77,9 @@ export class Transition<S, T> extends EventEmitter {
      * Tell the transition to fire (if the "from" state is active, move to the "to" state)
      */
     public fire(event?:any, source?:any):void {
-        this.emit('fire', this, event, source);
+        this.emit('fire', {
+            event, source
+        } as FireEvent);
     };
 
     /**
@@ -67,18 +87,26 @@ export class Transition<S, T> extends EventEmitter {
      * @param state The new "from" state
      */
     public setFromState(state:AbstractState<S,T>):void {
+        const oldFrom = this.fromState;
         this.fromState._removeOutgoingTransition(this);
         this.fromState = state;
         this.fromState._addOutgoingTransition(this);
+        this.emit('fromStateChanged', {
+            oldFrom, state
+        } as FromStateChangedEvent);
     };
     /**
      * Change which state this transition goes to
      * @param state The new "to" state
      */
     public setToState(state:AbstractState<S,T>):void {
+        const oldTo = this.toState;
         this.toState._removeIncomingTransition(this);
         this.toState = state;
         this.toState._addIncomingTransition(this);
+        this.emit('toStateChanged', {
+            oldTo, state
+        } as ToStateChangedEvent);
     };
 
     /**
@@ -91,5 +119,6 @@ export class Transition<S, T> extends EventEmitter {
      */
     public setPayload(payload:T):void {
         this.payload = payload;
+        this.emit('payloadChanged', { payload } as TPayloadChangedEvent);
     };
 };

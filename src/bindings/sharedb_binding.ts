@@ -1,12 +1,13 @@
 import {SDBDoc} from 'sdb-ts';
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent} from '../state_machine/StateContainer';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent} from '../state_machine/StateContainer';
 import {each} from 'lodash';
 
 interface JSONFSM {
     startState: string,
     states: {
         [stateName: string]: {
-            payload: any
+            payload: any,
+            active: boolean
         }
     },
     transitions: {
@@ -25,6 +26,8 @@ export class SDBBinding {
         this.fsm.on('stateRemoved', this.onStateRemoved);
         this.fsm.on('transitionAdded', this.onTransitionAdded);
         this.fsm.on('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
         this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
         this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
         this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
@@ -57,7 +60,8 @@ export class SDBBinding {
         };
         this.fsm.getStates().forEach((stateName: string) => {
             const payload = this.fsm.getStatePayload(stateName);
-            data.states[stateName] = { payload };
+            const active = this.fsm.getActiveState() === stateName;
+            data.states[stateName] = { payload, active };
         });
         this.fsm.getTransitions().forEach((transitionName: string) => {
             const from = this.fsm.getTransitionFrom(transitionName);
@@ -86,6 +90,13 @@ export class SDBBinding {
     private onStateRemoved = (event:StateRemovedEvent):void => {
         const {state} = event;
         this.doc.submitObjectDeleteOp(this.path.concat('states', state));
+    };
+    private onActiveStateChanged = (event:ActiveStateChangedEvent):void => {
+        const {state, oldActiveState} = event;
+        if(oldActiveState) {
+            this.doc.submitObjectReplaceOp(this.path.concat('states', oldActiveState, 'active'), false);
+        }
+        this.doc.submitObjectReplaceOp(this.path.concat('states', state, 'active'), true);
     };
     private onTransitionAdded = (event:TransitionAddedEvent):void => {
         const {transition, from, to, payload, alias} = event;

@@ -5,24 +5,29 @@ const Transition_1 = require("./Transition");
 const events_1 = require("events");
 const HashMap_1 = require("../utils/HashMap");
 const lodash_1 = require("lodash");
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
 class StateContainer extends events_1.EventEmitter {
     /**
      * Create a new StateContainer
      * @param startStateName The label for the start state
      */
-    constructor(startStateName = 'start') {
+    constructor() {
         super();
         this.states = new Map(); // States are indexed by name (string)
         this.stateLabels = new Map(); // Map back from states to labels
         this.transitions = new Map(); // Transitions are indexed by name too
         this.transitionLabels = new Map(); // Map back from transitions to labels
-        /**
-         * Called whenever a state is active
-         */
-        this.onStateActive = (state) => {
-            this.activeState = state;
-            this.emit('activeStateChanged', { state: this.getStateLabel(state) });
-        };
+        const startStateName = '(start)';
         this.startState = this.activeState = new State_1.StartState();
         this.states.set(startStateName, this.startState);
         this.stateLabels.set(this.startState, startStateName);
@@ -134,6 +139,35 @@ class StateContainer extends events_1.EventEmitter {
     }
     ;
     /**
+     * Get the alias of a transition
+     * @param label The label of the transition
+     * @returns The alias of the transition
+     */
+    getTransitionAlias(label) {
+        if (this.hasTransition(label)) {
+            return this.getTransition(label).getAlias();
+        }
+        else {
+            throw new Error(`Could not find transition ${label}`);
+        }
+    }
+    ;
+    /**
+     * Change the alias of a transition
+     * @param label The label of the transition
+     * @param alias The new alias
+     */
+    setTransitionAlias(label, alias) {
+        if (this.hasTransition(label)) {
+            this.getTransition(label).setAlias(alias);
+            return this;
+        }
+        else {
+            throw new Error(`Could not find transition ${label}`);
+        }
+    }
+    ;
+    /**
      * Fire a transition by its label
      * @param label The label of the transition
      * @param event The content of the event
@@ -179,12 +213,14 @@ class StateContainer extends events_1.EventEmitter {
             const state = new State_1.State(payload);
             this.states.set(label, state);
             this.stateLabels.set(state, label);
-            state.addListener('active', this.onStateActive);
             this.emit('stateAdded', { state: label, payload });
             return label;
         }
     }
     ;
+    /**
+     * Called whenever a state is active
+     */
     /**
      * Remove a state from the list of states
      * @param label The label of the state to remove
@@ -195,33 +231,12 @@ class StateContainer extends events_1.EventEmitter {
             state.remove();
             this.states.delete(label);
             this.stateLabels.delete(state);
-            state.removeListener('active', this.onStateActive);
             this.emit('stateRemoved', { state: label });
             return this;
         }
         else {
             throw new Error(`State container does not have a state with label ${label}`);
         }
-    }
-    ;
-    /**
-     * Change the name of a state
-     * @param fromLabel The old state label
-     * @param toLabel The new state label
-     */
-    renameState(fromLabel, toLabel) {
-        if (!this.hasState(fromLabel)) {
-            throw new Error(`State container does not have a state with label ${fromLabel}`);
-        }
-        if (this.hasState(toLabel)) {
-            throw new Error(`State container already has a state with label ${toLabel}`);
-        }
-        const fromState = this.getState(fromLabel);
-        this.states.delete(fromLabel);
-        this.states.set(toLabel, fromState);
-        this.stateLabels.set(fromState, toLabel);
-        this.emit('stateRenamed', { fromName: fromLabel, toName: toLabel });
-        return this;
     }
     ;
     /**
@@ -271,6 +286,7 @@ class StateContainer extends events_1.EventEmitter {
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
         this.emit('transitionAdded', { transition: label, from: fromLabel, to: toLabel, alias, payload });
+        this.addTransitionListeners(transition);
         return label;
     }
     ;
@@ -320,6 +336,14 @@ class StateContainer extends events_1.EventEmitter {
      */
     getStates() {
         return Array.from(this.states.keys());
+    }
+    ;
+    /**
+     * Get the label of every transition in this container
+     * @returns a list of transitions in this container
+     */
+    getTransitions() {
+        return Array.from(this.transitions.keys());
     }
     ;
     /**
@@ -499,14 +523,77 @@ class StateContainer extends events_1.EventEmitter {
         this.emit('destroyed');
     }
     ;
+    addStateListeners(state) {
+        const stateLabel = this.getStateLabel(state);
+        state.on('active', (event) => {
+            const previousActiveState = this.activeState;
+            let oldActiveState;
+            if (previousActiveState) {
+                try {
+                    oldActiveState = this.getStateLabel(previousActiveState);
+                }
+                catch (_a) { }
+            }
+            this.activeState = state;
+            this.emit('activeStateChanged', { state: stateLabel, oldActiveState });
+        });
+        // state.on('not_active', (event: NotActiveEvent) => { });
+        state.on('payloadChanged', (event) => {
+            const { payload } = event;
+            this.emit('stateloadChanged', {
+                state: stateLabel,
+                payload
+            });
+        });
+    }
+    ;
+    addTransitionListeners(transition) {
+        const transitionLabel = this.getTransitionLabel(transition);
+        transition.on('fromStateChanged', (event) => {
+            const { oldFrom, state } = event;
+            this.emit('transitionFromStateChanged', {
+                transition: transitionLabel,
+                oldFrom: this.getStateLabel(oldFrom),
+                state: this.getStateLabel(state)
+            });
+        });
+        transition.on('toStateChanged', (event) => {
+            const { oldTo, state } = event;
+            this.emit('transitionToStateChanged', {
+                transition: transitionLabel,
+                oldTo: this.getStateLabel(oldTo),
+                state: this.getStateLabel(state)
+            });
+        });
+        transition.on('payloadChanged', (event) => {
+            const { payload } = event;
+            this.emit('transitionPayloadChanged', {
+                transition: transitionLabel,
+                payload
+            });
+        });
+        transition.on('fire', (event) => {
+            this.emit('transitionFiredEvent', {
+                transition: transitionLabel,
+                event: event.event
+            });
+        });
+        transition.on('aliasChanged', (event) => {
+            const { alias } = event;
+            this.emit('transitionAliasChanged', {
+                transition: transitionLabel, alias
+            });
+        });
+    }
+    ;
 }
 exports.StateContainer = StateContainer;
 ;
 const defaultEqualityCheck = (a, b) => a === b;
 const defaultSimilarityScore = (a, b) => a === b ? 1 : 0;
 class FSM extends StateContainer {
-    constructor(transitionsEqual = defaultEqualityCheck, transitionSimilarityScore = defaultSimilarityScore, stateSimilarityScore = defaultSimilarityScore, startStateName) {
-        super(startStateName);
+    constructor(transitionsEqual = defaultEqualityCheck, transitionSimilarityScore = defaultSimilarityScore, stateSimilarityScore = defaultSimilarityScore) {
+        super();
         this.transitionsEqual = transitionsEqual;
         this.transitionSimilarityScore = transitionSimilarityScore;
         this.stateSimilarityScore = stateSimilarityScore;
@@ -517,14 +604,14 @@ class FSM extends StateContainer {
      * @param jsonObj The JSON object
      */
     static fromJSON(jsonObj) {
-        const rv = new FSM(undefined, undefined, undefined, '(init)');
+        const rv = new FSM();
         rv.addState(jsonObj.initial, jsonObj.initial);
         lodash_1.keys(jsonObj.states).forEach((stateName) => {
             if (stateName !== jsonObj.initial) {
                 rv.addState('', stateName);
             }
         });
-        rv.addTransition('(init)', jsonObj.initial, 'start');
+        rv.addTransition('(start)', jsonObj.initial, 'start');
         lodash_1.forEach(jsonObj.states, (stateInfo, stateName) => {
             lodash_1.forEach(stateInfo.on, (toStateInfo, eventName) => {
                 let toStateName;

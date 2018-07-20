@@ -1,10 +1,14 @@
 import * as dagre from 'dagre';
 import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent} from '../state_machine/StateContainer';
+import {isFunction} from 'lodash';
+
+type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};
+type TransitionOptions = ((transition: string) => {[key: string]: any}) | {[key: string]: any};
 
 export class DagreBinding {
     private graph: dagre.graphlib.Graph = new dagre.graphlib.Graph({ multigraph: true, directed: true });
 
-    public constructor(private fsm:FSM<any, any>) {
+    public constructor(private fsm:FSM<any, any>, private stateOptions?:StateOptions, private transitionOptions?:TransitionOptions) {
         this.fsm.on('stateAdded', this.onStateAdded);
         this.fsm.on('stateRemoved', this.onStateRemoved);
         this.fsm.on('transitionAdded', this.onTransitionAdded);
@@ -32,11 +36,21 @@ export class DagreBinding {
         this.graph.removeEdge(transition);
     };
     private getStateOptions(state:string):{[key:string]: any} {
-        const rv = {};
-        return rv;
+        if(isFunction(this.stateOptions)) {
+            return this.stateOptions(state);
+        } else if(this.stateOptions) {
+            return this.stateOptions;
+        } else {
+            return {};
+        }
     };
     private getTransitionOptions(transition:string):{[key:string]: any} {
-        const rv = {};
-        return rv;
+        if(isFunction(this.transitionOptions)) {
+            return this.transitionOptions(transition);
+        } else if(this.transitionOptions) {
+            return this.transitionOptions;
+        } else {
+            return {};
+        }
     };
 };

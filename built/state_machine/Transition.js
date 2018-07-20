@@ -1,6 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+;
+;
+;
+;
+;
 /**
  * A class representing a transition in a state machine
  */
@@ -29,6 +34,14 @@ class Transition extends events_1.EventEmitter {
         return this.alias;
     }
     ;
+    /**
+     * Change the alias of this transition
+     * @param alias The new alias for this transition
+     */
+    setAlias(alias) {
+        this.alias = alias;
+        this.emit('aliasChanged', { alias });
+    }
     /**
      * @returns whether this transition is eligible to fire
      */
@@ -62,7 +75,9 @@ class Transition extends events_1.EventEmitter {
      * Tell the transition to fire (if the "from" state is active, move to the "to" state)
      */
     fire(event, source) {
-        this.emit('fire', this, event, source);
+        this.emit('fire', {
+            event, source
+        });
     }
     ;
     /**
@@ -70,9 +85,13 @@ class Transition extends events_1.EventEmitter {
      * @param state The new "from" state
      */
     setFromState(state) {
+        const oldFrom = this.fromState;
         this.fromState._removeOutgoingTransition(this);
         this.fromState = state;
         this.fromState._addOutgoingTransition(this);
+        this.emit('fromStateChanged', {
+            oldFrom, state
+        });
     }
     ;
     /**
@@ -80,9 +99,13 @@ class Transition extends events_1.EventEmitter {
      * @param state The new "to" state
      */
     setToState(state) {
+        const oldTo = this.toState;
         this.toState._removeIncomingTransition(this);
         this.toState = state;
         this.toState._addIncomingTransition(this);
+        this.emit('toStateChanged', {
+            oldTo, state
+        });
     }
     ;
     /**
@@ -96,6 +119,7 @@ class Transition extends events_1.EventEmitter {
      */
     setPayload(payload) {
         this.payload = payload;
+        this.emit('payloadChanged', { payload });
     }
     ;
 }

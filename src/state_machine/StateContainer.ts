@@ -63,7 +63,8 @@ export interface TransitionFiredEvent {
 };
 
 export interface ActiveStateChangedEvent {
-    state: string
+    state: string,
+    oldActiveState: string
 };
 
 export abstract class StateContainer<S,T> extends EventEmitter {
@@ -541,11 +542,17 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     private addStateListeners(state: State<S, T>): void {
         const stateLabel = this.getStateLabel(state);
         state.on('active', (event: ActiveEvent) => {
+            const previousActiveState = this.activeState;
+            let oldActiveState: string;
+            if(previousActiveState) {
+                try {
+                    oldActiveState = this.getStateLabel(previousActiveState);
+                } catch { }
+            }
             this.activeState = state;
-            this.emit('activeStateChanged', {state: stateLabel} as ActiveStateChangedEvent);
+            this.emit('activeStateChanged', {state: stateLabel, oldActiveState } as ActiveStateChangedEvent);
         });
-        state.on('not_active', (event: NotActiveEvent) => {
-        });
+        // state.on('not_active', (event: NotActiveEvent) => { });
         state.on('payloadChanged', (event: SPayloadChangedEvent):void => {
             const {payload} = event;
             this.emit('stateloadChanged', {

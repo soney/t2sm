@@ -2,6 +2,53 @@
 import { AbstractState, StartState } from './State';
 import { Transition } from './Transition';
 import { EventEmitter } from 'events';
+export interface StateAddedEvent {
+    state: string;
+    payload: any;
+}
+export interface StateRemovedEvent {
+    state: string;
+}
+export interface TransitionAddedEvent {
+    transition: string;
+    from: string;
+    to: string;
+    alias?: string;
+    payload: any;
+}
+export interface TransitionRemovedEvent {
+    transition: string;
+}
+export interface TransitionToStateChangedEvent {
+    transition: string;
+    state: string;
+    oldTo: string;
+}
+export interface TransitionFromStateChangedEvent {
+    transition: string;
+    state: string;
+    oldFrom: string;
+}
+export interface TransitionPayloadChangedEvent {
+    transition: string;
+    payload: any;
+}
+export interface TransitionAliasChangedEvent {
+    transition: string;
+    alias: string;
+}
+export interface StatePayloadChangedEvent {
+    state: string;
+    payload: any;
+}
+export interface TransitionFiredEvent {
+    transition: string;
+    event: any;
+}
+export interface ActiveStateChangedEvent {
+    state: string;
+    oldActiveState: string;
+}
 export declare abstract class StateContainer<S, T> extends EventEmitter {
     protected startState: StartState<S, T>;
     private activeState;
@@ -13,7 +60,7 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      * Create a new StateContainer
      * @param startStateName The label for the start state
      */
-    constructor(startStateName?: string);
+    constructor();
     /**
      * Get the label of a state
      * @param state The AbstractState object we are searching for
@@ -73,6 +120,18 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      */
     setTransitionPayload(label: string, payload: T): this;
     /**
+     * Get the alias of a transition
+     * @param label The label of the transition
+     * @returns The alias of the transition
+     */
+    getTransitionAlias(label: string): string;
+    /**
+     * Change the alias of a transition
+     * @param label The label of the transition
+     * @param alias The new alias
+     */
+    setTransitionAlias(label: string, alias: string): this;
+    /**
      * Fire a transition by its label
      * @param label The label of the transition
      * @param event The content of the event
@@ -95,18 +154,11 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
     /**
      * Called whenever a state is active
      */
-    private onStateActive;
     /**
      * Remove a state from the list of states
      * @param label The label of the state to remove
      */
     removeState(label: string): this;
-    /**
-     * Change the name of a state
-     * @param fromLabel The old state label
-     * @param toLabel The new state label
-     */
-    renameState(fromLabel: string, toLabel: string): this;
     /**
      * Change the name of a transition
      * @param fromLabel The old transition label
@@ -144,6 +196,11 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      * @returns a list of states in this container
      */
     getStates(): string[];
+    /**
+     * Get the label of every transition in this container
+     * @returns a list of transitions in this container
+     */
+    getTransitions(): string[];
     /**
      * @returns a state name that will be unique for this container
      */
@@ -204,6 +261,8 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      * Clean up all of the objects stored in this container
      */
     destroy(): void;
+    private addStateListeners;
+    private addTransitionListeners;
 }
 export declare type EqualityCheck<E> = (i1: E, i2: E) => boolean;
 export declare type SimilarityScore<E> = (i1: E, i2: E) => number;
@@ -226,7 +285,7 @@ export declare class FSM<S, T> extends StateContainer<S, T> {
     private transitionsEqual;
     private transitionSimilarityScore;
     private stateSimilarityScore;
-    constructor(transitionsEqual?: EqualityCheck<T>, transitionSimilarityScore?: SimilarityScore<T>, stateSimilarityScore?: SimilarityScore<S>, startStateName?: string);
+    constructor(transitionsEqual?: EqualityCheck<T>, transitionSimilarityScore?: SimilarityScore<T>, stateSimilarityScore?: SimilarityScore<S>);
     /**
      * Converts a JSON object (such as that exported by https://musing-rosalind-2ce8e7.netlify.com) to an FSM
      * @param jsonObj The JSON object

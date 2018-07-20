@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+;
+;
+;
 /**
  * A class representing a state in a state machine
  */
@@ -37,7 +40,10 @@ class AbstractState extends events_1.EventEmitter {
      * Set the data attached to this state
      * @param payload The new payload
      */
-    setPayload(payload) { this.payload = payload; }
+    setPayload(payload) {
+        this.payload = payload;
+        this.emit('payloadChanged', { payload });
+    }
     ;
     /**
      * Get all of the transitions leaving this state (should only be used internally)
@@ -121,11 +127,11 @@ class AbstractState extends events_1.EventEmitter {
         this.active = active;
         if (this.isActive()) {
             this.addOutgoingTransitionListeners();
-            this.emit('active', this);
+            this.emit('active', {});
         }
         else {
             this.removeOutgoingTransitionListeners();
-            this.emit('not_active', this);
+            this.emit('not_active', {});
         }
     }
     ;

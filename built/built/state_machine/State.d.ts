@@ -1,6 +1,13 @@
 /// <reference types="node" />
 import { Transition } from './Transition';
 import { EventEmitter } from 'events';
+export interface ActiveEvent {
+}
+export interface NotActiveEvent {
+}
+export interface SPayloadChangedEvent {
+    payload: any;
+}
 /**
  * A class representing a state in a state machine
  */

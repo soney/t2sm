@@ -1,6 +1,23 @@
 /// <reference types="node" />
 import { AbstractState } from './State';
 import { EventEmitter } from 'events';
+export interface TPayloadChangedEvent {
+    payload: any;
+}
+export interface FromStateChangedEvent {
+    oldFrom: AbstractState<any, any>;
+    state: AbstractState<any, any>;
+}
+export interface ToStateChangedEvent {
+    oldTo: AbstractState<any, any>;
+    state: AbstractState<any, any>;
+}
+export interface FireEvent {
+    event: any;
+}
+export interface AliasChangedEvent {
+    alias: string;
+}
 /**
  * A class representing a transition in a state machine
  */
@@ -22,6 +39,11 @@ export declare class Transition<S, T> extends EventEmitter {
      * @returns the alias for this transition (typically the event name)
      */
     getAlias(): string;
+    /**
+     * Change the alias of this transition
+     * @param alias The new alias for this transition
+     */
+    setAlias(alias: string): void;
     /**
      * @returns whether this transition is eligible to fire
      */

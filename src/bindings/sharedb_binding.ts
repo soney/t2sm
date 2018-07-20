@@ -1,5 +1,6 @@
 import {SDBDoc} from 'sdb-ts';
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent} from '../state_machine/StateContainer';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent} from '../state_machine/StateContainer';
+import {each} from 'lodash';
 
 interface JSONFSM {
     startState: string,
@@ -25,11 +26,30 @@ export class SDBBinding {
         this.fsm.on('transitionAdded', this.onTransitionAdded);
         this.fsm.on('transitionRemoved', this.onTransitionRemoved);
         this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
         this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
         this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
         this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
+
+        let hasSDBData: boolean;
+        try {
+            const data = this.doc.traverse(this.path);
+            if(data) {
+                hasSDBData = true;
+            } else {
+                hasSDBData = false;
+            }
+        } catch {
+            hasSDBData = false;
+        }
+
+        if(hasSDBData) {
+            this.syncSDBToFSM();
+        } else {
+            this.syncFSMToSDB();
+        }
     };
-    private initialize() {
+    private syncFSMToSDB():void {
         const data:JSONFSM = {
             startState: this.fsm.getStartState(),
             states: {},
@@ -44,11 +64,20 @@ export class SDBBinding {
             const to = this.fsm.getTransitionTo(transitionName);
             const payload = this.fsm.getTransitionPayload(transitionName);
             const alias = this.fsm.getTransitionAlias(transitionName);
-            data.transitions[transitionName] = { from, to, payload, alias}
+            data.transitions[transitionName] = { from, to, payload, alias };
         });
+        this.doc.submitObjectReplaceOp(this.path, data);
     };
-    private getJSONFSM():JSONFSM {
-        return this.doc.traverse(this.path) as JSONFSM;
+    private syncSDBToFSM():void {
+        const data = this.doc.traverse(this.path) as JSONFSM;
+        each(data.states, (state, label) => {
+            const { payload } = state;
+            this.fsm.addState(payload, label);
+        });
+        each(data.transitions, (transition, label) => {
+            const { from, to, payload, alias } = transition;
+            this.fsm.addTransition(from, to, alias, payload, label);
+        });
     };
     private onStateAdded = (event:StateAddedEvent):void => {
         const {state, payload} = event;
@@ -66,7 +95,6 @@ export class SDBBinding {
         const {state, payload} = event;
         this.doc.submitObjectInsertOp(this.path.concat('states', state, 'payload'), payload);
     };
-
     private onTransitionPayloadChanged = (event:TransitionPayloadChangedEvent):void => {
         const {transition, payload} = event;
         this.doc.submitObjectInsertOp(this.path.concat('transitions', transition, 'payload'), payload);
@@ -83,5 +111,8 @@ export class SDBBinding {
         const {transition, state} = event;
         this.doc.submitObjectDeleteOp(this.path.concat('transitions', transition, 'from'), state);
     };
-
+    private onTransitionAliasChanged = (event:TransitionAliasChangedEvent):void => {
+        const {transition, alias} = event;
+        this.doc.submitObjectDeleteOp(this.path.concat('transitions', transition, 'alias'), alias);
+    };
 };

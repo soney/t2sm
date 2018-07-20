@@ -1,5 +1,5 @@
 import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent} from './State';
-import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent} from './Transition';
+import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent, AliasChangedEvent} from './Transition';
 import { EventEmitter } from 'events';
 import { HashMap } from '../utils/HashMap';
 import {keys, forEach, isString} from 'lodash';
@@ -47,6 +47,11 @@ export interface TransitionPayloadChangedEvent {
     payload: any
 };
 
+export interface TransitionAliasChangedEvent {
+    transition: string,
+    alias: string
+};
+
 export interface StatePayloadChangedEvent {
     state: string,
     payload: any
@@ -55,6 +60,10 @@ export interface StatePayloadChangedEvent {
 export interface TransitionFiredEvent {
     transition: string,
     event: any
+};
+
+export interface ActiveStateChangedEvent {
+    state: string
 };
 
 export abstract class StateContainer<S,T> extends EventEmitter {
@@ -68,8 +77,9 @@ export abstract class StateContainer<S,T> extends EventEmitter {
      * Create a new StateContainer
      * @param startStateName The label for the start state
      */
-    constructor(startStateName:string='start') {
+    constructor() {
         super();
+        const startStateName:string='(start)';
         this.startState = this.activeState = new StartState();
         this.states.set(startStateName, this.startState);
         this.stateLabels.set(this.startState, startStateName);
@@ -168,6 +178,33 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         if(this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
             this.emit('transitionPayloadChanged', {transition:label, payload});
+            return this;
+        } else {
+            throw new Error(`Could not find transition ${label}`);
+        }
+    };
+
+    /**
+     * Get the alias of a transition
+     * @param label The label of the transition
+     * @returns The alias of the transition
+     */
+    public getTransitionAlias(label: string): string {
+        if(this.hasTransition(label)) {
+            return this.getTransition(label).getAlias();
+        } else {
+            throw new Error(`Could not find transition ${label}`);
+        }
+    };
+
+    /**
+     * Change the alias of a transition
+     * @param label The label of the transition
+     * @param alias The new alias
+     */
+    public setTransitionAlias(label: string, alias: string): this {
+        if(this.hasTransition(label)) {
+            this.getTransition(label).setAlias(alias);
             return this;
         } else {
             throw new Error(`Could not find transition ${label}`);
@@ -505,7 +542,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const stateLabel = this.getStateLabel(state);
         state.on('active', (event: ActiveEvent) => {
             this.activeState = state;
-            this.emit('activeStateChanged', {state: stateLabel});
+            this.emit('activeStateChanged', {state: stateLabel} as ActiveStateChangedEvent);
         });
         state.on('not_active', (event: NotActiveEvent) => {
         });
@@ -552,6 +589,13 @@ export abstract class StateContainer<S,T> extends EventEmitter {
                 event: event.event
             } as TransitionFiredEvent);
         });
+
+        transition.on('aliasChanged', (event: AliasChangedEvent):void => {
+            const {alias} = event;
+            this.emit('transitionAliasChanged', {
+                transition: transitionLabel, alias
+            } as TransitionAliasChangedEvent);
+        });
     };
 };
 
@@ -580,9 +624,8 @@ export type JSONFSM = {
 export class FSM<S,T> extends StateContainer<S,T> {
     constructor(private transitionsEqual:EqualityCheck<T>=defaultEqualityCheck,
                 private transitionSimilarityScore:SimilarityScore<T>=defaultSimilarityScore,
-                private stateSimilarityScore:SimilarityScore<S>=defaultSimilarityScore,
-                startStateName?:string) {
-        super(startStateName);
+                private stateSimilarityScore:SimilarityScore<S>=defaultSimilarityScore) {
+        super();
     };
 
     /**
@@ -590,14 +633,14 @@ export class FSM<S,T> extends StateContainer<S,T> {
      * @param jsonObj The JSON object
      */
     public static fromJSON(jsonObj:JSONFSM):FSM<string, string> {
-        const rv = new FSM<string, string>(undefined, undefined, undefined, '(init)');
+        const rv = new FSM<string, string>();
         rv.addState(jsonObj.initial, jsonObj.initial)
         keys(jsonObj.states).forEach((stateName) => {
             if(stateName !== jsonObj.initial) {
                 rv.addState('', stateName);
             }
         });
-        rv.addTransition('(init)', jsonObj.initial, 'start');
+        rv.addTransition('(start)', jsonObj.initial, 'start');
         forEach(jsonObj.states, (stateInfo, stateName) => {
             forEach(stateInfo.on, (toStateInfo, eventName) => {
                 let toStateName:string;

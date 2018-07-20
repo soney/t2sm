@@ -19,6 +19,10 @@ export interface FireEvent {
     event: any
 };
 
+export interface AliasChangedEvent {
+    alias: string
+};
+
 /**
  * A class representing a transition in a state machine
  */
@@ -43,6 +47,15 @@ export class Transition<S, T> extends EventEmitter {
     public getAlias():string {
         return this.alias;
     };
+
+    /**
+     * Change the alias of this transition
+     * @param alias The new alias for this transition
+     */
+    public setAlias(alias: string): void {
+        this.alias = alias;
+        this.emit('aliasChanged', { alias } as AliasChangedEvent);
+    }
 
     /**
      * @returns whether this transition is eligible to fire

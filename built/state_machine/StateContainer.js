@@ -32,6 +32,7 @@ class StateContainer extends events_1.EventEmitter {
         this.states.set(startStateName, this.startState);
         this.stateLabels.set(this.startState, startStateName);
         this.startState.setIsActive(true);
+        this.addStateListeners(this.startState);
     }
     ;
     /**
@@ -213,6 +214,7 @@ class StateContainer extends events_1.EventEmitter {
             const state = new State_1.State(payload);
             this.states.set(label, state);
             this.stateLabels.set(state, label);
+            this.addStateListeners(state);
             this.emit('stateAdded', { state: label, payload });
             return label;
         }

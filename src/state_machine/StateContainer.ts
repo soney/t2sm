@@ -85,6 +85,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.states.set(startStateName, this.startState);
         this.stateLabels.set(this.startState, startStateName);
         this.startState.setIsActive(true);
+        this.addStateListeners(this.startState);
     };
 
     /**
@@ -257,6 +258,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             const state = new State<S,T>(payload);
             this.states.set(label, state);
             this.stateLabels.set(state, label);
+            this.addStateListeners(state);
             this.emit('stateAdded', {state:label, payload} as StateAddedEvent);
             return label;
         }

@@ -17,8 +17,9 @@ class AbstractState extends events_1.EventEmitter {
         /**
          * Called when a transition leaving this state was fired
          */
-        this.onOutgoingTransitionFired = (transition, event, source) => {
+        this.onOutgoingTransitionFired = (firedEvent) => {
             if (this.isActive()) {
+                const { transition, event, source } = firedEvent;
                 const toState = transition.getToState();
                 // Need to set self to inactive *before* setting the other to active
                 // in case it's a transition back to myself

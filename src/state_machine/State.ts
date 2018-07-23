@@ -1,4 +1,4 @@
-import {Transition} from './Transition';
+import {Transition, FireEvent} from './Transition';
 import { EventEmitter } from 'events';
 
 export interface ActiveEvent {};
@@ -141,8 +141,9 @@ export abstract class AbstractState<S, T> extends EventEmitter {
     /**
      * Called when a transition leaving this state was fired
      */
-    private onOutgoingTransitionFired = (transition:Transition<S,T>, event:any, source:any) => {
+    private onOutgoingTransitionFired = (firedEvent:FireEvent) => {
         if(this.isActive()) {
+            const {transition, event, source} = firedEvent;
             const toState = transition.getToState();
             
             // Need to set self to inactive *before* setting the other to active

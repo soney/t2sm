@@ -1,6 +1,6 @@
 import * as dagre from 'dagre';
 import { FSM } from '../state_machine/StateContainer';
-declare type StateOptions = ((state: string) => {
+export declare type StateOptions = ((state: string) => {
     [key: string]: any;
 }) | {
     [key: string]: any;

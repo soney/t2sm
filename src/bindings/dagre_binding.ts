@@ -2,8 +2,8 @@ import * as dagre from 'dagre';
 import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent} from '../state_machine/StateContainer';
 import {isFunction} from 'lodash';
 
-type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};
-type TransitionOptions = ((transition: string) => {[key: string]: any}) | {[key: string]: any};
+export type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};
+export type TransitionOptions = ((transition: string) => {[key: string]: any}) | {[key: string]: any};
 
 export class DagreBinding {
     private graph: dagre.graphlib.Graph = new dagre.graphlib.Graph({ multigraph: true, directed: true });

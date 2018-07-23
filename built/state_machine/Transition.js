@@ -76,7 +76,7 @@ class Transition extends events_1.EventEmitter {
      */
     fire(event, source) {
         this.emit('fire', {
-            event, source
+            transition: this, event, source
         });
     }
     ;

@@ -1,7 +1,9 @@
 import {FSM} from './state_machine/StateContainer';
+import {SDBBinding, JSONFSM} from './bindings/sharedb_binding';
 
-export {FSM};
+const t2sm = {FSM, SDBBinding}
+export {FSM, SDBBinding, JSONFSM};
 
 if(typeof window != 'undefined' && window.document) {
-    window['FSM'] = FSM;
+    window['t2sm'] = t2sm;
 }

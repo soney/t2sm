@@ -1,2 +1,3 @@
 import { FSM } from './state_machine/StateContainer';
-export { FSM };
+import { SDBBinding, JSONFSM } from './bindings/sharedb_binding';
+export { FSM, SDBBinding, JSONFSM };

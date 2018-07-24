@@ -1,4 +1,4 @@
-import {FSM, SDBBinding, JSONFSM} from '../built/index';
+import {FSM, SDBBinding, JSONFSM, DagreBinding} from '../built/index';
 import {expect} from 'chai';
 import {SDBServer, SDBDoc, SDBClient} from 'sdb-ts';
 import * as WebSocket from 'ws';
@@ -35,11 +35,13 @@ describe('Create a basic FSM', () => {
         expect(fsm.getActiveState()).to.equal('state1');
         fsm.fireTransition(tName);
         expect(fsm.getActiveState()).to.equal(secondStateName);
+        expect(fsm.getOutgoingTransitions('state1')).to.eql([tName]);
     });
 
     it(`Remove a state`, () => {
         fsm.removeState(secondStateName);
         expect(fsm.getStates()).to.eql([fsm.getStartState(), 'state1'])
+        expect(fsm.getOutgoingTransitions('state1')).to.eql([]);
     });
 
     it('Add another state', () => {
@@ -289,12 +291,60 @@ describe('ShareDB tests', async () => {
             expect(fsm.getStates()).does.not.contain('another');
         });
 
-
         socketClients.forEach((ws) => {
             ws.close();
         });
         
         server.close();
+    });
+});
+describe('Dagre tests', async () => {
+    it('Testing dagre binding', async () => {
+        const fsm:FSM<null, null> = new FSM();
+        const state1 = fsm.addState();
+        const startTransition = fsm.addTransition(fsm.getStartState(), state1);
+
+        const binding = new DagreBinding(fsm);
+        const graph = binding.getGraph();
+
+        function checkTransitions():void {
+            expect(graph.edges().map(e => e.name)).to.eql(fsm.getTransitions());
+            graph.edges().forEach((edge) => {
+                const {name} = edge;
+                expect(edge.v).to.equal(fsm.getTransitionFrom(name));
+                expect(edge.w).to.equal(fsm.getTransitionTo(name));
+            });
+        }
+
+        checkTransitions();
+        expect(graph.nodes()).to.eql(fsm.getStates());
+        fsm.addState(null, 'label2');
+        checkTransitions();
+
+        const otherTransition = fsm.addTransition(state1, 'label2');
+        checkTransitions();
+        fsm.setTransitionTo(otherTransition, state1);
+        checkTransitions();
+        fsm.setTransitionFrom(otherTransition, 'label2');
+        checkTransitions();
+        fsm.removeTransition(otherTransition);
+
+        expect(graph.nodes()).to.eql(fsm.getStates());
+        checkTransitions();
+
+        fsm.removeState('label2');
+        expect(graph.nodes()).to.eql(fsm.getStates());
+
+        const s2 = fsm.addState();
+        expect(graph.nodes()).to.eql(fsm.getStates());
+        checkTransitions();
+        fsm.addTransition(state1, s2);
+        checkTransitions();
+        fsm.addTransition(state1, s2);
+        checkTransitions();
+        fsm.removeState(s2);
+        checkTransitions();
+        expect(graph.nodes()).to.eql(fsm.getStates());
     });
 });
 

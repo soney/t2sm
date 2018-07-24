@@ -1,5 +1,5 @@
-import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent} from './State';
-import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent, AliasChangedEvent} from './Transition';
+import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent, SRemovedEvent} from './State';
+import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent, AliasChangedEvent, TRemovedEvent} from './Transition';
 import { EventEmitter } from 'events';
 import { HashMap } from '../utils/HashMap';
 import {keys, forEach, isString} from 'lodash';
@@ -27,7 +27,9 @@ export interface TransitionAddedEvent {
 };
 
 export interface TransitionRemovedEvent {
-    transition: string
+    transition: string,
+    oldFrom: string,
+    oldTo: string
 };
 
 export interface TransitionToStateChangedEvent {
@@ -276,9 +278,6 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         const state = this.getState(label);
         if(state) {
             state.remove();
-            this.states.delete(label);
-            this.stateLabels.delete(state);
-            this.emit('stateRemoved', {state:label} as StateRemovedEvent);
             return this;
         } else {
             throw new Error(`State container does not have a state with label ${label}`);
@@ -337,10 +336,8 @@ export abstract class StateContainer<S,T> extends EventEmitter {
     public removeTransition(label:string):this {
         if(this.hasTransition(label)) {
             const transition = this.getTransition(label);
+
             transition.remove();
-            this.transitions.delete(label);
-            this.transitionLabels.delete(transition);
-            this.emit('transitionRemoved', {transition:label} as TransitionRemovedEvent);
             return this;
         } else {
             throw new Error('Could not find transition');
@@ -562,6 +559,12 @@ export abstract class StateContainer<S,T> extends EventEmitter {
                 payload
             } as StatePayloadChangedEvent);
         });
+
+        state.on('removed', (event: SRemovedEvent):void => {
+            this.states.delete(stateLabel);
+            this.stateLabels.delete(state);
+            this.emit('stateRemoved', {state:stateLabel} as StateRemovedEvent);
+        });
     };
 
     private addTransitionListeners(transition: Transition<S, T>):void {
@@ -604,6 +607,14 @@ export abstract class StateContainer<S,T> extends EventEmitter {
             this.emit('transitionAliasChanged', {
                 transition: transitionLabel, alias
             } as TransitionAliasChangedEvent);
+        });
+
+        transition.on('removed', (event: TRemovedEvent):void => {
+            const oldTo = this.getTransitionTo(transitionLabel);
+            const oldFrom = this.getTransitionFrom(transitionLabel);
+            this.transitions.delete(transitionLabel);
+            this.transitionLabels.delete(transition);
+            this.emit('transitionRemoved', {transition:transitionLabel, oldFrom, oldTo} as TransitionRemovedEvent);
         });
     };
 };

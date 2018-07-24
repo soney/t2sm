@@ -6,6 +6,7 @@ export interface NotActiveEvent {};
 export interface SPayloadChangedEvent {
     payload: any
 };
+export interface SRemovedEvent { };
 
 /**
  * A class representing a state in a state machine
@@ -160,8 +161,9 @@ export abstract class AbstractState<S, T> extends EventEmitter {
      */
     public remove():void {
         this.removeOutgoingTransitionListeners();
-        this.incomingTransitions.forEach((it) => it.remove());
-        this.outgoingTransitions.forEach((ot) => ot.remove());
+        while(this.incomingTransitions.length > 0) { this.incomingTransitions[0].remove(); }
+        while(this.outgoingTransitions.length > 0) { this.outgoingTransitions[0].remove(); }
+        this.emit('removed', {} as SRemovedEvent);
     };
 };
 

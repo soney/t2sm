@@ -4,6 +4,7 @@ const events_1 = require("events");
 ;
 ;
 ;
+;
 /**
  * A class representing a state in a state machine
  */
@@ -161,8 +162,13 @@ class AbstractState extends events_1.EventEmitter {
      */
     remove() {
         this.removeOutgoingTransitionListeners();
-        this.incomingTransitions.forEach((it) => it.remove());
-        this.outgoingTransitions.forEach((ot) => ot.remove());
+        while (this.incomingTransitions.length > 0) {
+            this.incomingTransitions[0].remove();
+        }
+        while (this.outgoingTransitions.length > 0) {
+            this.outgoingTransitions[0].remove();
+        }
+        this.emit('removed', {});
     }
     ;
 }

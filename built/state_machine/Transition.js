@@ -6,6 +6,7 @@ const events_1 = require("events");
 ;
 ;
 ;
+;
 /**
  * A class representing a transition in a state machine
  */
@@ -59,6 +60,7 @@ class Transition extends events_1.EventEmitter {
     remove() {
         this.fromState._removeOutgoingTransition(this);
         this.toState._removeIncomingTransition(this);
+        this.emit('removed', {});
     }
     ;
     /**

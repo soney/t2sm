@@ -1,5 +1,5 @@
 import * as dagre from 'dagre';
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent} from '../state_machine/StateContainer';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent} from '../state_machine/StateContainer';
 import {isFunction} from 'lodash';
 
 export type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};
@@ -9,10 +9,20 @@ export class DagreBinding {
     private graph: dagre.graphlib.Graph = new dagre.graphlib.Graph({ multigraph: true, directed: true });
 
     public constructor(private fsm:FSM<any, any>, private stateOptions?:StateOptions, private transitionOptions?:TransitionOptions) {
+        this.fsm.getStates().forEach((state) => {
+            this.graph.setNode(state, this.getStateOptions(state));
+        });
+        this.fsm.getTransitions().forEach((transition) => {
+            const from = this.fsm.getTransitionFrom(transition);
+            const to = this.fsm.getTransitionTo(transition);
+            this.graph.setEdge(from, to, this.getTransitionOptions(transition), transition);
+        });
         this.fsm.on('stateAdded', this.onStateAdded);
         this.fsm.on('stateRemoved', this.onStateRemoved);
         this.fsm.on('transitionAdded', this.onTransitionAdded);
         this.fsm.on('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
+        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     };
 
     public getGraph():dagre.graphlib.Graph {
@@ -32,8 +42,24 @@ export class DagreBinding {
         this.graph.setEdge(from, to, this.getTransitionOptions(transition), transition);
     };
     private onTransitionRemoved = (event:TransitionRemovedEvent):void => {
-        const {transition} = event;
-        this.graph.removeEdge(transition);
+        const {transition, oldFrom, oldTo} = event;
+        (this.graph as any).removeEdge({name: transition, v: oldFrom, w: oldTo});
+    };
+    private onTransitionFromStateChanged = (event:TransitionFromStateChangedEvent):void => {
+        const {oldFrom} = event;
+        const name = event.transition;
+        const v = oldFrom;
+        const w = this.fsm.getTransitionTo(name);
+        (this.graph as any).removeEdge({name, v, w});
+        this.graph.setEdge(this.fsm.getTransitionFrom(name), w, this.getTransitionOptions(name), name);
+    };
+    private onTransitionToStateChanged = (event:TransitionToStateChangedEvent):void => {
+        const {oldTo} = event;
+        const name = event.transition;
+        const v = this.fsm.getTransitionFrom(name);
+        const w = oldTo;
+        (this.graph as any).removeEdge({name, v, w});
+        this.graph.setEdge(v, this.fsm.getTransitionTo(name), this.getTransitionOptions(name), name);
     };
     private getStateOptions(state:string):{[key:string]: any} {
         if(isFunction(this.stateOptions)) {

@@ -21,6 +21,8 @@ export declare class DagreBinding {
     private onStateRemoved;
     private onTransitionAdded;
     private onTransitionRemoved;
+    private onTransitionFromStateChanged;
+    private onTransitionToStateChanged;
     private getStateOptions;
     private getTransitionOptions;
 }

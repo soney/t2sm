@@ -8,6 +8,8 @@ export interface NotActiveEvent {
 export interface SPayloadChangedEvent {
     payload: any;
 }
+export interface SRemovedEvent {
+}
 /**
  * A class representing a state in a state machine
  */

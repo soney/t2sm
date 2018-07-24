@@ -231,9 +231,6 @@ class StateContainer extends events_1.EventEmitter {
         const state = this.getState(label);
         if (state) {
             state.remove();
-            this.states.delete(label);
-            this.stateLabels.delete(state);
-            this.emit('stateRemoved', { state: label });
             return this;
         }
         else {
@@ -300,9 +297,6 @@ class StateContainer extends events_1.EventEmitter {
         if (this.hasTransition(label)) {
             const transition = this.getTransition(label);
             transition.remove();
-            this.transitions.delete(label);
-            this.transitionLabels.delete(transition);
-            this.emit('transitionRemoved', { transition: label });
             return this;
         }
         else {
@@ -547,6 +541,11 @@ class StateContainer extends events_1.EventEmitter {
                 payload
             });
         });
+        state.on('removed', (event) => {
+            this.states.delete(stateLabel);
+            this.stateLabels.delete(state);
+            this.emit('stateRemoved', { state: stateLabel });
+        });
     }
     ;
     addTransitionListeners(transition) {
@@ -585,6 +584,13 @@ class StateContainer extends events_1.EventEmitter {
             this.emit('transitionAliasChanged', {
                 transition: transitionLabel, alias
             });
+        });
+        transition.on('removed', (event) => {
+            const oldTo = this.getTransitionTo(transitionLabel);
+            const oldFrom = this.getTransitionFrom(transitionLabel);
+            this.transitions.delete(transitionLabel);
+            this.transitionLabels.delete(transition);
+            this.emit('transitionRemoved', { transition: transitionLabel, oldFrom, oldTo });
         });
     }
     ;

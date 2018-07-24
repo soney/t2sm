@@ -25,6 +25,9 @@ export interface AliasChangedEvent {
     alias: string
 };
 
+export interface TRemovedEvent {
+};
+
 /**
  * A class representing a transition in a state machine
  */
@@ -76,6 +79,7 @@ export class Transition<S, T> extends EventEmitter {
     public remove():void {
         this.fromState._removeOutgoingTransition(this);
         this.toState._removeIncomingTransition(this);
+        this.emit('removed', {} as TRemovedEvent);
     };
 
     /**

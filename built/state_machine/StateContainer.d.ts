@@ -18,6 +18,8 @@ export interface TransitionAddedEvent {
 }
 export interface TransitionRemovedEvent {
     transition: string;
+    oldFrom: string;
+    oldTo: string;
 }
 export interface TransitionToStateChangedEvent {
     transition: string;

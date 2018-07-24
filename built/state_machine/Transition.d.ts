@@ -20,6 +20,8 @@ export interface FireEvent {
 export interface AliasChangedEvent {
     alias: string;
 }
+export interface TRemovedEvent {
+}
 /**
  * A class representing a transition in a state machine
  */

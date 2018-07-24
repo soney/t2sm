@@ -34,6 +34,7 @@
     "webpack-cli": "^3.0.8"
   },
   "dependencies": {
+    "@types/dagre": "^0.7.40",
     "@types/event-emitter": "^0.3.2",
     "@types/events": "^1.2.0",
     "@types/lodash": "^4.14.110",

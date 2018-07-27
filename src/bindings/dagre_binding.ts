@@ -9,6 +9,7 @@ export class DagreBinding {
     private graph: dagre.graphlib.Graph = new dagre.graphlib.Graph({ multigraph: true, directed: true });
 
     public constructor(private fsm:FSM<any, any>, private stateOptions?:StateOptions, private transitionOptions?:TransitionOptions) {
+        this.graph.setGraph({});
         this.fsm.getStates().forEach((state) => {
             this.graph.setNode(state, this.getStateOptions(state));
         });

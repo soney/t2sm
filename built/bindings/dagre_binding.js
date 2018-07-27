@@ -40,6 +40,7 @@ class DagreBinding {
             this.graph.removeEdge({ name, v, w });
             this.graph.setEdge(v, this.fsm.getTransitionTo(name), this.getTransitionOptions(name), name);
         };
+        this.graph.setGraph({});
         this.fsm.getStates().forEach((state) => {
             this.graph.setNode(state, this.getStateOptions(state));
         });

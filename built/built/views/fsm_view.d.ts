@@ -12,11 +12,14 @@ export declare class StateMachineDisplay {
     private creatingTransitionToState;
     private creatingTransitionLine;
     private addStateButton;
+    private startStateDimensions;
+    private stateDimensions;
     constructor(fsm: FSM<any, any>, element: HTMLElement);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private addViewForNewTransitions;
     addState(payload?: any): string;
     private addStateClicked;
+    private addStateListeners;
     private addViewForNewNodes;
     private destroyTransitionCreationIntermediateData;
     private updateCreatingTransitionLine;
@@ -24,7 +27,9 @@ export declare class StateMachineDisplay {
     private mousedownGroup;
     private mouseoutGroup;
     private mouseoverGroup;
+    private keydownWindow;
     private mouseupWindow;
     private mouseupGroup;
+    private getArrowPath;
     private updateLayout;
 }

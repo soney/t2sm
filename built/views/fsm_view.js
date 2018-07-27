@@ -5,9 +5,6 @@ const SVG = require("svg.js");
 const dagre = require("dagre");
 const index_1 = require("../index");
 const lodash_1 = require("lodash");
-// interface MorphableAnimation extends SVG.Animation {
-//     plot: (key: string) => this;
-// }
 var CREATE_TRANSITION_STATE;
 (function (CREATE_TRANSITION_STATE) {
     CREATE_TRANSITION_STATE[CREATE_TRANSITION_STATE["IDLE"] = 0] = "IDLE";
@@ -23,6 +20,8 @@ class StateMachineDisplay {
         this.transitions = new Map();
         this.createTransitionState = CREATE_TRANSITION_STATE.IDLE;
         this.creatingTransitionLine = null;
+        this.startStateDimensions = { width: 30, height: 30 };
+        this.stateDimensions = { width: 80, height: 40 };
         this.addStateClicked = () => {
             this.addState();
         };
@@ -34,7 +33,7 @@ class StateMachineDisplay {
             }
         };
         this.mousedownGroup = (stateName, event) => {
-            if (this.createTransitionState === CREATE_TRANSITION_STATE.IDLE && event.which === 3) {
+            if (this.createTransitionState === CREATE_TRANSITION_STATE.IDLE && event.which === 1) {
                 this.createTransitionState = CREATE_TRANSITION_STATE.PRESSED_ON_FROM;
                 this.creatingTransitionFromState = stateName;
                 this.creatingTransitionLine = this.svg.group();
@@ -42,7 +41,6 @@ class StateMachineDisplay {
                 event.preventDefault();
                 event.stopPropagation();
                 this.mousemoveSVG(event);
-                console.log('stop');
             }
             else {
                 this.destroyTransitionCreationIntermediateData();
@@ -61,18 +59,21 @@ class StateMachineDisplay {
         };
         this.mouseoverGroup = (stateName, event) => {
             if (this.createTransitionState === CREATE_TRANSITION_STATE.LEFT_FROM) {
-                console.log('over');
                 this.createTransitionState = CREATE_TRANSITION_STATE.OVER_TO;
                 this.creatingTransitionToState = stateName;
             }
             event.preventDefault();
+        };
+        this.keydownWindow = (event) => {
+            if (event.which === 27 && this.createTransitionState !== CREATE_TRANSITION_STATE.IDLE) {
+                this.destroyTransitionCreationIntermediateData();
+            }
         };
         this.mouseupWindow = (event) => {
             event.preventDefault();
             this.destroyTransitionCreationIntermediateData();
         };
         this.mouseupGroup = (stateName, event) => {
-            console.log('up');
             if (this.createTransitionState === CREATE_TRANSITION_STATE.OVER_TO &&
                 stateName === this.creatingTransitionToState) {
                 this.createTransitionState = CREATE_TRANSITION_STATE.IDLE;
@@ -85,19 +86,24 @@ class StateMachineDisplay {
             event.preventDefault();
             event.stopPropagation();
         };
-        this.dagreBinding = new index_1.DagreBinding(fsm, { width: 50, height: 20 });
+        this.dagreBinding = new index_1.DagreBinding(fsm, (state) => {
+            if (state === this.fsm.getStartState()) {
+                return lodash_1.clone(this.startStateDimensions);
+            }
+            else {
+                return lodash_1.clone(this.stateDimensions);
+            }
+        });
         this.graph = this.dagreBinding.getGraph();
         this.svg = SVG(element);
-        this.addStateButton = this.svg.text('Add state');
+        this.addStateButton = this.svg.text('Add state').addClass('noselect');
         this.addStateButton.click(this.addStateClicked);
-        this.graph.setGraph({});
-        this.graph.setNode(this.fsm.getStartState(), { type: 'start', width: 30, height: 30 });
-        const stateGroup = this.svg.group();
-        stateGroup.circle(15);
-        this.states.set(this.fsm.getStartState(), stateGroup);
+        this.addViewForNewNodes();
+        this.addViewForNewTransitions();
         this.updateLayout();
         this.svg.on('mousemove', this.mousemoveSVG);
         window.addEventListener('mouseup', this.mouseupWindow);
+        window.addEventListener('keydown', this.keydownWindow);
     }
     ;
     addTransition(fromLabel, toLabel, payload) {
@@ -108,8 +114,8 @@ class StateMachineDisplay {
     }
     addViewForNewTransitions() {
         this.graph.edges().forEach((edge) => {
-            if (!this.transitions.has(edge)) {
-                const { v, w, name } = edge;
+            const { v, w, name } = edge;
+            if (!this.transitions.has(name)) {
                 const transitionGroup = this.svg.group();
                 if (this.creatingTransitionLine) {
                     this.creatingTransitionLine.select('path').each(($, members) => {
@@ -134,15 +140,25 @@ class StateMachineDisplay {
         return stateName;
     }
     ;
+    addStateListeners(node, stateGroup) {
+        stateGroup.mousedown(this.mousedownGroup.bind(this, node));
+        stateGroup.mouseout(this.mouseoutGroup.bind(this, node));
+        stateGroup.mouseover(this.mouseoverGroup.bind(this, node));
+        stateGroup.mouseup(this.mouseupGroup.bind(this, node));
+    }
     addViewForNewNodes() {
         this.graph.nodes().forEach((node) => {
             if (!this.states.has(node)) {
                 const stateGroup = this.svg.group();
-                stateGroup.rect(50, 20);
-                stateGroup.mousedown(this.mousedownGroup.bind(this, node));
-                stateGroup.mouseout(this.mouseoutGroup.bind(this, node));
-                stateGroup.mouseover(this.mouseoverGroup.bind(this, node));
-                stateGroup.mouseup(this.mouseupGroup.bind(this, node));
+                if (node === this.fsm.getStartState()) {
+                    this.graph.setNode(this.fsm.getStartState(), { type: 'start', width: this.startStateDimensions.width, height: this.startStateDimensions.height });
+                    stateGroup.circle(this.startStateDimensions.width / 2);
+                }
+                else {
+                    stateGroup.rect(this.stateDimensions.width, this.stateDimensions.height).fill('#AAA').stroke('#444');
+                    stateGroup.text(node);
+                }
+                this.addStateListeners(node, stateGroup);
                 this.states.set(node, stateGroup);
             }
         });
@@ -159,9 +175,18 @@ class StateMachineDisplay {
         const node = this.graph.node(this.creatingTransitionFromState);
         this.creatingTransitionLine.select('path').each(($, members) => {
             members.forEach((p) => {
-                p.plot(`M ${node.x} ${node.y} L ${x} ${y}`);
+                p.plot(`M ${node.x} ${node.y} L ${x} ${y} ${this.getArrowPath(node, { x, y })}`);
             });
         });
+    }
+    getArrowPath(sndLstPnt, lastPnt) {
+        const theta = Math.atan2(sndLstPnt.y - lastPnt.y, sndLstPnt.x - lastPnt.x);
+        const offset = 20 * Math.PI / 180;
+        const s = 10;
+        const pathString = ` m ${Math.cos(theta + offset) * s} ${Math.sin(theta + offset) * s}` +
+            ` L ${lastPnt.x} ${lastPnt.y}` +
+            ` l ${Math.cos(theta - offset) * s} ${Math.sin(theta - offset) * s}`;
+        return pathString;
     }
     updateLayout() {
         dagre.layout(this.graph);
@@ -176,6 +201,11 @@ class StateMachineDisplay {
                     r.width(node.width);
                     r.height(node.height);
                     r.animate(1).center(node.x, node.y);
+                });
+            });
+            group.select('text').each((i, members) => {
+                members.forEach((t) => {
+                    t.center(node.x, node.y);
                 });
             });
         });
@@ -194,14 +224,7 @@ class StateMachineDisplay {
                     }
                     const sndLstPnt = points[points.length - 2];
                     const lastPnt = points[points.length - 1];
-                    const theta = Math.atan2(sndLstPnt.y - lastPnt.y, sndLstPnt.x - lastPnt.x);
-                    const offset = 20 * Math.PI / 180;
-                    const s = 10;
-                    pathString += ` m ${Math.cos(theta + offset) * s} ${Math.sin(theta + offset) * s}`;
-                    pathString += ` L ${lastPnt.x} ${lastPnt.y}`;
-                    pathString += ` l ${Math.cos(theta - offset) * s} ${Math.sin(theta - offset) * s}`;
-                    //  ${Math.cos(theta - offset) * s} ${Math.sin(theta - offset) * s}`;
-                    // (p.animate(1) as MorphableAnimation).plot(pathString);
+                    pathString += this.getArrowPath(sndLstPnt, lastPnt);
                     p.plot(pathString);
                 });
             });

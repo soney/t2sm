@@ -65,7 +65,7 @@ class DagreBinding {
             return this.stateOptions(state);
         }
         else if (this.stateOptions) {
-            return this.stateOptions;
+            return lodash_1.clone(this.stateOptions);
         }
         else {
             return {};
@@ -77,7 +77,7 @@ class DagreBinding {
             return this.transitionOptions(transition);
         }
         else if (this.transitionOptions) {
-            return this.transitionOptions;
+            return lodash_1.clone(this.transitionOptions);
         }
         else {
             return {};

@@ -4,10 +4,14 @@
 
     </head>
     <body>
-
+        <div id="contents"></div>
     </body>
     <script type="text/javascript" src="../built/bundle.js"></script>
     <script type="text/javascript">
-        console.log("Hello world");
+        const contents = document.getElementById("contents");
+        const fsm = new t2sm.FSM();
+        console.log(fsm.toString());
+        new t2sm.StateMachineDisplay(fsm, contents);
+        // console.log("Hello world");
     </script>
 </html>

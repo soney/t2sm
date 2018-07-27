@@ -14,9 +14,13 @@ export interface ToStateChangedEvent {
 }
 export interface FireEvent {
     event: any;
+    transition: Transition<any, any>;
+    source: any;
 }
 export interface AliasChangedEvent {
     alias: string;
+}
+export interface TRemovedEvent {
 }
 /**
  * A class representing a transition in a state machine

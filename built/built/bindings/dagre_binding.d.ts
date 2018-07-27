@@ -5,7 +5,7 @@ export declare type StateOptions = ((state: string) => {
 }) | {
     [key: string]: any;
 };
-declare type TransitionOptions = ((transition: string) => {
+export declare type TransitionOptions = ((transition: string) => {
     [key: string]: any;
 }) | {
     [key: string]: any;
@@ -21,7 +21,8 @@ export declare class DagreBinding {
     private onStateRemoved;
     private onTransitionAdded;
     private onTransitionRemoved;
+    private onTransitionFromStateChanged;
+    private onTransitionToStateChanged;
     private getStateOptions;
     private getTransitionOptions;
 }
-export {};

@@ -1,6 +1,6 @@
 import * as dagre from 'dagre';
 import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent} from '../state_machine/StateContainer';
-import {isFunction} from 'lodash';
+import {isFunction, clone} from 'lodash';
 
 export type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};
 export type TransitionOptions = ((transition: string) => {[key: string]: any}) | {[key: string]: any};
@@ -65,7 +65,7 @@ export class DagreBinding {
         if(isFunction(this.stateOptions)) {
             return this.stateOptions(state);
         } else if(this.stateOptions) {
-            return this.stateOptions;
+            return clone(this.stateOptions);
         } else {
             return {};
         }
@@ -74,7 +74,7 @@ export class DagreBinding {
         if(isFunction(this.transitionOptions)) {
             return this.transitionOptions(transition);
         } else if(this.transitionOptions) {
-            return this.transitionOptions;
+            return clone(this.transitionOptions);
         } else {
             return {};
         }

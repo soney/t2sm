@@ -1,6 +1,5 @@
 import * as SVG from 'svg.js';
 import 'svg.pathmorphing.js';
-import 'svg.draggable.js';
 import * as dagre from 'dagre';
 import { FSM, DagreBinding } from '../index';
 import { clone, tail, extend } from 'lodash';
@@ -41,6 +40,7 @@ export class StateMachineDisplay {
     private startStateDimensions: Dimensions = { width: 50, height: 30 };
     private stateDimensions: Dimensions = { width: 80, height: 40 };
     private transitionLabelDimensions: Dimensions = {width: 120, height: 20};
+    private selectColor: string = '#002366';
 
     public constructor(private fsm:FSM<any, any>, private element:HTMLElement) {
         this.dagreBinding = new DagreBinding(fsm, (state) => {
@@ -112,15 +112,17 @@ export class StateMachineDisplay {
                         members.forEach((p: SVG.Path) => {
                             this.creatingTransitionLine.removeElement(p);
                             transitionGroup.add(p);
-                            p.stroke({ color: '#000' });
+                            p.stroke({ color: '#777' });
                         });
                     });
                 } else {
-                    transitionGroup.path('').stroke({ color: '#000', width: 2 }).fill('none').addClass('nopointer');
+                    transitionGroup.path('').stroke({ color: '#777', width: 2 }).fill('none').addClass('nopointer');
                 }
 
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill('#EEE' ).stroke('#777');
                 transitionGroup.text(name).fill('#777');
+
+                this.addTransitionListeners(name, transitionGroup);
 
                 this.transitions.set(name, transitionGroup);
             }
@@ -160,11 +162,18 @@ export class StateMachineDisplay {
                 });
             });
         });
-        stateGroup.mousedown(this.mousedownGroup.bind(this, node));
+        stateGroup.mousedown(this.mousedownStateGroup.bind(this, node));
         stateGroup.mouseout(this.mouseoutStateGroup.bind(this, node));
         stateGroup.mouseover(this.mouseoverStateGroup.bind(this, node));
         stateGroup.mouseup(this.mouseupStateGroup.bind(this, node));
         stateGroup.click(this.clickGroup.bind(this, node));
+    }
+
+    private addTransitionListeners(edge: string, transitionGroup: SVG.G) {
+        transitionGroup.mousedown(this.mousedownTransitionGroup.bind(this, edge));
+        transitionGroup.mouseout(this.mouseoutTransitionGroup.bind(this, edge));
+        transitionGroup.mouseover(this.mouseoverTransitionGroup.bind(this, edge));
+        transitionGroup.mouseup(this.mouseupTransitionGroup.bind(this, edge));
     }
 
     private addViewForNewNodes(): void {
@@ -214,10 +223,8 @@ export class StateMachineDisplay {
 
     private updateCreatingTransitionLine(x: number, y: number): void {
         const node = this.graph.node(this.creatingTransitionFromState);
-        this.creatingTransitionLine.select('path').each(($: number, members: SVG.Element[]) => {
-            members.forEach((p: SVG.Path) => {
-                p.plot(`M ${node.x} ${node.y} L ${x} ${y} ${this.getArrowPath(node, {x, y})}`);
-            });
+        this.forEachInGroup(this.creatingTransitionLine, 'path', (p: SVG.Path) => {
+            p.plot(`M ${node.x} ${node.y} L ${x} ${y} ${this.getArrowPath(node, {x, y})}`);
         });
     }
 
@@ -235,7 +242,29 @@ export class StateMachineDisplay {
         }
     };
 
-    private mousedownGroup = (stateName: string, event: MouseEvent): void => {
+    private mouseoverTransitionGroup = (transitionName: string, event: MouseEvent): void => {
+        const group = this.transitions.get(transitionName);
+
+        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.selectColor));
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.selectColor));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.selectColor));
+    };
+
+    private mouseoutTransitionGroup = (transitionName: string, event: MouseEvent): void => {
+        const group = this.transitions.get(transitionName);
+
+        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke('#777'));
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke('#777'));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill('#777'));
+    };
+
+    private mouseupTransitionGroup = (transitionName: string, event: MouseEvent): void => {
+    };
+
+    private mousedownTransitionGroup = (transitionName: string, event: MouseEvent): void => {
+    };
+
+    private mousedownStateGroup = (stateName: string, event: MouseEvent): void => {
         if (this.fsmState === FSM_STATE.IDLE && event.which === 3) {
             this.fsmState = FSM_STATE.CT_PRESSED_FROM;
             this.creatingTransitionFromState = stateName;
@@ -324,51 +353,45 @@ export class StateMachineDisplay {
             const group = this.states.get(v);
             const node = this.graph.node(v);
 
-            group.select('rect').each((i: number, members: SVG.Element[]) => {
-                members.forEach((r: SVG.Rect) => {
-                    r.width(node.width);
-                    r.height(node.height);
-                    r.animate(this.animationDuration).center(node.x, node.y);
-                });
+            this.forEachInGroup(group, 'rect', (r: SVG.Rect) => {
+                r.width(node.width);
+                r.height(node.height);
+                r.animate(this.animationDuration).center(node.x, node.y);
             });
-            group.select('text').each((i: number, members: SVG.Element[]) => {
-                members.forEach((t: SVG.Text) => {
-                    t.animate(this.animationDuration).center(node.x, node.y);
-                });
+            this.forEachInGroup(group, 'text', (t: SVG.Text) => {
+                t.animate(this.animationDuration).center(node.x, node.y);
             });
         });
         this.graph.edges().forEach((e) => {
-            const node = this.graph.edge(e);
             const group = this.transitions.get(e.name);
 
-            const path = group.select('path');
             const { points, x, y, width, height } = this.graph.edge(e);
-            group.select('path').each(($: number, members: SVG.Element[]) => {
-                members.forEach((p: SVG.Path) => {
-                    const pointStrings = points.map(pnt => `${pnt.x} ${pnt.y}`);
-                    const controlPoints = tail(pointStrings);
-                    let pathString = `M ${pointStrings[0]}`;
-                    for (let i: number = 1; i < pointStrings.length - 1; i += 2) {
-                        pathString += ` Q ${pointStrings[i]} ${pointStrings[i + 1]}`;
-                    }
-                    const sndLstPnt = points[points.length - 2];
-                    const lastPnt = points[points.length - 1];
+            this.forEachInGroup(group, 'path', (p: SVG.Path) => {
+                const pointStrings = points.map(pnt => `${pnt.x} ${pnt.y}`);
+                let pathString = `M ${pointStrings[0]}`;
+                for (let i: number = 1; i < pointStrings.length - 1; i += 2) {
+                    pathString += ` Q ${pointStrings[i]} ${pointStrings[i + 1]}`;
+                }
+                const sndLstPnt = points[points.length - 2];
+                const lastPnt = points[points.length - 1];
 
-                    pathString += this.getArrowPath(sndLstPnt, lastPnt);
+                pathString += this.getArrowPath(sndLstPnt, lastPnt);
 
-                    (p.animate(this.animationDuration) as MorphableAnimation).plot(pathString);
-                });
+                (p.animate(this.animationDuration) as MorphableAnimation).plot(pathString);
             });
-            group.select('rect').each((i: number, members: SVG.Element[]) => {
-                members.forEach((r: SVG.Rect) => {
-                    r.width(width).height(height);
-                    r.animate(this.animationDuration).center(x, y);
-                });
+            this.forEachInGroup(group, 'rect', (r: SVG.Rect) => {
+                r.width(width).height(height);
+                r.animate(this.animationDuration).center(x, y);
             });
-            group.select('text').each((i: number, members: SVG.Element[]) => {
-                members.forEach((t: SVG.Text) => {
-                    t.animate(this.animationDuration).center(x, y);
-                });
+            this.forEachInGroup(group, 'text', (t: SVG.Text) => {
+                t.animate(this.animationDuration).center(x, y);
+            });
+        });
+    }
+    private forEachInGroup(group: SVG.G, selector: string, fn: (el: SVG.Element) => void): void {
+        group.select(selector).each((i: number, members: SVG.Element[]) => {
+            members.forEach((el: SVG.Element) => {
+                fn(el);
             });
         });
     }

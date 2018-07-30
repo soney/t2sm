@@ -15,7 +15,7 @@ export abstract class AbstractState<S, T> extends EventEmitter {
     private active:boolean = false; // Whether this state is currently active
     private outgoingTransitions:Transition<S,T>[] = []; // All of the transitions that leave this state
     private incomingTransitions:Transition<S,T>[] = []; // All of the transitions that enter this state
-    public abstract isStartState():boolean; // Is this where the state machien starts
+    public abstract isStartState():boolean; // Is this where the state machine starts
     constructor(private payload?:S) {
         super();
     };

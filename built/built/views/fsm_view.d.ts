@@ -1,5 +1,4 @@
 import 'svg.pathmorphing.js';
-import 'svg.draggable.js';
 import { FSM } from '../index';
 export declare class StateMachineDisplay {
     private fsm;
@@ -24,6 +23,7 @@ export declare class StateMachineDisplay {
     private startStateDimensions;
     private stateDimensions;
     private transitionLabelDimensions;
+    private selectColor;
     constructor(fsm: FSM<any, any>, element: HTMLElement);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
@@ -34,6 +34,7 @@ export declare class StateMachineDisplay {
     private removeStateClicked;
     private removeTransitionClicked;
     private addStateListeners;
+    private addTransitionListeners;
     private addViewForNewNodes;
     private removeViewForOldNodes;
     private removeViewForOldTransitions;
@@ -41,7 +42,11 @@ export declare class StateMachineDisplay {
     private updateCreatingTransitionLine;
     private mousemoveSVG;
     private clickGroup;
-    private mousedownGroup;
+    private mouseoverTransitionGroup;
+    private mouseoutTransitionGroup;
+    private mouseupTransitionGroup;
+    private mousedownTransitionGroup;
+    private mousedownStateGroup;
     private mouseoutStateGroup;
     private mouseoverStateGroup;
     private keydownWindow;
@@ -49,4 +54,5 @@ export declare class StateMachineDisplay {
     private mouseupStateGroup;
     private getArrowPath;
     private updateLayout;
+    private forEachInGroup;
 }

@@ -16,7 +16,8 @@ interface Dimensions {
 enum FSM_STATE {
     IDLE, CT_PRESSED_FROM, CT_LEFT_FROM, CT_OVER_TO,
     AT_AWAITING_FROM, AT_AWAITING_TO,
-    RMS_WAITING
+    RMS_WAITING,
+    RMT_WAITING
 }
 
 export class StateMachineDisplay {
@@ -40,7 +41,16 @@ export class StateMachineDisplay {
     private startStateDimensions: Dimensions = { width: 50, height: 30 };
     private stateDimensions: Dimensions = { width: 80, height: 40 };
     private transitionLabelDimensions: Dimensions = {width: 120, height: 20};
-    private selectColor: string = '#002366';
+    private colors: {[key: string]: string} = {
+        selectColor: '#002366',
+        selectBackgroundColor: '#AAFFFF',
+        startStateBackgroundColor: '#888',
+        stateBackgroundColor: '#AAA',
+        stateTextColor: '#444',
+        transitionLineColor: '#777',
+        transitionBackgroundColor: '#EEE',
+        creatingTransitionColor: '#F00'
+    };
 
     public constructor(private fsm:FSM<any, any>, private element:HTMLElement) {
         this.dagreBinding = new DagreBinding(fsm, (state) => {
@@ -85,7 +95,7 @@ export class StateMachineDisplay {
 
         this.updateLayout();
 
-        this.svg.on('mousemove', this.mousemoveSVG);
+        window.addEventListener('mousemove', this.mousemoveWindow);
         window.addEventListener('mouseup', this.mouseupWindow);
         window.addEventListener('keydown', this.keydownWindow);
     };
@@ -112,15 +122,16 @@ export class StateMachineDisplay {
                         members.forEach((p: SVG.Path) => {
                             this.creatingTransitionLine.removeElement(p);
                             transitionGroup.add(p);
-                            p.stroke({ color: '#777' });
+                            p.stroke({ color: this.colors.transitionLineColor });
                         });
                     });
                 } else {
-                    transitionGroup.path('').stroke({ color: '#777', width: 2 }).fill('none').addClass('nopointer');
+                    transitionGroup.path('').stroke({ color: this.colors.transitionLineColor, width: 2 }).fill('none').addClass('nopointer');
                 }
 
-                transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill('#EEE' ).stroke('#777');
-                transitionGroup.text(name).fill('#777');
+                transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
+                transitionGroup.text(name).fill(this.colors.transitionLineColor);
+                transitionGroup.element('foreignobject');
 
                 this.addTransitionListeners(name, transitionGroup);
 
@@ -149,7 +160,7 @@ export class StateMachineDisplay {
     }
 
     private removeTransitionClicked = (): void => {
-        console.log('remove transition');
+        this.fsmState = FSM_STATE.RMT_WAITING;
     }
 
     private addStateListeners(node: string, stateGroup: SVG.G): void {
@@ -182,8 +193,9 @@ export class StateMachineDisplay {
                 const stateGroup = this.svg.group();
                 const isStart = node === this.fsm.getStartState();
                 const dimensions = isStart ? this.startStateDimensions : this.stateDimensions;
-                stateGroup.rect(dimensions.width, dimensions.height).fill( isStart ? '#888' : '#AAA' ).stroke('#444');
-                stateGroup.text(node);
+                stateGroup.rect(dimensions.width, dimensions.height).fill( isStart ? this.colors.startStateBackgroundColor : this.colors.stateBackgroundColor).stroke(this.colors.stateTextColor);
+                stateGroup.text(node).fill(this.colors.stateTextColor);
+                stateGroup.element('foreignobject');
 
                 this.addStateListeners(node, stateGroup);
                 this.states.set(node, stateGroup);
@@ -228,7 +240,7 @@ export class StateMachineDisplay {
         });
     }
 
-    private mousemoveSVG = (event: MouseEvent): void => {
+    private mousemoveWindow = (event: MouseEvent): void => {
         if (this.creatingTransitionLine !== null) {
             const {clientX, clientY} = event;
             const {x, y} = this.svg.node.getBoundingClientRect() as DOMRect;
@@ -245,23 +257,29 @@ export class StateMachineDisplay {
     private mouseoverTransitionGroup = (transitionName: string, event: MouseEvent): void => {
         const group = this.transitions.get(transitionName);
 
-        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.selectColor));
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.selectColor));
-        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.selectColor));
+        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.colors.selectColor));
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.selectColor).fill(this.colors.selectBackgroundColor));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.colors.selectColor));
     };
 
     private mouseoutTransitionGroup = (transitionName: string, event: MouseEvent): void => {
         const group = this.transitions.get(transitionName);
 
-        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke('#777'));
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke('#777'));
-        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill('#777'));
+        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.colors.transitionLineColor));
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.transitionLineColor).fill(this.colors.transitionBackgroundColor));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.colors.transitionLineColor));
     };
 
     private mouseupTransitionGroup = (transitionName: string, event: MouseEvent): void => {
     };
 
     private mousedownTransitionGroup = (transitionName: string, event: MouseEvent): void => {
+        if(this.fsmState === FSM_STATE.RMT_WAITING) {
+            this.fsm.removeTransition(transitionName);
+            this.removeViewForOldTransitions();
+            this.fsmState = FSM_STATE.IDLE;
+            this.updateLayout();
+        }
     };
 
     private mousedownStateGroup = (stateName: string, event: MouseEvent): void => {
@@ -269,15 +287,15 @@ export class StateMachineDisplay {
             this.fsmState = FSM_STATE.CT_PRESSED_FROM;
             this.creatingTransitionFromState = stateName;
             this.creatingTransitionLine = this.svg.group();
-            this.creatingTransitionLine.path('').stroke({ color: '#F00', width: 2 }).fill('none').addClass('nopointer');
+            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: 2 }).fill('none').addClass('nopointer');
             event.preventDefault();
             event.stopPropagation();
-            this.mousemoveSVG(event);
+            this.mousemoveWindow(event);
         } else if(this.fsmState === FSM_STATE.AT_AWAITING_FROM) {
             this.fsmState = FSM_STATE.AT_AWAITING_TO;
             this.creatingTransitionFromState = stateName;
             this.creatingTransitionLine = this.svg.group();
-            this.creatingTransitionLine.path('').stroke({ color: '#F00', width: 2 }).fill('none').addClass('nopointer');
+            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: 2 }).fill('none').addClass('nopointer');
         } else if(this.fsmState === FSM_STATE.AT_AWAITING_TO) {
             this.creatingTransitionToState = stateName;
             this.addTransition(this.creatingTransitionFromState, this.creatingTransitionToState, {});
@@ -294,6 +312,10 @@ export class StateMachineDisplay {
         }
     }
     private mouseoutStateGroup = (stateName: string, event: MouseEvent): void => {
+        const group = this.states.get(stateName);
+
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.stateTextColor).fill(this.colors.stateBackgroundColor));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.colors.stateTextColor));
         if (this.fsmState === FSM_STATE.CT_PRESSED_FROM &&
                 stateName === this.creatingTransitionFromState) {
             this.fsmState = FSM_STATE.CT_LEFT_FROM;
@@ -304,6 +326,10 @@ export class StateMachineDisplay {
         event.preventDefault();
     }
     private mouseoverStateGroup = (stateName: string, event: MouseEvent): void => {
+        const group = this.states.get(stateName);
+
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.selectColor).fill(this.colors.selectBackgroundColor));
+        this.forEachInGroup(group, 'text', (t: SVG.Text) => t.fill(this.colors.selectColor));
         if (this.fsmState === FSM_STATE.CT_LEFT_FROM) {
             this.fsmState = FSM_STATE.CT_OVER_TO;
             this.creatingTransitionToState = stateName;
@@ -319,7 +345,9 @@ export class StateMachineDisplay {
 
     private mouseupWindow = (event: MouseEvent): void => {
         event.preventDefault();
-        // this.destroyTransitionCreationIntermediateData();
+        if(this.fsmState === FSM_STATE.AT_AWAITING_TO || this.fsmState === FSM_STATE.CT_LEFT_FROM) {
+            this.destroyTransitionCreationIntermediateData();
+        }
     }
 
     private mouseupStateGroup = (stateName: string, event: MouseEvent): void => {

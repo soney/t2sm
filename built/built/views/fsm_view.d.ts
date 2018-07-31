@@ -23,7 +23,7 @@ export declare class StateMachineDisplay {
     private startStateDimensions;
     private stateDimensions;
     private transitionLabelDimensions;
-    private selectColor;
+    private colors;
     constructor(fsm: FSM<any, any>, element: HTMLElement);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
@@ -40,7 +40,7 @@ export declare class StateMachineDisplay {
     private removeViewForOldTransitions;
     private destroyTransitionCreationIntermediateData;
     private updateCreatingTransitionLine;
-    private mousemoveSVG;
+    private mousemoveWindow;
     private clickGroup;
     private mouseoverTransitionGroup;
     private mouseoutTransitionGroup;

@@ -14,6 +14,7 @@ export declare class StateMachineDisplay {
     private creatingTransitionFromState;
     private creatingTransitionToState;
     private creatingTransitionLine;
+    private modifyingTransition;
     private addStateButton;
     private addTransitionButton;
     private removeStateButton;

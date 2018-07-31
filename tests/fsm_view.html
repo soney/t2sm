@@ -10,7 +10,7 @@
     <script type="text/javascript">
         const contents = document.getElementById("contents");
         const fsm = new t2sm.FSM();
-        console.log(fsm.toString());
+        fsm.addTransition(fsm.addState(), fsm.addState());
         new t2sm.StateMachineDisplay(fsm, contents);
         // console.log("Hello world");
     </script>

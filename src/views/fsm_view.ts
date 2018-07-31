@@ -17,7 +17,9 @@ enum FSM_STATE {
     IDLE, CT_PRESSED_FROM, CT_LEFT_FROM, CT_OVER_TO,
     AT_AWAITING_FROM, AT_AWAITING_TO,
     RMS_WAITING,
-    RMT_WAITING
+    RMT_WAITING,
+    TRANSITION_CHANGE_FROM,
+    TRANSITION_CHANGE_TO
 }
 
 export class StateMachineDisplay {
@@ -32,6 +34,7 @@ export class StateMachineDisplay {
     private creatingTransitionFromState: string;
     private creatingTransitionToState: string;
     private creatingTransitionLine: SVG.G = null;
+    private modifyingTransition: string;
     private addStateButton: HTMLButtonElement = document.createElement('button');
     private addTransitionButton: HTMLButtonElement = document.createElement('button');
     private removeStateButton: HTMLButtonElement = document.createElement('button');
@@ -118,15 +121,13 @@ export class StateMachineDisplay {
                 const transitionGroup = this.svg.group();
 
                 if (this.creatingTransitionLine) {
-                    this.creatingTransitionLine.select('path').each(($: number, members: SVG.Element[]) => {
-                        members.forEach((p: SVG.Path) => {
-                            this.creatingTransitionLine.removeElement(p);
-                            transitionGroup.add(p);
-                            p.stroke({ color: this.colors.transitionLineColor });
-                        });
+                    this.forEachInGroup(this.creatingTransitionLine, 'path', (p: SVG.Path) => {
+                        this.creatingTransitionLine.removeElement(p);
+                        transitionGroup.add(p);
+                        p.stroke({ color: this.colors.transitionLineColor }).removeClass('nopointer');
                     });
                 } else {
-                    transitionGroup.path('').stroke({ color: this.colors.transitionLineColor, width: 2 }).fill('none').addClass('nopointer');
+                    transitionGroup.path('').stroke({ color: this.colors.transitionLineColor, width: 2 }).fill('none').removeClass('nopointer');
                 }
 
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
@@ -228,15 +229,27 @@ export class StateMachineDisplay {
         this.creatingTransitionToState = this.creatingTransitionFromState = null;
         this.fsmState = FSM_STATE.IDLE;
         if (this.creatingTransitionLine) {
+            if(this.modifyingTransition) {
+                const transitionGroup = this.transitions.get(this.modifyingTransition);
+                this.forEachInGroup(this.creatingTransitionLine, 'path', (p: SVG.Path) => {
+                    this.creatingTransitionLine.removeElement(p);
+                    transitionGroup.add(p);
+                    p.stroke({ color: this.colors.transitionLineColor }).removeClass('nopointer');
+                });
+                this.modifyingTransition = null;
+            }
             this.creatingTransitionLine.remove();
             this.creatingTransitionLine = null;
         }
     }
 
     private updateCreatingTransitionLine(x: number, y: number): void {
-        const node = this.graph.node(this.creatingTransitionFromState);
+        const reverse = this.fsmState === FSM_STATE.TRANSITION_CHANGE_FROM;
+        const node = this.graph.node(reverse ? this.creatingTransitionToState : this.creatingTransitionFromState);
         this.forEachInGroup(this.creatingTransitionLine, 'path', (p: SVG.Path) => {
-            p.plot(`M ${node.x} ${node.y} L ${x} ${y} ${this.getArrowPath(node, {x, y})}`);
+            const from = reverse ? {x, y} : node;
+            const to = reverse ? node : {x, y};
+            p.plot(`M ${from.x} ${from.y} L ${to.x} ${to.y} ${this.getArrowPath(from, to)}`);
         });
     }
 
@@ -279,7 +292,43 @@ export class StateMachineDisplay {
             this.removeViewForOldTransitions();
             this.fsmState = FSM_STATE.IDLE;
             this.updateLayout();
+        } else {
+            const v = this.fsm.getTransitionFrom(transitionName);
+            const w = this.fsm.getTransitionTo(transitionName);
+            const { points } = this.graph.edge({v, w, name: transitionName});
+            const firstPoint = points[0];
+            const lastPoint = points[points.length-1];
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const distanceOriginSq = Math.pow(x - firstPoint.x, 2) + Math.pow(y - firstPoint.y, 2);
+            const distanceTailSq = Math.pow(x - lastPoint.x, 2) + Math.pow(y - lastPoint.y, 2);
+            const draggingFrom: boolean = distanceOriginSq < distanceTailSq && distanceOriginSq < 300;
+            const draggingTo: boolean = distanceOriginSq > distanceTailSq && distanceTailSq < 300;
+
+            const group = this.transitions.get(transitionName);
+
+            if(draggingFrom || draggingTo) {
+                if(draggingFrom) {
+                    this.creatingTransitionToState = w;
+                    this.fsmState = FSM_STATE.TRANSITION_CHANGE_FROM;
+                } else {
+                    this.creatingTransitionFromState = v;
+                    this.fsmState = FSM_STATE.TRANSITION_CHANGE_TO;
+                }
+
+                this.creatingTransitionLine = this.svg.group();
+                this.forEachInGroup(group, 'path', (p: SVG.Path) => {
+                    this.creatingTransitionLine.add(p);
+                    group.removeElement(p);
+                    p.stroke({ color: this.colors.creatingTransitionColor }).addClass('nopointer');
+                });
+
+                this.modifyingTransition = transitionName;
+                this.updateCreatingTransitionLine(x, y);
+            }
         }
+        event.preventDefault();
+        event.stopPropagation();
     };
 
     private mousedownStateGroup = (stateName: string, event: MouseEvent): void => {
@@ -357,6 +406,14 @@ export class StateMachineDisplay {
 
             this.addTransition(this.creatingTransitionFromState, this.creatingTransitionToState, {});
             this.destroyTransitionCreationIntermediateData();
+        } else if(this.fsmState === FSM_STATE.TRANSITION_CHANGE_FROM) {
+            this.fsm.setTransitionFrom(this.modifyingTransition, stateName);
+            this.destroyTransitionCreationIntermediateData();
+            this.updateLayout();
+        } else if(this.fsmState === FSM_STATE.TRANSITION_CHANGE_TO) {
+            this.fsm.setTransitionTo(this.modifyingTransition, stateName);
+            this.destroyTransitionCreationIntermediateData();
+            this.updateLayout();
         }
         event.preventDefault();
         event.stopPropagation();

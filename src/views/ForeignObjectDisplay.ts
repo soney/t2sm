@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { DISPLAY_TYPE } from "./fsm_view";
+import { DISPLAY_TYPE } from "./StateMachineDisplay";
 
 export interface SetDimensionsEvent {
     width: number, height: number

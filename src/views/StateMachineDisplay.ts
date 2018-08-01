@@ -1,9 +1,9 @@
 import * as SVG from 'svg.js';
 import 'svg.pathmorphing.js';
 import * as dagre from 'dagre';
-import { FSM, DagreBinding } from '../index';
+import { FSM, DagreBinding } from '..';
 import { clone, tail, extend } from 'lodash';
-import { ForeignObjectDisplay, SetDimensionsEvent } from './foreign_object_display';
+import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay';
 
 interface MorphableAnimation extends SVG.Animation {
     plot: (key: string) => this;

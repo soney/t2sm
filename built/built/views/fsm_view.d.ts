@@ -1,8 +1,14 @@
 import 'svg.pathmorphing.js';
 import { FSM } from '../index';
+import { ForeignObjectDisplay } from './foreign_object_display';
+export declare enum DISPLAY_TYPE {
+    STATE = 0,
+    TRANSITION = 1
+}
 export declare class StateMachineDisplay {
     private fsm;
     private element;
+    private getForeignObjectViewport?;
     private header;
     private svgContainer;
     private svg;
@@ -25,7 +31,8 @@ export declare class StateMachineDisplay {
     private stateDimensions;
     private transitionLabelDimensions;
     private colors;
-    constructor(fsm: FSM<any, any>, element: HTMLElement);
+    private transitionThickness;
+    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => void);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;

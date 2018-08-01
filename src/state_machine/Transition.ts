@@ -107,12 +107,23 @@ export class Transition<S, T> extends EventEmitter {
      */
     public setFromState(state:AbstractState<S,T>):void {
         const oldFrom = this.fromState;
-        this.fromState._removeOutgoingTransition(this);
-        this.fromState = state;
-        this.fromState._addOutgoingTransition(this);
-        this.emit('fromStateChanged', {
-            oldFrom, state
-        } as FromStateChangedEvent);
+        try {
+            this.fromState._removeOutgoingTransition(this);
+        } catch(err) {
+            throw(err);
+        }
+
+        try {
+            this.fromState = state;
+            this.fromState._addOutgoingTransition(this);
+            this.emit('fromStateChanged', {
+                oldFrom, state
+            } as FromStateChangedEvent);
+        } catch(err) {
+            oldFrom._addOutgoingTransition(this);
+            this.fromState = oldFrom;
+            throw(err);
+        }
     };
     /**
      * Change which state this transition goes to
@@ -120,12 +131,23 @@ export class Transition<S, T> extends EventEmitter {
      */
     public setToState(state:AbstractState<S,T>):void {
         const oldTo = this.toState;
-        this.toState._removeIncomingTransition(this);
-        this.toState = state;
-        this.toState._addIncomingTransition(this);
-        this.emit('toStateChanged', {
-            oldTo, state
-        } as ToStateChangedEvent);
+        try {
+            this.toState._removeIncomingTransition(this);
+        } catch(err) {
+            throw(err);
+        }
+
+        try {
+            this.toState = state;
+            this.toState._addIncomingTransition(this);
+            this.emit('toStateChanged', {
+                oldTo, state
+            } as ToStateChangedEvent);
+        } catch(err) {
+            oldTo._addIncomingTransition(this);
+            this.toState = oldTo;
+            throw(err);
+        }
     };
 
     /**

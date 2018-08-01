@@ -3,6 +3,7 @@ import 'svg.pathmorphing.js';
 import * as dagre from 'dagre';
 import { FSM, DagreBinding } from '../index';
 import { clone, tail, extend } from 'lodash';
+import { ForeignObjectDisplay, SetDimensionsEvent } from './foreign_object_display';
 
 interface MorphableAnimation extends SVG.Animation {
     plot: (key: string) => this;
@@ -20,6 +21,10 @@ enum FSM_STATE {
     RMT_WAITING,
     TRANSITION_CHANGE_FROM,
     TRANSITION_CHANGE_TO
+}
+
+export enum DISPLAY_TYPE {
+    STATE, TRANSITION
 }
 
 export class StateMachineDisplay {
@@ -54,8 +59,9 @@ export class StateMachineDisplay {
         transitionBackgroundColor: '#EEE',
         creatingTransitionColor: '#F00'
     };
+    private transitionThickness: number = 3;
 
-    public constructor(private fsm:FSM<any, any>, private element:HTMLElement) {
+    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport?: (el: ForeignObjectDisplay) => void) {
         this.dagreBinding = new DagreBinding(fsm, (state) => {
             if(state === this.fsm.getStartState()) {
                 return clone(this.startStateDimensions);
@@ -127,12 +133,20 @@ export class StateMachineDisplay {
                         p.stroke({ color: this.colors.transitionLineColor }).removeClass('nopointer');
                     });
                 } else {
-                    transitionGroup.path('').stroke({ color: this.colors.transitionLineColor, width: 2 }).fill('none').removeClass('nopointer');
+                    transitionGroup.path('').stroke({ color: this.colors.transitionLineColor, width: this.transitionThickness }).fill('none').removeClass('nopointer');
                 }
 
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
                 transitionGroup.text(name).fill(this.colors.transitionLineColor);
-                transitionGroup.element('foreignobject');
+                const foreignObjectElement = transitionGroup.element('foreignobject');
+                const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, name, DISPLAY_TYPE.TRANSITION);
+                if(this.getForeignObjectViewport) {
+                    this.getForeignObjectViewport(foreignObjectDisplay);
+                }
+                foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
+                    this.updateLayout();
+                });
+
 
                 this.addTransitionListeners(name, transitionGroup);
 
@@ -292,7 +306,7 @@ export class StateMachineDisplay {
             this.removeViewForOldTransitions();
             this.fsmState = FSM_STATE.IDLE;
             this.updateLayout();
-        } else {
+        } else if(event.which === 1) {
             const v = this.fsm.getTransitionFrom(transitionName);
             const w = this.fsm.getTransitionTo(transitionName);
             const { points } = this.graph.edge({v, w, name: transitionName});
@@ -318,8 +332,8 @@ export class StateMachineDisplay {
 
                 this.creatingTransitionLine = this.svg.group();
                 this.forEachInGroup(group, 'path', (p: SVG.Path) => {
-                    this.creatingTransitionLine.add(p);
                     group.removeElement(p);
+                    this.creatingTransitionLine.add(p);
                     p.stroke({ color: this.colors.creatingTransitionColor }).addClass('nopointer');
                 });
 
@@ -336,7 +350,7 @@ export class StateMachineDisplay {
             this.fsmState = FSM_STATE.CT_PRESSED_FROM;
             this.creatingTransitionFromState = stateName;
             this.creatingTransitionLine = this.svg.group();
-            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: 2 }).fill('none').addClass('nopointer');
+            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: this.transitionThickness }).fill('none').addClass('nopointer');
             event.preventDefault();
             event.stopPropagation();
             this.mousemoveWindow(event);
@@ -344,7 +358,7 @@ export class StateMachineDisplay {
             this.fsmState = FSM_STATE.AT_AWAITING_TO;
             this.creatingTransitionFromState = stateName;
             this.creatingTransitionLine = this.svg.group();
-            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: 2 }).fill('none').addClass('nopointer');
+            this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: this.transitionThickness }).fill('none').addClass('nopointer');
         } else if(this.fsmState === FSM_STATE.AT_AWAITING_TO) {
             this.creatingTransitionToState = stateName;
             this.addTransition(this.creatingTransitionFromState, this.creatingTransitionToState, {});
@@ -389,13 +403,15 @@ export class StateMachineDisplay {
     private keydownWindow = (event: KeyboardEvent): void => {
         if(event.which === 27 && this.fsmState !== FSM_STATE.IDLE) {
             this.destroyTransitionCreationIntermediateData();
+            this.updateLayout();
         }
     };
 
     private mouseupWindow = (event: MouseEvent): void => {
         event.preventDefault();
-        if(this.fsmState === FSM_STATE.AT_AWAITING_TO || this.fsmState === FSM_STATE.CT_LEFT_FROM) {
+        if(this.fsmState === FSM_STATE.AT_AWAITING_TO || this.fsmState === FSM_STATE.CT_LEFT_FROM || this.fsmState === FSM_STATE.TRANSITION_CHANGE_FROM || this.fsmState === FSM_STATE.TRANSITION_CHANGE_TO) {
             this.destroyTransitionCreationIntermediateData();
+            this.updateLayout();
         }
     }
 
@@ -404,14 +420,27 @@ export class StateMachineDisplay {
                 stateName === this.creatingTransitionToState && event.which === 3) {
             this.fsmState = FSM_STATE.IDLE;
 
-            this.addTransition(this.creatingTransitionFromState, this.creatingTransitionToState, {});
+            try {
+                this.addTransition(this.creatingTransitionFromState, this.creatingTransitionToState, {});
+            } catch(err) {
+                console.error(err);
+            }
             this.destroyTransitionCreationIntermediateData();
         } else if(this.fsmState === FSM_STATE.TRANSITION_CHANGE_FROM) {
-            this.fsm.setTransitionFrom(this.modifyingTransition, stateName);
+            try {
+                this.fsm.setTransitionFrom(this.modifyingTransition, stateName);
+            } catch(err) {
+                console.error(err);
+            }
+
             this.destroyTransitionCreationIntermediateData();
             this.updateLayout();
         } else if(this.fsmState === FSM_STATE.TRANSITION_CHANGE_TO) {
-            this.fsm.setTransitionTo(this.modifyingTransition, stateName);
+            try {
+                this.fsm.setTransitionTo(this.modifyingTransition, stateName);
+            } catch(err) {
+                console.error(err);
+            }
             this.destroyTransitionCreationIntermediateData();
             this.updateLayout();
         }
@@ -467,9 +496,11 @@ export class StateMachineDisplay {
             this.forEachInGroup(group, 'rect', (r: SVG.Rect) => {
                 r.width(width).height(height);
                 r.animate(this.animationDuration).center(x, y);
+                r.front();
             });
             this.forEachInGroup(group, 'text', (t: SVG.Text) => {
                 t.animate(this.animationDuration).center(x, y);
+                t.front();
             });
         });
     }

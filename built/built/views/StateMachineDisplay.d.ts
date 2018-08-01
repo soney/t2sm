@@ -16,6 +16,8 @@ export declare class StateMachineDisplay {
     private graph;
     private states;
     private transitions;
+    private stateFODisplays;
+    private transitionFODisplays;
     private fsmState;
     private creatingTransitionFromState;
     private creatingTransitionToState;
@@ -36,6 +38,8 @@ export declare class StateMachineDisplay {
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;
+    onTransitionFired(transition: string, event: any): void;
+    animateTransition(transition: string): void;
     addState(payload?: any): string;
     private addStateClicked;
     private addTransitionClicked;
@@ -49,7 +53,6 @@ export declare class StateMachineDisplay {
     private destroyTransitionCreationIntermediateData;
     private updateCreatingTransitionLine;
     private mousemoveWindow;
-    private clickGroup;
     private mouseoverTransitionGroup;
     private mouseoutTransitionGroup;
     private mouseupTransitionGroup;

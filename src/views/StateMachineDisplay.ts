@@ -3,8 +3,8 @@ import 'svg.pathmorphing.js';
 import * as dagre from 'dagre';
 import { FSM, DagreBinding } from '..';
 import { clone, tail, extend } from 'lodash';
-import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay';
-import { TransitionFiredEvent, ActiveStateChangedEvent } from '../state_machine/StateContainer';
+import { ForeignObjectDisplay, SetDimensionsEvent, displayName } from './ForeignObjectDisplay';
+import { TransitionFiredEvent, ActiveStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent } from '../state_machine/StateContainer';
 
 interface MorphableAnimation extends SVG.Animation {
     plot: (key: string) => this;
@@ -43,13 +43,15 @@ export class StateMachineDisplay {
     private creatingTransitionToState: string;
     private creatingTransitionLine: SVG.G = null;
     private modifyingTransition: string;
+    private hoveringState: string;
+    private hoveringTransition: string;
     private addStateButton: HTMLButtonElement = document.createElement('button');
     private addTransitionButton: HTMLButtonElement = document.createElement('button');
     private removeStateButton: HTMLButtonElement = document.createElement('button');
     private removeTransitionButton: HTMLButtonElement = document.createElement('button');
     private resetLayoutButton: HTMLButtonElement = document.createElement('button');
     private animationDuration: number = 140;
-    private startStateDimensions: Dimensions = { width: 50, height: 30 };
+    private startStateDimensions: Dimensions = { width: 60, height: 30 };
     private stateDimensions: Dimensions = { width: 80, height: 40 };
     private transitionLabelDimensions: Dimensions = {width: 120, height: 30};
     private colors: {[key: string]: string} = {
@@ -65,8 +67,9 @@ export class StateMachineDisplay {
         activeBackgroundColor: '#FAA'
     };
     private transitionThickness: number = 3;
+    private transitionAnimationDuration: number = 300;
 
-    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport?: (el: ForeignObjectDisplay) => void) {
+    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport: (el: ForeignObjectDisplay) => void = displayName) {
         this.dagreBinding = new DagreBinding(fsm, (state) => {
             if(state === this.fsm.getStartState()) {
                 return clone(this.startStateDimensions);
@@ -113,10 +116,23 @@ export class StateMachineDisplay {
         window.addEventListener('mouseup', this.mouseupWindow);
         window.addEventListener('keydown', this.keydownWindow);
         this.fsm.on('transitionFiredEvent', (event: TransitionFiredEvent) => {
-            this.onTransitionFired(event.transition, event.event);
+            if(event.eligible) {
+                this.onTransitionFired(event.transition, event.event);
+            } else {
+                this.onIneligibleTransitionFired(event.transition, event.event);
+            }
         });
         this.fsm.on('activeStateChanged', (event: ActiveStateChangedEvent) => {
-            console.log('active state changed');
+            this.updateStateDisplay(event.oldActiveState, this.transitionAnimationDuration/3);
+            this.updateStateDisplay(event.state, 2*this.transitionAnimationDuration/3);
+        });
+        this.fsm.on('statePayloadChanged', (event: StatePayloadChangedEvent) => {
+            const fod = this.stateFODisplays.get(event.state);
+            fod.setPayload(event.payload);
+        });
+        this.fsm.on('transitionPayloadChanged', (event: TransitionPayloadChangedEvent) => {
+            const fod = this.transitionFODisplays.get(event.transition);
+            fod.setPayload(event.payload);
         });
     };
 
@@ -127,8 +143,8 @@ export class StateMachineDisplay {
         return name;
     }
 
-    private resetLayout() {
-        console.log('reset layout');
+    private resetLayout = (): void => {
+        this.fsm.setActiveState(this.fsm.getStartState());
     };
 
     private addViewForNewTransitions(): void {
@@ -150,9 +166,7 @@ export class StateMachineDisplay {
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
                 const foreignObjectElement = transitionGroup.element('foreignObject');
                 const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, name, DISPLAY_TYPE.TRANSITION, this.fsm.getTransitionPayload(name));
-                if(this.getForeignObjectViewport) {
-                    this.getForeignObjectViewport(foreignObjectDisplay);
-                }
+                this.getForeignObjectViewport(foreignObjectDisplay);
                 foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
                     const e = this.graph.edge(edge);
                     extend(e, {width: event.width, height: event.height});
@@ -166,15 +180,47 @@ export class StateMachineDisplay {
             }
         });
     }
+    public getTransitionColors(transitionName: string): {background: string, foreground: string} {
+        if(this.hoveringTransition === transitionName) {
+            return { background: this.colors.selectBackgroundColor, foreground: this.colors.selectColor};
+        } else {
+            return { background: this.colors.transitionBackgroundColor, foreground: this.colors.transitionLineColor};
+        }
+    }
+
+    public getStateColors(stateName: string): {background: string, foreground: string} {
+        if(this.hoveringState === stateName) {
+            return { background: this.colors.selectBackgroundColor, foreground: this.colors.selectColor};
+        } else if(this.fsm.getActiveState() === stateName) {
+            return { background: this.colors.activeBackgroundColor, foreground: this.colors.activeColor};
+        } else if(this.fsm.getStartState() === stateName) {
+            return { background: this.colors.startStateBackgroundColor, foreground: this.colors.stateTextColor};
+        } else {
+            return { background: this.colors.stateBackgroundColor, foreground: this.colors.stateTextColor};
+        }
+    }
+
     public onTransitionFired(transition: string, event: any) {
         const foDisplay = this.transitionFODisplays.get(transition);
         foDisplay.transitionFired(event);
         this.animateTransition(transition);
     }
 
+    private onIneligibleTransitionFired(transition: string, event: any): void {
+        this.forEachInGroup(this.transitions.get(transition), 'rect', (r: SVG.Rect) => {
+            const cx = r.cx();
+            const cy = r.cy();
+            const width = r.width();
+            const height = r.height();
+            r.animate(25).size(width + 10, height + 10).center(cx, cy);
+            r.animate(75).size(width, height).center(cx, cy);
+        });
+        setTimeout(() => this.updateLayout(), 110);
+    }
+
     public animateTransition(transition: string) {
-        const overallDuration = 300;
-        const segments = 5;
+        const overallDuration = this.transitionAnimationDuration;
+        const segments = 10;
         this.forEachInGroup(this.transitions.get(transition), 'path', (p: SVG.Path) => {
             const len = p.length();
             let point: {x: number, y: number} = p.pointAt(0);
@@ -195,8 +241,11 @@ export class StateMachineDisplay {
         });
         this.forEachInGroup(this.transitions.get(transition), 'rect', (r: SVG.Rect) => {
             setTimeout(() => { r.stroke({ color: this.colors.activeColor }).fill(this.colors.activeBackgroundColor); }, overallDuration/3)
-            setTimeout(() => { r.stroke({ color: this.colors.transitionLineColor }).fill(this.colors.transitionBackgroundColor); }, 2*overallDuration/3);
+            setTimeout(() => { this.updateTransitionDisplay(transition); }, 2*overallDuration/3);
             r.front();
+        });
+        this.forEachInGroup(this.transitions.get(transition), 'foreignObject', (f: SVG.Element) => {
+            f.front();
         });
     }
 
@@ -256,9 +305,7 @@ export class StateMachineDisplay {
 
                 const foreignObjectElement = stateGroup.element('foreignObject');
                 const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, node, DISPLAY_TYPE.STATE, this.fsm.getStatePayload(node));
-                if(this.getForeignObjectViewport) {
-                    this.getForeignObjectViewport(foreignObjectDisplay);
-                }
+                this.getForeignObjectViewport(foreignObjectDisplay);
                 foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
                     const e = this.graph.node(node);
                     extend(e, {width: event.width, height: event.height});
@@ -339,18 +386,22 @@ export class StateMachineDisplay {
 
     private mouseoverTransitionGroup = (transitionName: string, event: MouseEvent): void => {
         const group = this.transitions.get(transitionName);
+        if(this.hoveringTransition) {
+            this.updateTransitionDisplay(this.hoveringTransition);
+        }
+        this.hoveringTransition = transitionName;
+        this.updateTransitionDisplay(transitionName);
 
-        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.colors.selectColor));
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.selectColor).fill(this.colors.selectBackgroundColor));
         const foDisplay = this.transitionFODisplays.get(transitionName);
         foDisplay.mouseEntered();
     };
 
     private mouseoutTransitionGroup = (transitionName: string, event: MouseEvent): void => {
-        const group = this.transitions.get(transitionName);
+        if(this.hoveringTransition === transitionName) {
+            this.hoveringTransition = null;
+            this.updateTransitionDisplay(transitionName);
+        }
 
-        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(this.colors.transitionLineColor));
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.transitionLineColor).fill(this.colors.transitionBackgroundColor));
         const foDisplay = this.transitionFODisplays.get(transitionName);
         foDisplay.mouseLeft();
     };
@@ -432,10 +483,29 @@ export class StateMachineDisplay {
             this.destroyTransitionCreationIntermediateData();
         }
     }
+    private updateTransitionDisplay(transitionName: string): void {
+        const {foreground, background} = this.getTransitionColors(transitionName);
+        const group = this.transitions.get(transitionName);
+
+        this.forEachInGroup(group, 'path', (p: SVG.Path) => p.stroke(foreground));
+        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(foreground).fill(background));
+    }
+    
+    private updateStateDisplay(stateName: string, delay: number = 0): void {
+        const {foreground, background} = this.getStateColors(stateName);
+        const group = this.states.get(stateName);
+
+
+        setTimeout(() => this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(foreground).fill(background)), delay);
+    }
+
     private mouseoutStateGroup = (stateName: string, event: MouseEvent): void => {
         const group = this.states.get(stateName);
 
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.stateTextColor).fill(this.colors.stateBackgroundColor));
+        if(this.hoveringState === stateName) {
+            this.hoveringState = null;
+            this.updateStateDisplay(stateName);
+        }
         if (this.fsmState === FSM_STATE.CT_PRESSED_FROM &&
                 stateName === this.creatingTransitionFromState) {
             this.fsmState = FSM_STATE.CT_LEFT_FROM;
@@ -450,7 +520,9 @@ export class StateMachineDisplay {
     private mouseoverStateGroup = (stateName: string, event: MouseEvent): void => {
         const group = this.states.get(stateName);
 
-        this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(this.colors.selectColor).fill(this.colors.selectBackgroundColor));
+        this.hoveringState = stateName;
+        this.updateStateDisplay(stateName);
+
         if (this.fsmState === FSM_STATE.CT_LEFT_FROM) {
             this.fsmState = FSM_STATE.CT_OVER_TO;
             this.creatingTransitionToState = stateName;

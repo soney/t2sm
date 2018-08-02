@@ -10,8 +10,21 @@
     <script type="text/javascript">
         const contents = document.getElementById("contents");
         const fsm = new t2sm.FSM();
-        fsm.addTransition(fsm.addState(), fsm.addState());
+
+        const s1 = fsm.addState();
+        const s2 = fsm.addState();
+        const st = fsm.addTransition(fsm.getStartState(), s1);
+        const t12 = fsm.addTransition(s1, s2);
+        const t21 = fsm.addTransition(s2, s1);
+        const fireStart = fsm.getFireFunction(st);
+        const firet12 = fsm.getFireFunction(t12);
+        const firet21 = fsm.getFireFunction(t21);
         new t2sm.StateMachineDisplay(fsm, contents);
+        fireStart();
+        setInterval(firet12, 2000);
+        setTimeout(() => {
+            setInterval(firet21, 2000);
+        }, 1000);
         // console.log("Hello world");
     </script>
 </html>

@@ -46,6 +46,7 @@ export interface StatePayloadChangedEvent {
 export interface TransitionFiredEvent {
     transition: string;
     event: any;
+    eligible: boolean;
 }
 export interface ActiveStateChangedEvent {
     state: string;
@@ -263,6 +264,7 @@ export declare abstract class StateContainer<S, T> extends EventEmitter {
      * Clean up all of the objects stored in this container
      */
     destroy(): void;
+    getStartTransition(): string;
     private addStateListeners;
     private addTransitionListeners;
 }

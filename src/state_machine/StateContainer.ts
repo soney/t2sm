@@ -61,7 +61,8 @@ export interface StatePayloadChangedEvent {
 
 export interface TransitionFiredEvent {
     transition: string,
-    event: any
+    event: any,
+    eligible: boolean
 };
 
 export interface ActiveStateChangedEvent {
@@ -538,6 +539,15 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         this.emit('destroyed');
     };
 
+    public getStartTransition(): string {
+        const ssOutgoingTransitions = this.getOutgoingTransitions(this.getStartState());
+        if(ssOutgoingTransitions.length > 0) {
+            return ssOutgoingTransitions[0];
+        } else {
+            return null;
+        }
+    }
+
     private addStateListeners(state: State<S, T>): void {
         const stateLabel = this.getStateLabel(state);
         state.on('active', (event: ActiveEvent) => {
@@ -598,6 +608,7 @@ export abstract class StateContainer<S,T> extends EventEmitter {
         transition.on('fire', (event: FireEvent):void => {
             this.emit('transitionFiredEvent', {
                 transition: transitionLabel,
+                eligible: transition.isEligible(),
                 event: event.event
             } as TransitionFiredEvent);
         });

@@ -10,14 +10,18 @@ export declare class ForeignObjectDisplay extends EventEmitter {
     private name;
     private displayType;
     private payload;
-    private body;
     constructor(element: SVGForeignObjectElement, name: string, displayType: DISPLAY_TYPE, payload: any);
+    protected initialize(): void;
+    setPayload(payload: any): void;
     setDimensions(width: number, height: number): void;
-    getBody(): HTMLBodyElement;
     mouseEntered(): void;
     mouseLeft(): void;
     stateActive(): void;
     stateInactive(): void;
     transitionFired(event: any): void;
     destroy(): void;
+    getElement(): SVGForeignObjectElement;
+    getName(): string;
+    getDisplayType(): DISPLAY_TYPE;
 }
+export declare function displayName(fod: ForeignObjectDisplay): void;

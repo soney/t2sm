@@ -8,7 +8,7 @@ export declare enum DISPLAY_TYPE {
 export declare class StateMachineDisplay {
     private fsm;
     private element;
-    private getForeignObjectViewport?;
+    private getForeignObjectViewport;
     private header;
     private svgContainer;
     private svg;
@@ -23,6 +23,8 @@ export declare class StateMachineDisplay {
     private creatingTransitionToState;
     private creatingTransitionLine;
     private modifyingTransition;
+    private hoveringState;
+    private hoveringTransition;
     private addStateButton;
     private addTransitionButton;
     private removeStateButton;
@@ -34,11 +36,21 @@ export declare class StateMachineDisplay {
     private transitionLabelDimensions;
     private colors;
     private transitionThickness;
+    private transitionAnimationDuration;
     constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => void);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;
+    getTransitionColors(transitionName: string): {
+        background: string;
+        foreground: string;
+    };
+    getStateColors(stateName: string): {
+        background: string;
+        foreground: string;
+    };
     onTransitionFired(transition: string, event: any): void;
+    private onIneligibleTransitionFired;
     animateTransition(transition: string): void;
     addState(payload?: any): string;
     private addStateClicked;
@@ -58,6 +70,8 @@ export declare class StateMachineDisplay {
     private mouseupTransitionGroup;
     private mousedownTransitionGroup;
     private mousedownStateGroup;
+    private updateTransitionDisplay;
+    private updateStateDisplay;
     private mouseoutStateGroup;
     private mouseoverStateGroup;
     private keydownWindow;

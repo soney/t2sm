@@ -6,27 +6,25 @@ export interface SetDimensionsEvent {
 }
 
 export class ForeignObjectDisplay extends EventEmitter {
-    private body: HTMLBodyElement = document.createElement('body');
     public constructor(private element: SVGForeignObjectElement, private name: string, private displayType: DISPLAY_TYPE, private payload: any) {
         super();
-        this.element.appendChild(this.body);
-        this.body.textContent = this.name;
+        this.initialize();
     }
+    protected initialize(): void { }
+    public setPayload(payload: any): void {
+        this.payload = payload;
+        this.emit('setPayload', payload);
+    };
     public setDimensions(width: number, height: number): void {
         this.element.setAttribute('width', `${width}`);
         this.element.setAttribute('height', `${height}`);
         this.emit('setDimensions', {width, height});
     }
-    public getBody(): HTMLBodyElement {
-        return this.body;
-    }
     public mouseEntered(): void {
         this.emit('mouseenter', { fod: this });
-        this.body.setAttribute('style', 'color: blue');
     }
     public mouseLeft(): void {
         this.emit('mouseleft', { fod: this });
-        this.body.removeAttribute('style');
     }
     public stateActive(): void {
 
@@ -39,5 +37,27 @@ export class ForeignObjectDisplay extends EventEmitter {
     }
     public destroy(): void {
         this.emit('destroy', { fod: this });
+        super.removeAllListeners();
     }
+    public getElement(): SVGForeignObjectElement { return this.element; }
+    public getName(): string { return this.name; }
+    public getDisplayType(): DISPLAY_TYPE { return this.displayType; }
 };
+
+export function displayName(fod: ForeignObjectDisplay): void {
+    const body: HTMLBodyElement = document.createElement('body');
+    const content: HTMLDivElement = document.createElement('div');
+    const element = fod.getElement();
+    element.appendChild(body);
+    body.setAttribute('style', 'font-family: Helvetica, Arial, Sans-Serif;')
+    body.appendChild(content);
+    content.textContent = fod.getName();
+
+    content.setAttribute('style', 'text-align: center;');
+    fod.on('mouseenter', () => {
+        content.setAttribute('style', 'text-align: center; color: blue');
+    });
+    fod.on('mouseleft', () => {
+        content.setAttribute('style', 'text-align: center;');
+    });
+}

@@ -519,6 +519,15 @@ class StateContainer extends events_1.EventEmitter {
         this.emit('destroyed');
     }
     ;
+    getStartTransition() {
+        const ssOutgoingTransitions = this.getOutgoingTransitions(this.getStartState());
+        if (ssOutgoingTransitions.length > 0) {
+            return ssOutgoingTransitions[0];
+        }
+        else {
+            return null;
+        }
+    }
     addStateListeners(state) {
         const stateLabel = this.getStateLabel(state);
         state.on('active', (event) => {
@@ -576,6 +585,7 @@ class StateContainer extends events_1.EventEmitter {
         transition.on('fire', (event) => {
             this.emit('transitionFiredEvent', {
                 transition: transitionLabel,
+                eligible: transition.isEligible(),
                 event: event.event
             });
         });

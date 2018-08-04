@@ -88,12 +88,24 @@ class Transition extends events_1.EventEmitter {
      */
     setFromState(state) {
         const oldFrom = this.fromState;
-        this.fromState._removeOutgoingTransition(this);
-        this.fromState = state;
-        this.fromState._addOutgoingTransition(this);
-        this.emit('fromStateChanged', {
-            oldFrom, state
-        });
+        try {
+            this.fromState._removeOutgoingTransition(this);
+        }
+        catch (err) {
+            throw (err);
+        }
+        try {
+            this.fromState = state;
+            this.fromState._addOutgoingTransition(this);
+            this.emit('fromStateChanged', {
+                oldFrom, state
+            });
+        }
+        catch (err) {
+            oldFrom._addOutgoingTransition(this);
+            this.fromState = oldFrom;
+            throw (err);
+        }
     }
     ;
     /**
@@ -102,12 +114,24 @@ class Transition extends events_1.EventEmitter {
      */
     setToState(state) {
         const oldTo = this.toState;
-        this.toState._removeIncomingTransition(this);
-        this.toState = state;
-        this.toState._addIncomingTransition(this);
-        this.emit('toStateChanged', {
-            oldTo, state
-        });
+        try {
+            this.toState._removeIncomingTransition(this);
+        }
+        catch (err) {
+            throw (err);
+        }
+        try {
+            this.toState = state;
+            this.toState._addIncomingTransition(this);
+            this.emit('toStateChanged', {
+                oldTo, state
+            });
+        }
+        catch (err) {
+            oldTo._addIncomingTransition(this);
+            this.toState = oldTo;
+            throw (err);
+        }
     }
     ;
     /**

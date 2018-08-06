@@ -301,7 +301,7 @@ export class StateMachineDisplay {
                 const stateGroup = this.svg.group();
                 const isStart = node === this.fsm.getStartState();
                 const dimensions = isStart ? this.startStateDimensions : this.stateDimensions;
-                stateGroup.rect(dimensions.width, dimensions.height).fill( isStart ? this.colors.startStateBackgroundColor : this.colors.stateBackgroundColor).stroke(this.colors.stateTextColor);
+                stateGroup.rect(dimensions.width, dimensions.height);
 
                 const foreignObjectElement = stateGroup.element('foreignObject');
                 const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, node, DISPLAY_TYPE.STATE, this.fsm.getStatePayload(node));
@@ -315,6 +315,7 @@ export class StateMachineDisplay {
 
                 this.addStateListeners(node, stateGroup);
                 this.states.set(node, stateGroup);
+                this.updateStateDisplay(node);
             }
         });
     }

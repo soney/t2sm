@@ -8,7 +8,9 @@ const dagre_binding_1 = require("./bindings/dagre_binding");
 exports.DagreBinding = dagre_binding_1.DagreBinding;
 const StateMachineDisplay_1 = require("./views/StateMachineDisplay");
 exports.StateMachineDisplay = StateMachineDisplay_1.StateMachineDisplay;
-const t2sm = { FSM: StateContainer_1.FSM, SDBBinding: sharedb_binding_1.SDBBinding, DagreBinding: dagre_binding_1.DagreBinding, StateMachineDisplay: StateMachineDisplay_1.StateMachineDisplay };
+const ForeignObjectDisplay_1 = require("./views/ForeignObjectDisplay");
+exports.ForeignObjectDisplay = ForeignObjectDisplay_1.ForeignObjectDisplay;
+const t2sm = { FSM: StateContainer_1.FSM, SDBBinding: sharedb_binding_1.SDBBinding, DagreBinding: dagre_binding_1.DagreBinding, StateMachineDisplay: StateMachineDisplay_1.StateMachineDisplay, ForeignObjectDisplay: ForeignObjectDisplay_1.ForeignObjectDisplay };
 if (typeof window != 'undefined' && window.document) {
     window['t2sm'] = t2sm;
 }

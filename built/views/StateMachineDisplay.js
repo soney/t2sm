@@ -450,7 +450,7 @@ class StateMachineDisplay {
                 const stateGroup = this.svg.group();
                 const isStart = node === this.fsm.getStartState();
                 const dimensions = isStart ? this.startStateDimensions : this.stateDimensions;
-                stateGroup.rect(dimensions.width, dimensions.height).fill(isStart ? this.colors.startStateBackgroundColor : this.colors.stateBackgroundColor).stroke(this.colors.stateTextColor);
+                stateGroup.rect(dimensions.width, dimensions.height);
                 const foreignObjectElement = stateGroup.element('foreignObject');
                 const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(foreignObjectElement.node, node, DISPLAY_TYPE.STATE, this.fsm.getStatePayload(node));
                 this.getForeignObjectViewport(foreignObjectDisplay);
@@ -462,6 +462,7 @@ class StateMachineDisplay {
                 this.stateFODisplays.set(node, foreignObjectDisplay);
                 this.addStateListeners(node, stateGroup);
                 this.states.set(node, stateGroup);
+                this.updateStateDisplay(node);
             }
         });
     }

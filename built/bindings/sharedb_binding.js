@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const StateContainer_1 = require("../state_machine/StateContainer");
 const lodash_1 = require("lodash");
 ;
 class SDBBinding {
-    constructor(fsm, doc, path) {
-        this.fsm = fsm;
+    constructor(doc, path, fsm = new StateContainer_1.FSM()) {
         this.doc = doc;
         this.path = path;
+        this.fsm = fsm;
         this.ignoreFSMChanges = false;
         this.ignoreSDBChanges = false;
         this.onStateAdded = (event) => {

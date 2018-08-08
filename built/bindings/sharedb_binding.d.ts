@@ -18,12 +18,12 @@ export interface JSONFSM {
     };
 }
 export declare class SDBBinding {
-    private fsm;
     private doc;
     private path;
+    private fsm;
     private ignoreFSMChanges;
     private ignoreSDBChanges;
-    constructor(fsm: FSM<any, any>, doc: SDBDoc<any>, path: (string | number)[]);
+    constructor(doc: SDBDoc<any>, path: (string | number)[], fsm?: FSM<any, any>);
     destroy(): void;
     getFSM(): FSM<any, any>;
     private unsubscribeFromSDB;

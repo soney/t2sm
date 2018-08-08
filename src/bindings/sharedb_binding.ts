@@ -24,7 +24,7 @@ export class SDBBinding {
     private ignoreFSMChanges: boolean = false;
     private ignoreSDBChanges: boolean = false;
 
-    constructor(private fsm: FSM<any, any>, private doc: SDBDoc<any>, private path:(string|number)[]) {
+    constructor(private doc: SDBDoc<any>, private path:(string|number)[], private fsm: FSM<any, any> = new FSM<any, any>()) {
         this.fsm.on('stateAdded', this.onStateAdded);
         this.fsm.on('stateRemoved', this.onStateRemoved);
         this.fsm.on('transitionAdded', this.onTransitionAdded);

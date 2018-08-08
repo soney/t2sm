@@ -183,10 +183,10 @@ describe('ShareDB tests', async () => {
         expect(fsm.getActiveState()).to.equal('state1');
         expect(fsm.getStatePayload('state1')).to.equal('state1data');
 
-        const binding = new SDBBinding(fsm, serverDoc, ['contents', 'subcontents', 'fsm']);
+        const binding = new SDBBinding(serverDoc, ['contents', 'subcontents', 'fsm'], fsm);
 
         const clientBindings:SDBBinding[] = clientDocs.map((clientDoc) => {
-            return new SDBBinding(new FSM<string, string>(), clientDoc, ['contents', 'subcontents', 'fsm']);
+            return new SDBBinding(clientDoc, ['contents', 'subcontents', 'fsm']);
         });
         const clientFSMs:FSM<string, string>[] = clientBindings.map((clientBinding) => {
             return clientBinding.getFSM();

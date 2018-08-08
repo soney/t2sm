@@ -5,6 +5,7 @@
     </head>
     <body>
         <div id="contents"></div>
+        <div id="contents2"></div>
     </body>
     <script type="text/javascript" src="../built/bundle.js"></script>
     <script type="text/javascript">
@@ -13,18 +14,49 @@
 
         const s1 = fsm.addState();
         const s2 = fsm.addState();
+        const s3 = fsm.addState();
         const st = fsm.addTransition(fsm.getStartState(), s1);
         const t12 = fsm.addTransition(s1, s2);
         const t21 = fsm.addTransition(s2, s1);
+        const t13 = fsm.addTransition(s1, s3);
         const fireStart = fsm.getFireFunction(st);
         const firet12 = fsm.getFireFunction(t12);
         const firet21 = fsm.getFireFunction(t21);
         new t2sm.StateMachineDisplay(fsm, contents);
+        const fsm2 = new t2sm.FSM();
+        const contents2 = document.getElementById("contents2");
+
+        function myDisplay(fod) {
+            const body = document.createElement('body');
+            const content = document.createElement('div');
+            const element = fod.getElement();
+            element.appendChild(body);
+            body.setAttribute('style', 'font-family: Helvetica, Arial, Sans-Serif;')
+            body.appendChild(content);
+            content.textContent = fod.getName();
+        }
+        new t2sm.StateMachineDisplay(fsm2, contents2, myDisplay);
+        fsm.on('transitionFiredEvent', (event) => {
+            const {transition} = event;
+            const from = fsm.getTransitionFrom(transition);
+            const to = fsm.getTransitionTo(transition);
+            if(!fsm2.hasState(from)) {
+                fsm2.addState(fsm.getStatePayload(from), from);
+            }
+            if(!fsm2.hasState(to)) {
+                fsm2.addState(fsm.getStatePayload(to), to);
+            }
+            if(!fsm2.hasTransition(transition)) {
+                fsm2.addTransition(from, to, fsm.getTransitionAlias(transition), fsm.getTransitionPayload(transition), transition);
+            }
+            fsm2.fireTransition(transition, event);
+        });
         fireStart();
         setInterval(firet12, 2000);
         setTimeout(() => {
             setInterval(firet21, 2000);
         }, 1000);
+
         // console.log("Hello world");
     </script>
 </html>

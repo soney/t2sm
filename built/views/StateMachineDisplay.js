@@ -312,6 +312,14 @@ class StateMachineDisplay {
             const fod = this.transitionFODisplays.get(event.transition);
             fod.setPayload(event.payload);
         });
+        this.fsm.on('stateAdded', () => {
+            this.addViewForNewNodes();
+            this.updateLayout();
+        });
+        this.fsm.on('transitionAdded', () => {
+            this.addViewForNewTransitions();
+            this.updateLayout();
+        });
     }
     ;
     addTransition(fromLabel, toLabel, payload) {

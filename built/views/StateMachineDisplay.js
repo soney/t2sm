@@ -137,10 +137,10 @@ class StateMachineDisplay {
                     });
                     this.modifyingTransition = transitionName;
                     this.updateCreatingTransitionLine(x, y);
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             }
-            event.preventDefault();
-            event.stopPropagation();
         };
         this.mousedownStateGroup = (stateName, event) => {
             if (this.fsmState === FSM_STATE.IDLE && event.which === 3) {

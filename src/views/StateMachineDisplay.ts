@@ -457,10 +457,10 @@ export class StateMachineDisplay {
 
                 this.modifyingTransition = transitionName;
                 this.updateCreatingTransitionLine(x, y);
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
-        event.preventDefault();
-        event.stopPropagation();
     };
 
     private mousedownStateGroup = (stateName: string, event: MouseEvent): void => {

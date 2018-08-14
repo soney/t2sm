@@ -139,7 +139,7 @@ describe('ShareDB tests', async () => {
     it('Testing ShareDB', async () => {
         const server = http.createServer();
         const wss = new WebSocket.Server({ server });
-        const sdbServer = new SDBServer({wss});
+        const sdbServer = new SDBServer(wss);
         const fsm = new FSM<string, string>();
         server.listen();
         const address = server.address() as AddressInfo;

@@ -23,11 +23,13 @@ export declare class SDBBinding {
     private fsm;
     private ignoreFSMChanges;
     private ignoreSDBChanges;
+    private fsmProvided;
     constructor(doc: SDBDoc<any>, path: (string | number)[], fsm?: FSM<any, any>);
     destroy(): void;
     getFSM(): FSM<any, any>;
     private unsubscribeFromSDB;
     private subscribeToSDB;
+    private onDocEvent;
     private initialize;
     private syncFSMToSDB;
     private syncSDBToFSM;

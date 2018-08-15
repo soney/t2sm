@@ -17,5 +17,9 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'built')
+    },
+    externals: {
+        'SDB': 'sdb-ts',
+        'dagre': 'dagre'
     }
 };

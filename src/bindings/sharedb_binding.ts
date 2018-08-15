@@ -23,8 +23,17 @@ export interface JSONFSM {
 export class SDBBinding {
     private ignoreFSMChanges: boolean = false;
     private ignoreSDBChanges: boolean = false;
+    private fsmProvided: boolean;
 
-    constructor(private doc: SDBDoc<any>, private path:(string|number)[], private fsm: FSM<any, any> = new FSM<any, any>()) {
+    constructor(private doc: SDBDoc<any>, private path:(string|number)[], private fsm: FSM<any, any> = null) {
+        this.fsmProvided = !!this.fsm;
+        if(this.fsm) {
+            this.fsmProvided = true;
+        } else {
+            this.fsm = new FSM<any, any>();
+            this.fsmProvided = false;
+        }
+        this.subscribeToSDB();
         this.fsm.on('stateAdded', this.onStateAdded);
         this.fsm.on('stateRemoved', this.onStateRemoved);
         this.fsm.on('transitionAdded', this.onTransitionAdded);
@@ -36,8 +45,6 @@ export class SDBBinding {
         this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
         this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
         this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
-
-        this.subscribeToSDB();
     };
     public destroy():void {
         this.fsm.removeListener('stateAdded', this.onStateAdded);
@@ -57,113 +64,103 @@ export class SDBBinding {
         return this.fsm;
     };
     private unsubscribeFromSDB():void {
-        this.doc.destroy();
+        this.doc.unsubscribe(this.onDocEvent);
+        // this.doc.destroy();
         this.ignoreSDBChanges = true;
     };
     private subscribeToSDB():void {
-        this.doc.subscribe((eventType: string, ops: any[], source: any) => {
-            if(!this.ignoreSDBChanges) {
-                if(eventType === null) {
-                    this.initialize();
-                } else if(eventType === 'op') {
-                    ops.forEach((op) => {
-                        const {p} = op;
-                        if(isEqual(p.slice(0, this.path.length), this.path)) {
-                            const extraPath = p.slice(this.path.length);
-                            this.ignoreFSMChanges = true;
+        this.doc.subscribe(this.onDocEvent);
+    };
+    private onDocEvent = (eventType: string, ops: any[], source: any) => {
+        if(!this.ignoreSDBChanges) {
+            if(eventType === null) {
+                this.initialize();
+            } else if(eventType === 'op') {
+                ops.forEach((op) => {
+                    const {p} = op;
+                    if(isEqual(p.slice(0, this.path.length), this.path)) {
+                        const extraPath = p.slice(this.path.length);
+                        this.ignoreFSMChanges = true;
 
-                            if(isEqual(extraPath, [])) {
-                                this.syncSDBToFSM();
-                            } else if(extraPath[0] === 'states') {
-                                const label = extraPath[1];
-                                if(extraPath.length === 2) {
-                                    if(has(op, 'od')) {
-                                        this.fsm.removeState(label);
+                        if(isEqual(extraPath, [])) {
+                            this.syncSDBToFSM();
+                        } else if(extraPath[0] === 'states') {
+                            const label = extraPath[1];
+                            if(extraPath.length === 2) {
+                                if(has(op, 'od')) {
+                                    this.fsm.removeState(label);
+                                }
+                                if(has(op, 'oi')) {
+                                    const {oi} = op;
+                                    const {payload, active} = oi;
+                                    this.fsm.addState(payload, label);
+                                    if(active) {
+                                        this.fsm.setActiveState(label);
                                     }
+                                }
+                            } else if(extraPath.length === 3) {
+                                if(extraPath[2] === 'payload') {
                                     if(has(op, 'oi')) {
                                         const {oi} = op;
-                                        const {payload, active} = oi;
-                                        this.fsm.addState(payload, label);
-                                        if(active) {
+                                        this.fsm.setStatePayload(label, oi);
+                                    }
+                                } else if(extraPath[2] === 'active') {
+                                    if(has(op, 'oi')) {
+                                        const {oi} = op;
+                                        if(oi === true) {
                                             this.fsm.setActiveState(label);
                                         }
                                     }
-                                } else if(extraPath.length === 3) {
-                                    if(extraPath[2] === 'payload') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            this.fsm.setStatePayload(label, oi);
-                                        }
-                                    } else if(extraPath[2] === 'active') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            if(oi === true) {
-                                                this.fsm.setActiveState(label);
-                                            }
-                                        }
-                                    }
                                 }
-                            } else if(extraPath[0] === 'transitions') {
-                                const label = extraPath[1];
-                                if(extraPath.length === 2) {
+                            }
+                        } else if(extraPath[0] === 'transitions') {
+                            const label = extraPath[1];
+                            if(extraPath.length === 2) {
+                                if(has(op, 'oi')) {
+                                    const {oi} = op;
+                                    const { from, to, payload, alias } = oi;
+                                    this.fsm.addTransition(from, to, alias, payload, label);
+                                }
+                                if(has(op, 'od')) {
+                                    this.fsm.removeTransition(label);
+                                }
+                            } else if(extraPath.length === 3) {
+                                if(extraPath[2] === 'from') {
                                     if(has(op, 'oi')) {
                                         const {oi} = op;
-                                        const { from, to, payload, alias } = oi;
-                                        this.fsm.addTransition(from, to, alias, payload, label);
+                                        this.fsm.setTransitionFrom(label, oi);
                                     }
-                                    if(has(op, 'od')) {
-                                        this.fsm.removeTransition(label);
+                                } else if(extraPath[2] === 'to') {
+                                    if(has(op, 'oi')) {
+                                        const {oi} = op;
+                                        this.fsm.setTransitionTo(label, oi);
                                     }
-                                } else if(extraPath.length === 3) {
-                                    if(extraPath[2] === 'from') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            this.fsm.setTransitionFrom(label, oi);
-                                        }
-                                    } else if(extraPath[2] === 'to') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            this.fsm.setTransitionTo(label, oi);
-                                        }
-                                    } else if(extraPath[2] === 'alias') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            this.fsm.setTransitionAlias(label, oi);
-                                        }
-                                    } else if(extraPath[2] === 'payload') {
-                                        if(has(op, 'oi')) {
-                                            const {oi} = op;
-                                            this.fsm.setTransitionPayload(label, oi);
-                                        }
+                                } else if(extraPath[2] === 'alias') {
+                                    if(has(op, 'oi')) {
+                                        const {oi} = op;
+                                        this.fsm.setTransitionAlias(label, oi);
+                                    }
+                                } else if(extraPath[2] === 'payload') {
+                                    if(has(op, 'oi')) {
+                                        const {oi} = op;
+                                        this.fsm.setTransitionPayload(label, oi);
                                     }
                                 }
-                            } else {
-                                console.log(extraPath);
                             }
-                            this.ignoreFSMChanges = false;
+                        } else {
+                            console.log(extraPath);
                         }
-                    });
-                }
+                        this.ignoreFSMChanges = false;
+                    }
+                });
             }
-        });
+        }
     };
     private initialize(): void {
-        let hasSDBData: boolean;
-        try {
-            const data = this.doc.traverse(this.path);
-            if(data) {
-                hasSDBData = true;
-            } else {
-                hasSDBData = false;
-            }
-        } catch {
-            hasSDBData = false;
-        }
-
-        if(hasSDBData) {
-            this.syncSDBToFSM();
-        } else {
+        if(this.fsmProvided) {
             this.syncFSMToSDB();
+        } else {
+            this.syncSDBToFSM();
         }
     };
     private syncFSMToSDB():void {
@@ -191,23 +188,25 @@ export class SDBBinding {
     };
     private syncSDBToFSM():void {
         const data = this.doc.traverse(this.path) as JSONFSM;
-        this.ignoreFSMChanges = true;
-        each(data.states, (state, label) => {
-            const { active, payload } = state;
-            if(label === data.startState) {
-                this.fsm.setStatePayload(label, payload);
-            } else {
-                this.fsm.addState(payload, label);
-            }
-            if(active) {
-                this.fsm.setActiveState(label);
-            }
-        });
-        each(data.transitions, (transition, label) => {
-            const { from, to, payload, alias } = transition;
-            this.fsm.addTransition(from, to, alias, payload, label);
-        });
-        this.ignoreFSMChanges = false;
+        if (data) {
+            this.ignoreFSMChanges = true;
+            each(data.states, (state, label) => {
+                const { active, payload } = state;
+                if(label === data.startState) {
+                    this.fsm.setStatePayload(label, payload);
+                } else {
+                    this.fsm.addState(payload, label);
+                }
+                if(active) {
+                    this.fsm.setActiveState(label);
+                }
+            });
+            each(data.transitions, (transition, label) => {
+                const { from, to, payload, alias } = transition;
+                this.fsm.addTransition(from, to, alias, payload, label);
+            });
+            this.ignoreFSMChanges = false;
+        }
     };
     private onStateAdded = (event:StateAddedEvent):void => {
         if(!this.ignoreFSMChanges) {

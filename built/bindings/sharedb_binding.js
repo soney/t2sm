@@ -4,135 +4,13 @@ const StateContainer_1 = require("../state_machine/StateContainer");
 const lodash_1 = require("lodash");
 ;
 class SDBBinding {
-    constructor(doc, path, fsm = new StateContainer_1.FSM()) {
+    constructor(doc, path, fsm = null) {
         this.doc = doc;
         this.path = path;
         this.fsm = fsm;
         this.ignoreFSMChanges = false;
         this.ignoreSDBChanges = false;
-        this.onStateAdded = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { state, payload } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectInsertOp(this.path.concat('states', state), { payload, active: this.fsm.getActiveState() === state });
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onStateRemoved = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { state } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectDeleteOp(this.path.concat('states', state));
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onActiveStateChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { state, oldActiveState } = event;
-                this.ignoreSDBChanges = true;
-                if (oldActiveState) {
-                    this.doc.submitObjectReplaceOp(this.path.concat('states', oldActiveState, 'active'), false);
-                }
-                this.doc.submitObjectReplaceOp(this.path.concat('states', state, 'active'), true);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionAdded = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition, from, to, payload, alias } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectInsertOp(this.path.concat('transitions', transition), { from, to, payload, alias });
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onStatePayloadChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { state, payload } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectReplaceOp(this.path.concat('states', state, 'payload'), payload);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionPayloadChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition, payload } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'payload'), payload);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionRemoved = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectDeleteOp(this.path.concat('transitions', transition));
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionToStateChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition, state } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'to'), state);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionFromStateChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition, state } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'from'), state);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.onTransitionAliasChanged = (event) => {
-            if (!this.ignoreFSMChanges) {
-                const { transition, alias } = event;
-                this.ignoreSDBChanges = true;
-                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'alias'), alias);
-                this.ignoreSDBChanges = false;
-            }
-        };
-        this.fsm.on('stateAdded', this.onStateAdded);
-        this.fsm.on('stateRemoved', this.onStateRemoved);
-        this.fsm.on('transitionAdded', this.onTransitionAdded);
-        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
-        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
-        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
-        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
-        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
-        this.subscribeToSDB();
-    }
-    ;
-    destroy() {
-        this.fsm.removeListener('stateAdded', this.onStateAdded);
-        this.fsm.removeListener('stateRemoved', this.onStateRemoved);
-        this.fsm.removeListener('transitionAdded', this.onTransitionAdded);
-        this.fsm.removeListener('transitionRemoved', this.onTransitionRemoved);
-        this.fsm.removeListener('activeStateChanged', this.onActiveStateChanged);
-        this.fsm.removeListener('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.removeListener('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.removeListener('transitionAliasChanged', this.onTransitionAliasChanged);
-        this.fsm.removeListener('transitionPayloadChanged', this.onTransitionPayloadChanged);
-        this.fsm.removeListener('transitionToStateChanged', this.onTransitionToStateChanged);
-        this.fsm.removeListener('transitionFromStateChanged', this.onTransitionFromStateChanged);
-        this.unsubscribeFromSDB();
-    }
-    ;
-    getFSM() {
-        return this.fsm;
-    }
-    ;
-    unsubscribeFromSDB() {
-        this.doc.destroy();
-        this.ignoreSDBChanges = true;
-    }
-    ;
-    subscribeToSDB() {
-        this.doc.subscribe((eventType, ops, source) => {
+        this.onDocEvent = (eventType, ops, source) => {
             if (!this.ignoreSDBChanges) {
                 if (eventType === null) {
                     this.initialize();
@@ -225,28 +103,147 @@ class SDBBinding {
                     });
                 }
             }
-        });
+        };
+        this.onStateAdded = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { state, payload } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectInsertOp(this.path.concat('states', state), { payload, active: this.fsm.getActiveState() === state });
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onStateRemoved = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { state } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectDeleteOp(this.path.concat('states', state));
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onActiveStateChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { state, oldActiveState } = event;
+                this.ignoreSDBChanges = true;
+                if (oldActiveState) {
+                    this.doc.submitObjectReplaceOp(this.path.concat('states', oldActiveState, 'active'), false);
+                }
+                this.doc.submitObjectReplaceOp(this.path.concat('states', state, 'active'), true);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionAdded = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition, from, to, payload, alias } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectInsertOp(this.path.concat('transitions', transition), { from, to, payload, alias });
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onStatePayloadChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { state, payload } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectReplaceOp(this.path.concat('states', state, 'payload'), payload);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionPayloadChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition, payload } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'payload'), payload);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionRemoved = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectDeleteOp(this.path.concat('transitions', transition));
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionToStateChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition, state } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'to'), state);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionFromStateChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition, state } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'from'), state);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.onTransitionAliasChanged = (event) => {
+            if (!this.ignoreFSMChanges) {
+                const { transition, alias } = event;
+                this.ignoreSDBChanges = true;
+                this.doc.submitObjectReplaceOp(this.path.concat('transitions', transition, 'alias'), alias);
+                this.ignoreSDBChanges = false;
+            }
+        };
+        this.fsmProvided = !!this.fsm;
+        if (this.fsm) {
+            this.fsmProvided = true;
+        }
+        else {
+            this.fsm = new StateContainer_1.FSM();
+            this.fsmProvided = false;
+        }
+        this.subscribeToSDB();
+        this.fsm.on('stateAdded', this.onStateAdded);
+        this.fsm.on('stateRemoved', this.onStateRemoved);
+        this.fsm.on('transitionAdded', this.onTransitionAdded);
+        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
+        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
+        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
+        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
+    }
+    ;
+    destroy() {
+        this.fsm.removeListener('stateAdded', this.onStateAdded);
+        this.fsm.removeListener('stateRemoved', this.onStateRemoved);
+        this.fsm.removeListener('transitionAdded', this.onTransitionAdded);
+        this.fsm.removeListener('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.removeListener('activeStateChanged', this.onActiveStateChanged);
+        this.fsm.removeListener('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.removeListener('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.removeListener('transitionAliasChanged', this.onTransitionAliasChanged);
+        this.fsm.removeListener('transitionPayloadChanged', this.onTransitionPayloadChanged);
+        this.fsm.removeListener('transitionToStateChanged', this.onTransitionToStateChanged);
+        this.fsm.removeListener('transitionFromStateChanged', this.onTransitionFromStateChanged);
+        this.unsubscribeFromSDB();
+    }
+    ;
+    getFSM() {
+        return this.fsm;
+    }
+    ;
+    unsubscribeFromSDB() {
+        this.doc.unsubscribe(this.onDocEvent);
+        // this.doc.destroy();
+        this.ignoreSDBChanges = true;
+    }
+    ;
+    subscribeToSDB() {
+        this.doc.subscribe(this.onDocEvent);
     }
     ;
     initialize() {
-        let hasSDBData;
-        try {
-            const data = this.doc.traverse(this.path);
-            if (data) {
-                hasSDBData = true;
-            }
-            else {
-                hasSDBData = false;
-            }
-        }
-        catch (_a) {
-            hasSDBData = false;
-        }
-        if (hasSDBData) {
-            this.syncSDBToFSM();
+        if (this.fsmProvided) {
+            this.syncFSMToSDB();
         }
         else {
-            this.syncFSMToSDB();
+            this.syncSDBToFSM();
         }
     }
     ;
@@ -275,24 +272,26 @@ class SDBBinding {
     ;
     syncSDBToFSM() {
         const data = this.doc.traverse(this.path);
-        this.ignoreFSMChanges = true;
-        lodash_1.each(data.states, (state, label) => {
-            const { active, payload } = state;
-            if (label === data.startState) {
-                this.fsm.setStatePayload(label, payload);
-            }
-            else {
-                this.fsm.addState(payload, label);
-            }
-            if (active) {
-                this.fsm.setActiveState(label);
-            }
-        });
-        lodash_1.each(data.transitions, (transition, label) => {
-            const { from, to, payload, alias } = transition;
-            this.fsm.addTransition(from, to, alias, payload, label);
-        });
-        this.ignoreFSMChanges = false;
+        if (data) {
+            this.ignoreFSMChanges = true;
+            lodash_1.each(data.states, (state, label) => {
+                const { active, payload } = state;
+                if (label === data.startState) {
+                    this.fsm.setStatePayload(label, payload);
+                }
+                else {
+                    this.fsm.addState(payload, label);
+                }
+                if (active) {
+                    this.fsm.setActiveState(label);
+                }
+            });
+            lodash_1.each(data.transitions, (transition, label) => {
+                const { from, to, payload, alias } = transition;
+                this.fsm.addTransition(from, to, alias, payload, label);
+            });
+            this.ignoreFSMChanges = false;
+        }
     }
     ;
 }

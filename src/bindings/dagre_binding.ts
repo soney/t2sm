@@ -1,5 +1,5 @@
 import * as dagre from 'dagre';
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent} from '../state_machine/StateContainer';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent} from '../state_machine/FSM';
 import {isFunction, clone} from 'lodash';
 
 export type StateOptions = ((state: string) => {[key: string]: any}) | {[key: string]: any};

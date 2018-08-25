@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const StateContainer_1 = require("../state_machine/StateContainer");
+const FSM_1 = require("../state_machine/FSM");
 const lodash_1 = require("lodash");
 ;
 class SDBBinding {
@@ -192,7 +192,7 @@ class SDBBinding {
             this.fsmProvided = true;
         }
         else {
-            this.fsm = new StateContainer_1.FSM();
+            this.fsm = new FSM_1.FSM();
             this.fsmProvided = false;
         }
         this.subscribeToSDB();

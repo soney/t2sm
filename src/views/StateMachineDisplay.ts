@@ -4,7 +4,7 @@ import * as dagre from 'dagre';
 import { FSM, DagreBinding } from '..';
 import { clone, tail, extend } from 'lodash';
 import { ForeignObjectDisplay, SetDimensionsEvent, displayName } from './ForeignObjectDisplay';
-import { TransitionFiredEvent, ActiveStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent } from '../state_machine/StateContainer';
+import { TransitionFiredEvent, ActiveStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent } from '../state_machine/FSM';
 
 interface MorphableAnimation extends SVG.Animation {
     plot: (key: string) => this;

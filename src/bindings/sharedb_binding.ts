@@ -1,5 +1,5 @@
 import {SDBDoc} from 'sdb-ts';
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent} from '../state_machine/StateContainer';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent} from '../state_machine/FSM';
 import {each, isEqual, has} from 'lodash';
 
 export interface JSONFSM {

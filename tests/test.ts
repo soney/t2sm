@@ -1,4 +1,5 @@
 import { FSM, SDBBinding, JSONFSM, DagreBinding } from '../built/index';
+import { mergeStates } from '../built/utils/TraceToStateMachine';
 import { expect } from 'chai';
 import { times, sample } from 'lodash';
 import './binding-test';
@@ -76,6 +77,24 @@ describe('Create a basic FSM', () => {
 
     it('Destroy the FSM', () => {
         fsm.destroy();
+    });
+});
+
+describe('Merging states', () => {
+    const fsm = new FSM<string, string>();
+    it('Basic state merging', () => {
+        const s1 = fsm.addState();
+        const s2 = fsm.addState();
+        const s3 = fsm.addState();
+
+        const t12 = fsm.addTransition(s1, s2);
+        const t23 = fsm.addTransition(s2, s3);
+
+        fsm.addTransition(fsm.getStartState(), s1);
+
+        expect(fsm.getStates()).to.eql(['(start)', 'state_0', 'state_1', 'state_2']);
+        mergeStates(fsm, s1, s2);
+        expect(fsm.getStates()).to.eql(['(start)', 'state_1', 'state_2']);
     });
 });
 

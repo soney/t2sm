@@ -655,4 +655,4 @@ class FSM extends events_1.EventEmitter {
 }
 exports.FSM = FSM;
 ;
-//# sourceMappingURL=StateContainer.js.map
+//# sourceMappingURL=FSM.js.map

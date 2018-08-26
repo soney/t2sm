@@ -1,5 +1,5 @@
 import * as dagre from 'dagre';
-import { FSM } from '../state_machine/StateContainer';
+import { FSM } from '../state_machine/FSM';
 export declare type StateOptions = ((state: string) => {
     [key: string]: any;
 }) | {

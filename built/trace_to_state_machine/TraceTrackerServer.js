@@ -13,6 +13,7 @@ const wss = new WebSocket.Server({ server });
 const sdbServer = new sdb_ts_1.SDBServer(wss);
 const userTracesDoc = sdbServer.get('t2sm', 'userTraces');
 userTracesDoc.createIfEmpty({});
+console.log('create');
 server.listen(PORT);
 console.log(`Listening on port ${PORT}`);
 //# sourceMappingURL=TraceTrackerServer.js.map

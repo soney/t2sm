@@ -16,11 +16,13 @@ function mergeStates(fsm, removeState, mergeInto, removeStaleStates = true, tran
             const tPayload = fsm.getTransitionPayload(t);
             let hasConflict = false;
             for (let i in mergeIntoOutgoingTransitions) {
-                const t2 = mergeIntoOutgoingTransitions[i];
-                const t2Payload = fsm.getTransitionPayload(t2);
-                if (transitionsEqual(tPayload, t2Payload)) {
-                    hasConflict = true;
-                    break;
+                if (mergeIntoOutgoingTransitions.hasOwnProperty(i)) {
+                    const t2 = mergeIntoOutgoingTransitions[i];
+                    const t2Payload = fsm.getTransitionPayload(t2);
+                    if (transitionsEqual(tPayload, t2Payload)) {
+                        hasConflict = true;
+                        break;
+                    }
                 }
             }
             if (hasConflict) {

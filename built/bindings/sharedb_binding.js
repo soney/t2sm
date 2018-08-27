@@ -196,17 +196,6 @@ class SDBBinding {
             this.fsmProvided = false;
         }
         this.subscribeToSDB();
-        this.fsm.on('stateAdded', this.onStateAdded);
-        this.fsm.on('stateRemoved', this.onStateRemoved);
-        this.fsm.on('transitionAdded', this.onTransitionAdded);
-        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
-        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
-        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
-        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
-        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     }
     ;
     destroy() {
@@ -245,6 +234,17 @@ class SDBBinding {
         else {
             this.syncSDBToFSM();
         }
+        this.fsm.on('stateAdded', this.onStateAdded);
+        this.fsm.on('stateRemoved', this.onStateRemoved);
+        this.fsm.on('transitionAdded', this.onTransitionAdded);
+        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
+        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
+        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
+        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     }
     ;
     syncFSMToSDB() {

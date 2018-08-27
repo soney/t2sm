@@ -1,5 +1,5 @@
-import { SDBDoc } from 'sdb-ts';
 import { FSM } from '../state_machine/FSM';
+import { SDBDoc } from 'sdb-ts';
 export interface JSONFSM {
     startState: string;
     states: {

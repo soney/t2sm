@@ -34,7 +34,6 @@
     "dagre": "^0.8.2",
     "express": "^4.16.3",
     "mocha": "^5.2.0",
-    "sdb-ts": "^0.2.1",
     "svg.js": "^2.6.5",
     "svg.pathmorphing.js": "^0.1.3",
     "ts-loader": "^4.4.2",
@@ -49,7 +48,8 @@
   "dependencies": {
     "event-emitter": "^0.3.5",
     "events": "^3.0.0",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "sdb-ts": "file:../sdb-ts"
   },
   "peerDependencies": {
     "dagre": "^0.8.2",

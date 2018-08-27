@@ -1,6 +1,6 @@
-import {SDBDoc} from 'sdb-ts';
 import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent} from '../state_machine/FSM';
 import {each, isEqual, has} from 'lodash';
+import {SDBDoc} from 'sdb-ts';
 
 export interface JSONFSM {
     startState: string,
@@ -34,17 +34,6 @@ export class SDBBinding {
             this.fsmProvided = false;
         }
         this.subscribeToSDB();
-        this.fsm.on('stateAdded', this.onStateAdded);
-        this.fsm.on('stateRemoved', this.onStateRemoved);
-        this.fsm.on('transitionAdded', this.onTransitionAdded);
-        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
-        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
-        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
-        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
-        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     };
     public destroy():void {
         this.fsm.removeListener('stateAdded', this.onStateAdded);
@@ -162,6 +151,17 @@ export class SDBBinding {
         } else {
             this.syncSDBToFSM();
         }
+        this.fsm.on('stateAdded', this.onStateAdded);
+        this.fsm.on('stateRemoved', this.onStateRemoved);
+        this.fsm.on('transitionAdded', this.onTransitionAdded);
+        this.fsm.on('transitionRemoved', this.onTransitionRemoved);
+        this.fsm.on('activeStateChanged', this.onActiveStateChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
+        this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
+        this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
+        this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);
+        this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     };
     private syncFSMToSDB():void {
         const data:JSONFSM = {

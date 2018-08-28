@@ -31,7 +31,6 @@
     "@types/svg.js": "^2.3.1",
     "@types/ws": "^5.1.2",
     "chai": "^4.1.2",
-    "dagre": "^0.8.2",
     "express": "^4.16.3",
     "mocha": "^5.2.0",
     "svg.js": "^2.6.5",
@@ -49,7 +48,6 @@
     "event-emitter": "^0.3.5",
     "events": "^3.0.0",
     "lodash": "^4.17.10",
-    "sdb-ts": "file:../sdb-ts"
   },
   "peerDependencies": {
     "dagre": "^0.8.2",

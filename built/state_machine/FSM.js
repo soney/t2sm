@@ -228,7 +228,10 @@ class FSM extends events_1.EventEmitter {
      */
     removeState(label) {
         const state = this.getState(label);
-        if (state) {
+        if (label === this.getStartState()) {
+            throw new Error(`Cannot remove start state ${label}`);
+        }
+        else if (state) {
             state.remove();
             return this;
         }

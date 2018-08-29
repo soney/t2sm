@@ -1,7 +1,6 @@
 import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent, SRemovedEvent} from './State';
 import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent, AliasChangedEvent, TRemovedEvent} from './Transition';
 import { EventEmitter } from 'events';
-import { HashMap } from '../utils/HashMap';
 import {keys, forEach, isString} from 'lodash';
 
 export interface StateAddedEvent {
@@ -293,7 +292,9 @@ export class FSM<S,T> extends EventEmitter {
      */
     public removeState(label:string):this {
         const state = this.getState(label);
-        if(state) {
+        if (label === this.getStartState()) {
+            throw new Error(`Cannot remove start state ${label}`);
+        } else if(state) {
             state.remove();
             return this;
         } else {

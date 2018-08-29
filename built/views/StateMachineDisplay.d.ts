@@ -5,6 +5,10 @@ export declare enum DISPLAY_TYPE {
     STATE = 0,
     TRANSITION = 1
 }
+export interface SMDOptions {
+    animationDuration?: number;
+    transitionAnimationDuration?: number;
+}
 export declare class StateMachineDisplay {
     private fsm;
     private element;
@@ -30,14 +34,14 @@ export declare class StateMachineDisplay {
     private removeStateButton;
     private removeTransitionButton;
     private resetLayoutButton;
-    private animationDuration;
     private startStateDimensions;
     private stateDimensions;
     private transitionLabelDimensions;
     private colors;
     private transitionThickness;
-    private transitionAnimationDuration;
-    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => string | void);
+    private static optionDefaults;
+    private options;
+    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => string | void, options?: SMDOptions);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;

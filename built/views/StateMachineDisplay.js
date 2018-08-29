@@ -24,8 +24,9 @@ var DISPLAY_TYPE;
     DISPLAY_TYPE[DISPLAY_TYPE["STATE"] = 0] = "STATE";
     DISPLAY_TYPE[DISPLAY_TYPE["TRANSITION"] = 1] = "TRANSITION";
 })(DISPLAY_TYPE = exports.DISPLAY_TYPE || (exports.DISPLAY_TYPE = {}));
+;
 class StateMachineDisplay {
-    constructor(fsm, element, getForeignObjectViewport = ForeignObjectDisplay_1.displayName) {
+    constructor(fsm, element, getForeignObjectViewport = ForeignObjectDisplay_1.displayName, options) {
         this.fsm = fsm;
         this.element = element;
         this.getForeignObjectViewport = getForeignObjectViewport;
@@ -40,7 +41,6 @@ class StateMachineDisplay {
         this.removeStateButton = document.createElement('button');
         this.removeTransitionButton = document.createElement('button');
         this.resetLayoutButton = document.createElement('button');
-        this.animationDuration = 140;
         this.startStateDimensions = { width: 60, height: 30 };
         this.stateDimensions = { width: 80, height: 40 };
         this.transitionLabelDimensions = { width: 120, height: 30 };
@@ -57,7 +57,6 @@ class StateMachineDisplay {
             activeBackgroundColor: '#FAA'
         };
         this.transitionThickness = 3;
-        this.transitionAnimationDuration = 300;
         this.resetLayout = () => {
             this.fsm.setActiveState(this.fsm.getStartState());
         };
@@ -253,6 +252,7 @@ class StateMachineDisplay {
             event.preventDefault();
             event.stopPropagation();
         };
+        this.options = lodash_1.extend({}, StateMachineDisplay.optionDefaults, options);
         this.dagreBinding = new __1.DagreBinding(fsm, (state) => {
             if (state === this.fsm.getStartState()) {
                 return lodash_1.clone(this.startStateDimensions);
@@ -301,8 +301,8 @@ class StateMachineDisplay {
             }
         });
         this.fsm.on('activeStateChanged', (event) => {
-            this.updateStateDisplay(event.oldActiveState, this.transitionAnimationDuration / 3);
-            this.updateStateDisplay(event.state, 2 * this.transitionAnimationDuration / 3);
+            this.updateStateDisplay(event.oldActiveState, this.options.transitionAnimationDuration / 3);
+            this.updateStateDisplay(event.state, 2 * this.options.transitionAnimationDuration / 3);
         });
         this.fsm.on('statePayloadChanged', (event) => {
             const fod = this.stateFODisplays.get(event.state);
@@ -318,6 +318,14 @@ class StateMachineDisplay {
         });
         this.fsm.on('transitionAdded', () => {
             this.addViewForNewTransitions();
+            this.updateLayout();
+        });
+        this.fsm.on('stateRemoved', () => {
+            this.removeViewForOldNodes();
+            this.updateLayout();
+        });
+        this.fsm.on('transitionRemoved', () => {
+            this.removeViewForOldTransitions();
             this.updateLayout();
         });
     }
@@ -387,7 +395,9 @@ class StateMachineDisplay {
     onTransitionFired(transition, event) {
         const foDisplay = this.transitionFODisplays.get(transition);
         foDisplay.transitionFired(event);
-        this.animateTransition(transition);
+        if (this.options.transitionAnimationDuration > 0) {
+            this.animateTransition(transition);
+        }
     }
     onIneligibleTransitionFired(transition, event) {
         this.forEachInGroup(this.transitions.get(transition), 'rect', (r) => {
@@ -401,7 +411,7 @@ class StateMachineDisplay {
         setTimeout(() => this.updateLayout(), 110);
     }
     animateTransition(transition) {
-        const overallDuration = this.transitionAnimationDuration;
+        const overallDuration = this.options.transitionAnimationDuration;
         const segments = 10;
         this.forEachInGroup(this.transitions.get(transition), 'path', (p) => {
             const len = p.length();
@@ -541,7 +551,12 @@ class StateMachineDisplay {
     updateStateDisplay(stateName, delay = 0) {
         const { foreground, background } = this.getStateColors(stateName);
         const group = this.states.get(stateName);
-        setTimeout(() => this.forEachInGroup(group, 'rect', (r) => r.stroke(foreground).fill(background)), delay);
+        if (delay > 0) {
+            setTimeout(() => this.forEachInGroup(group, 'rect', (r) => r.stroke(foreground).fill(background)), delay);
+        }
+        else {
+            this.forEachInGroup(group, 'rect', (r) => r.stroke(foreground).fill(background));
+        }
     }
     getArrowPath(sndLstPnt, lastPnt) {
         const theta = Math.atan2(sndLstPnt.y - lastPnt.y, sndLstPnt.x - lastPnt.x);
@@ -562,11 +577,22 @@ class StateMachineDisplay {
             const { x, y, width, height } = this.graph.node(v);
             this.forEachInGroup(group, 'rect', (r) => {
                 r.size(width, height);
-                r.animate(this.animationDuration).center(x, y);
+                if (this.options.animationDuration > 0) {
+                    r.animate(this.options.animationDuration).center(x, y);
+                }
+                else {
+                    r.center(x, y);
+                }
             });
             this.forEachInGroup(group, 'foreignObject', (f) => {
-                f.animate(this.animationDuration).x(x - width / 2).y(y - height / 2);
-                f.animate(this.animationDuration).size(width, height);
+                if (this.options.animationDuration > 0) {
+                    f.animate(this.options.animationDuration).x(x - width / 2).y(y - height / 2);
+                    f.animate(this.options.animationDuration).size(width, height);
+                }
+                else {
+                    f.x(x - width / 2).y(y - height / 2);
+                    f.size(width, height);
+                }
             });
         });
         this.graph.edges().forEach((e) => {
@@ -581,16 +607,32 @@ class StateMachineDisplay {
                 const sndLstPnt = points[points.length - 2];
                 const lastPnt = points[points.length - 1];
                 pathString += this.getArrowPath(sndLstPnt, lastPnt);
-                p.animate(this.animationDuration).plot(pathString);
+                if (this.options.animationDuration > 0) {
+                    p.animate(this.options.animationDuration).plot(pathString);
+                }
+                else {
+                    p.plot(pathString);
+                }
             });
             this.forEachInGroup(group, 'rect', (r) => {
                 r.width(width).height(height);
-                r.animate(this.animationDuration).center(x, y);
+                if (this.options.animationDuration > 0) {
+                    r.animate(this.options.animationDuration).center(x, y);
+                }
+                else {
+                    r.center(x, y);
+                }
                 r.front();
             });
             this.forEachInGroup(group, 'foreignObject', (f) => {
-                f.animate(this.animationDuration).x(x - width / 2).y(y - height / 2);
-                f.animate(this.animationDuration).size(width, height);
+                if (this.options.animationDuration > 0) {
+                    f.animate(this.options.animationDuration).x(x - width / 2).y(y - height / 2);
+                    f.animate(this.options.animationDuration).size(width, height);
+                }
+                else {
+                    f.x(x - width / 2).y(y - height / 2);
+                    f.size(width, height);
+                }
                 f.front();
             });
         });
@@ -603,6 +645,10 @@ class StateMachineDisplay {
         });
     }
 }
+StateMachineDisplay.optionDefaults = {
+    transitionAnimationDuration: 300,
+    animationDuration: 140
+};
 exports.StateMachineDisplay = StateMachineDisplay;
 function isString(obj) { return typeof obj === 'string' || obj instanceof String; }
 //# sourceMappingURL=StateMachineDisplay.js.map

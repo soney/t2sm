@@ -28,6 +28,11 @@ export enum DISPLAY_TYPE {
     STATE, TRANSITION
 }
 
+export interface SMDOptions {
+    animationDuration? : number;
+    transitionAnimationDuration? : number;
+};
+
 export class StateMachineDisplay {
     private header: HTMLDivElement;
     private svgContainer: HTMLDivElement;
@@ -50,7 +55,6 @@ export class StateMachineDisplay {
     private removeStateButton: HTMLButtonElement = document.createElement('button');
     private removeTransitionButton: HTMLButtonElement = document.createElement('button');
     private resetLayoutButton: HTMLButtonElement = document.createElement('button');
-    private animationDuration: number = 140;
     private startStateDimensions: Dimensions = { width: 60, height: 30 };
     private stateDimensions: Dimensions = { width: 80, height: 40 };
     private transitionLabelDimensions: Dimensions = {width: 120, height: 30};
@@ -67,9 +71,14 @@ export class StateMachineDisplay {
         activeBackgroundColor: '#FAA'
     };
     private transitionThickness: number = 3;
-    private transitionAnimationDuration: number = 300;
+    private static optionDefaults: SMDOptions  = {
+        transitionAnimationDuration: 300,
+        animationDuration: 140
+    };
+    private options: SMDOptions;
 
-    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport: (el: ForeignObjectDisplay) => string | void = displayName) {
+    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport: (el: ForeignObjectDisplay) => string | void = displayName, options?: SMDOptions) {
+        this.options = extend({}, StateMachineDisplay.optionDefaults, options);
         this.dagreBinding = new DagreBinding(fsm, (state) => {
             if(state === this.fsm.getStartState()) {
                 return clone(this.startStateDimensions);
@@ -123,8 +132,8 @@ export class StateMachineDisplay {
             }
         });
         this.fsm.on('activeStateChanged', (event: ActiveStateChangedEvent) => {
-            this.updateStateDisplay(event.oldActiveState, this.transitionAnimationDuration/3);
-            this.updateStateDisplay(event.state, 2*this.transitionAnimationDuration/3);
+            this.updateStateDisplay(event.oldActiveState, this.options.transitionAnimationDuration/3);
+            this.updateStateDisplay(event.state, 2*this.options.transitionAnimationDuration/3);
         });
         this.fsm.on('statePayloadChanged', (event: StatePayloadChangedEvent) => {
             const fod = this.stateFODisplays.get(event.state);
@@ -140,6 +149,14 @@ export class StateMachineDisplay {
         });
         this.fsm.on('transitionAdded', () => {
             this.addViewForNewTransitions();
+            this.updateLayout();
+        });
+        this.fsm.on('stateRemoved', () => {
+            this.removeViewForOldNodes();
+            this.updateLayout();
+        });
+        this.fsm.on('transitionRemoved', () => {
+            this.removeViewForOldTransitions();
             this.updateLayout();
         });
     };
@@ -215,7 +232,9 @@ export class StateMachineDisplay {
     public onTransitionFired(transition: string, event: any) {
         const foDisplay = this.transitionFODisplays.get(transition);
         foDisplay.transitionFired(event);
-        this.animateTransition(transition);
+        if(this.options.transitionAnimationDuration > 0) {
+            this.animateTransition(transition);
+        }
     }
 
     private onIneligibleTransitionFired(transition: string, event: any): void {
@@ -231,7 +250,7 @@ export class StateMachineDisplay {
     }
 
     public animateTransition(transition: string) {
-        const overallDuration = this.transitionAnimationDuration;
+        const overallDuration = this.options.transitionAnimationDuration;
         const segments = 10;
         this.forEachInGroup(this.transitions.get(transition), 'path', (p: SVG.Path) => {
             const len = p.length();
@@ -513,7 +532,11 @@ export class StateMachineDisplay {
         const group = this.states.get(stateName);
 
 
-        setTimeout(() => this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(foreground).fill(background)), delay);
+        if(delay > 0) {
+            setTimeout(() => this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(foreground).fill(background)), delay);
+        } else {
+            this.forEachInGroup(group, 'rect', (r: SVG.Rect) => r.stroke(foreground).fill(background));
+        }
     }
 
     private mouseoutStateGroup = (stateName: string, event: MouseEvent): void => {
@@ -618,11 +641,20 @@ export class StateMachineDisplay {
 
             this.forEachInGroup(group, 'rect', (r: SVG.Rect) => {
                 r.size(width, height);
-                r.animate(this.animationDuration).center(x, y);
+                if(this.options.animationDuration > 0) {
+                    r.animate(this.options.animationDuration).center(x, y);
+                } else {
+                    r.center(x, y);
+                }
             });
             this.forEachInGroup(group, 'foreignObject', (f: SVG.Element) => {
-                f.animate(this.animationDuration).x(x-width/2).y(y-height/2);
-                f.animate(this.animationDuration).size(width, height);
+                if(this.options.animationDuration > 0) {
+                    f.animate(this.options.animationDuration).x(x-width/2).y(y-height/2);
+                    f.animate(this.options.animationDuration).size(width, height);
+                } else {
+                    f.x(x-width/2).y(y-height/2);
+                    f.size(width, height);
+                }
             });
         });
         this.graph.edges().forEach((e) => {
@@ -640,16 +672,29 @@ export class StateMachineDisplay {
 
                 pathString += this.getArrowPath(sndLstPnt, lastPnt);
 
-                (p.animate(this.animationDuration) as MorphableAnimation).plot(pathString);
+                if(this.options.animationDuration > 0) {
+                    (p.animate(this.options.animationDuration) as MorphableAnimation).plot(pathString);
+                } else {
+                    p.plot(pathString);
+                }
             });
             this.forEachInGroup(group, 'rect', (r: SVG.Rect) => {
                 r.width(width).height(height);
-                r.animate(this.animationDuration).center(x, y);
+                if(this.options.animationDuration > 0) {
+                    r.animate(this.options.animationDuration).center(x, y);
+                } else {
+                    r.center(x, y);
+                }
                 r.front();
             });
             this.forEachInGroup(group, 'foreignObject', (f: SVG.Element) => {
-                f.animate(this.animationDuration).x(x-width/2).y(y-height/2);
-                f.animate(this.animationDuration).size(width, height);
+                if(this.options.animationDuration > 0) {
+                    f.animate(this.options.animationDuration).x(x-width/2).y(y-height/2);
+                    f.animate(this.options.animationDuration).size(width, height);
+                } else {
+                    f.x(x-width/2).y(y-height/2);
+                    f.size(width, height);
+                }
                 f.front();
             });
         });

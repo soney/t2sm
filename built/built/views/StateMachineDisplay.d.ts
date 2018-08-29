@@ -37,7 +37,7 @@ export declare class StateMachineDisplay {
     private colors;
     private transitionThickness;
     private transitionAnimationDuration;
-    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => void);
+    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => string | void);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;

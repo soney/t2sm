@@ -3,7 +3,7 @@ import 'svg.pathmorphing.js';
 import * as dagre from 'dagre';
 import { FSM, DagreBinding } from '..';
 import { clone, tail, extend } from 'lodash';
-import { ForeignObjectDisplay, SetDimensionsEvent, displayName } from './ForeignObjectDisplay';
+import { ForeignObjectDisplay, SetDimensionsEvent, displayName, displayValue } from './ForeignObjectDisplay';
 import { TransitionFiredEvent, ActiveStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent } from '../state_machine/FSM';
 
 interface MorphableAnimation extends SVG.Animation {
@@ -69,7 +69,7 @@ export class StateMachineDisplay {
     private transitionThickness: number = 3;
     private transitionAnimationDuration: number = 300;
 
-    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport: (el: ForeignObjectDisplay) => void = displayName) {
+    public constructor(private fsm:FSM<any, any>, private element:HTMLElement, private getForeignObjectViewport: (el: ForeignObjectDisplay) => string | void = displayName) {
         this.dagreBinding = new DagreBinding(fsm, (state) => {
             if(state === this.fsm.getStartState()) {
                 return clone(this.startStateDimensions);
@@ -173,8 +173,12 @@ export class StateMachineDisplay {
 
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
                 const foreignObjectElement = transitionGroup.element('foreignObject');
-                const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, name, DISPLAY_TYPE.TRANSITION, this.fsm.getTransitionPayload(name));
-                this.getForeignObjectViewport(foreignObjectDisplay);
+                const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, foreignObjectElement.node as any, name, DISPLAY_TYPE.TRANSITION);
+                const value = this.getForeignObjectViewport(foreignObjectDisplay);
+                if (isString(value) && !foreignObjectDisplay.getElement().hasChildNodes()) {
+                    this.getForeignObjectViewport = displayValue(this.getForeignObjectViewport as any);
+                    this.getForeignObjectViewport(foreignObjectDisplay);
+                }
                 foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
                     const e = this.graph.edge(edge);
                     extend(e, {width: event.width, height: event.height});
@@ -312,8 +316,12 @@ export class StateMachineDisplay {
                 stateGroup.rect(dimensions.width, dimensions.height);
 
                 const foreignObjectElement = stateGroup.element('foreignObject');
-                const foreignObjectDisplay = new ForeignObjectDisplay(foreignObjectElement.node as any, node, DISPLAY_TYPE.STATE, this.fsm.getStatePayload(node));
-                this.getForeignObjectViewport(foreignObjectDisplay);
+                const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, foreignObjectElement.node as any, node, DISPLAY_TYPE.STATE);
+                const value = this.getForeignObjectViewport(foreignObjectDisplay);
+                if (isString(value) && !foreignObjectDisplay.getElement().hasChildNodes()) {
+                    this.getForeignObjectViewport = displayValue(this.getForeignObjectViewport as any);
+                    this.getForeignObjectViewport(foreignObjectDisplay);
+                }
                 foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
                     const e = this.graph.node(node);
                     extend(e, {width: event.width, height: event.height});
@@ -654,3 +662,4 @@ export class StateMachineDisplay {
         });
     }
 } 
+function isString(obj: any): boolean { return typeof obj === 'string' || obj instanceof String; }

@@ -345,8 +345,12 @@ class StateMachineDisplay {
                 }
                 transitionGroup.rect(this.transitionLabelDimensions.width, this.transitionLabelDimensions.height).fill(this.colors.transitionBackgroundColor).stroke(this.colors.transitionLineColor);
                 const foreignObjectElement = transitionGroup.element('foreignObject');
-                const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(foreignObjectElement.node, name, DISPLAY_TYPE.TRANSITION, this.fsm.getTransitionPayload(name));
-                this.getForeignObjectViewport(foreignObjectDisplay);
+                const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, foreignObjectElement.node, name, DISPLAY_TYPE.TRANSITION);
+                const value = this.getForeignObjectViewport(foreignObjectDisplay);
+                if (isString(value) && !foreignObjectDisplay.getElement().hasChildNodes()) {
+                    this.getForeignObjectViewport = ForeignObjectDisplay_1.displayValue(this.getForeignObjectViewport);
+                    this.getForeignObjectViewport(foreignObjectDisplay);
+                }
                 foreignObjectDisplay.on('setDimensions', (event) => {
                     const e = this.graph.edge(edge);
                     lodash_1.extend(e, { width: event.width, height: event.height });
@@ -460,8 +464,12 @@ class StateMachineDisplay {
                 const dimensions = isStart ? this.startStateDimensions : this.stateDimensions;
                 stateGroup.rect(dimensions.width, dimensions.height);
                 const foreignObjectElement = stateGroup.element('foreignObject');
-                const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(foreignObjectElement.node, node, DISPLAY_TYPE.STATE, this.fsm.getStatePayload(node));
-                this.getForeignObjectViewport(foreignObjectDisplay);
+                const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, foreignObjectElement.node, node, DISPLAY_TYPE.STATE);
+                const value = this.getForeignObjectViewport(foreignObjectDisplay);
+                if (isString(value) && !foreignObjectDisplay.getElement().hasChildNodes()) {
+                    this.getForeignObjectViewport = ForeignObjectDisplay_1.displayValue(this.getForeignObjectViewport);
+                    this.getForeignObjectViewport(foreignObjectDisplay);
+                }
                 foreignObjectDisplay.on('setDimensions', (event) => {
                     const e = this.graph.node(node);
                     lodash_1.extend(e, { width: event.width, height: event.height });
@@ -596,4 +604,5 @@ class StateMachineDisplay {
     }
 }
 exports.StateMachineDisplay = StateMachineDisplay;
+function isString(obj) { return typeof obj === 'string' || obj instanceof String; }
 //# sourceMappingURL=StateMachineDisplay.js.map

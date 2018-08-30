@@ -328,6 +328,14 @@ class StateMachineDisplay {
             this.removeViewForOldTransitions();
             this.updateLayout();
         });
+        this.fsm.on('transitionToStateChanged', () => {
+            console.log('a');
+            this.updateLayout();
+        });
+        this.fsm.on('transitionFromStateChanged', () => {
+            console.log('b');
+            this.updateLayout();
+        });
     }
     ;
     addTransition(fromLabel, toLabel, payload) {

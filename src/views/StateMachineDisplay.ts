@@ -159,6 +159,14 @@ export class StateMachineDisplay {
             this.removeViewForOldTransitions();
             this.updateLayout();
         });
+        this.fsm.on('transitionToStateChanged', () => {
+            console.log('a');
+            this.updateLayout();
+        });
+        this.fsm.on('transitionFromStateChanged', () => {
+            console.log('b');
+            this.updateLayout();
+        });
     };
 
     public addTransition(fromLabel: string, toLabel: string, payload?: any): string {

@@ -69,6 +69,8 @@ export interface ActiveStateChangedEvent {
     oldActiveState: string
 };
 
+export interface UpdateEvent {};
+
 export type JSONFSM = {
     initial:string,
     states: {
@@ -148,6 +150,7 @@ export class FSM<S,T> extends EventEmitter {
         if(this.hasState(label)) {
             this.getState(label).setPayload(payload);
             this.emit('statePayloadChanged', {state:label, payload});
+            this.emit('update');
             return this;
         } else {
             throw new Error(`Could not find state with label ${label}`);
@@ -198,6 +201,7 @@ export class FSM<S,T> extends EventEmitter {
         if(this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
             this.emit('transitionPayloadChanged', {transition:label, payload});
+            this.emit('update');
             return this;
         } else {
             throw new Error(`Could not find transition ${label}`);
@@ -278,6 +282,7 @@ export class FSM<S,T> extends EventEmitter {
             this.stateLabels.set(state, label);
             this.addStateListeners(state);
             this.emit('stateAdded', {state:label, payload} as StateAddedEvent);
+            this.emit('update');
             return label;
         }
     };
@@ -316,6 +321,7 @@ export class FSM<S,T> extends EventEmitter {
         this.transitions.set(toLabel, transition);
         this.transitionLabels.set(transition, toLabel);
         this.emit('transitionRenamed', {fromName:fromLabel, toName:toLabel});
+        this.emit('update');
         return this;
     };
 
@@ -342,6 +348,7 @@ export class FSM<S,T> extends EventEmitter {
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
         this.emit('transitionAdded', {transition:label, from:fromLabel, to:toLabel, alias, payload} as TransitionAddedEvent);
+        this.emit('update');
         this.addTransitionListeners(transition);
 
         return label;
@@ -554,6 +561,7 @@ export class FSM<S,T> extends EventEmitter {
         this.transitions.clear();
         this.transitionLabels.clear();
         this.emit('destroyed');
+        this.emit('update');
     };
 
     public getStartTransition(): string {
@@ -577,6 +585,7 @@ export class FSM<S,T> extends EventEmitter {
             }
             this.activeState = state;
             this.emit('activeStateChanged', {state: stateLabel, oldActiveState } as ActiveStateChangedEvent);
+            this.emit('update');
         });
         // state.on('not_active', (event: NotActiveEvent) => { });
         state.on('payloadChanged', (event: SPayloadChangedEvent):void => {
@@ -585,12 +594,14 @@ export class FSM<S,T> extends EventEmitter {
                 state: stateLabel,
                 payload
             } as StatePayloadChangedEvent);
+            this.emit('update');
         });
 
         state.on('removed', (event: SRemovedEvent):void => {
             this.states.delete(stateLabel);
             this.stateLabels.delete(state);
             this.emit('stateRemoved', {state:stateLabel} as StateRemovedEvent);
+            this.emit('update');
         });
     };
 
@@ -603,6 +614,7 @@ export class FSM<S,T> extends EventEmitter {
                 oldFrom: this.getStateLabel(oldFrom),
                 state: this.getStateLabel(state)
             } as TransitionFromStateChangedEvent);
+            this.emit('update');
         });
 
         transition.on('toStateChanged', (event: ToStateChangedEvent):void => {
@@ -612,6 +624,7 @@ export class FSM<S,T> extends EventEmitter {
                 oldTo: this.getStateLabel(oldTo),
                 state: this.getStateLabel(state)
             } as TransitionToStateChangedEvent);
+            this.emit('update');
         });
 
         transition.on('payloadChanged', (event: TPayloadChangedEvent):void => {
@@ -620,6 +633,7 @@ export class FSM<S,T> extends EventEmitter {
                 transition: transitionLabel,
                 payload
             } as TransitionPayloadChangedEvent);
+            this.emit('update');
         });
 
         transition.on('fire', (event: FireEvent):void => {
@@ -628,6 +642,7 @@ export class FSM<S,T> extends EventEmitter {
                 eligible: transition.isEligible(),
                 event: event.event
             } as TransitionFiredEvent);
+            this.emit('update');
         });
 
         transition.on('aliasChanged', (event: AliasChangedEvent):void => {
@@ -635,6 +650,7 @@ export class FSM<S,T> extends EventEmitter {
             this.emit('transitionAliasChanged', {
                 transition: transitionLabel, alias
             } as TransitionAliasChangedEvent);
+            this.emit('update');
         });
 
         transition.on('removed', (event: TRemovedEvent):void => {
@@ -643,6 +659,7 @@ export class FSM<S,T> extends EventEmitter {
             this.transitions.delete(transitionLabel);
             this.transitionLabels.delete(transition);
             this.emit('transitionRemoved', {transition:transitionLabel, oldFrom, oldTo} as TransitionRemovedEvent);
+            this.emit('update');
         });
     };
 

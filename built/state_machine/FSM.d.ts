@@ -52,6 +52,8 @@ export interface ActiveStateChangedEvent {
     state: string;
     oldActiveState: string;
 }
+export interface UpdateEvent {
+}
 export declare type JSONFSM = {
     initial: string;
     states: {
@@ -177,12 +179,6 @@ export declare class FSM<S, T> extends EventEmitter {
      * @param label The label of the state to remove
      */
     removeState(label: string): this;
-    /**
-     * Change the name of a transition
-     * @param fromLabel The old transition label
-     * @param toLabel The new transition label
-     */
-    renameTransition(fromLabel: string, toLabel: string): this;
     /**
      * Add a new transition
      *

@@ -15,6 +15,7 @@ const lodash_1 = require("lodash");
 ;
 ;
 ;
+;
 class FSM extends events_1.EventEmitter {
     /**
      * Create a new StateContainer
@@ -78,7 +79,8 @@ class FSM extends events_1.EventEmitter {
     setStatePayload(label, payload) {
         if (this.hasState(label)) {
             this.getState(label).setPayload(payload);
-            this.emit('statePayloadChanged', { state: label, payload });
+            // this.emit('statePayloadChanged', {state:label, payload});
+            // this.emit('update');
             return this;
         }
         else {
@@ -130,7 +132,8 @@ class FSM extends events_1.EventEmitter {
     setTransitionPayload(label, payload) {
         if (this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
-            this.emit('transitionPayloadChanged', { transition: label, payload });
+            // this.emit('transitionPayloadChanged', {transition:label, payload});
+            // this.emit('update');
             return this;
         }
         else {
@@ -215,6 +218,7 @@ class FSM extends events_1.EventEmitter {
             this.stateLabels.set(state, label);
             this.addStateListeners(state);
             this.emit('stateAdded', { state: label, payload });
+            this.emit('update');
             return label;
         }
     }
@@ -238,26 +242,6 @@ class FSM extends events_1.EventEmitter {
         else {
             throw new Error(`State container does not have a state with label ${label}`);
         }
-    }
-    ;
-    /**
-     * Change the name of a transition
-     * @param fromLabel The old transition label
-     * @param toLabel The new transition label
-     */
-    renameTransition(fromLabel, toLabel) {
-        if (!this.hasTransition(fromLabel)) {
-            throw new Error(`State container does not have a transition with label ${fromLabel}`);
-        }
-        if (this.hasTransition(toLabel)) {
-            throw new Error(`State container already has a transition with label ${toLabel}`);
-        }
-        const transition = this.getTransition(fromLabel);
-        this.transitions.delete(fromLabel);
-        this.transitions.set(toLabel, transition);
-        this.transitionLabels.set(transition, toLabel);
-        this.emit('transitionRenamed', { fromName: fromLabel, toName: toLabel });
-        return this;
     }
     ;
     /**
@@ -287,6 +271,7 @@ class FSM extends events_1.EventEmitter {
         this.transitions.set(label, transition);
         this.transitionLabels.set(transition, label);
         this.emit('transitionAdded', { transition: label, from: fromLabel, to: toLabel, alias, payload });
+        this.emit('update');
         this.addTransitionListeners(transition);
         return label;
     }
@@ -519,6 +504,7 @@ class FSM extends events_1.EventEmitter {
         this.transitions.clear();
         this.transitionLabels.clear();
         this.emit('destroyed');
+        this.emit('update');
     }
     ;
     getStartTransition() {
@@ -543,19 +529,22 @@ class FSM extends events_1.EventEmitter {
             }
             this.activeState = state;
             this.emit('activeStateChanged', { state: stateLabel, oldActiveState });
+            this.emit('update');
         });
         // state.on('not_active', (event: NotActiveEvent) => { });
         state.on('payloadChanged', (event) => {
             const { payload } = event;
-            this.emit('stateloadChanged', {
+            this.emit('statePayloadChanged', {
                 state: stateLabel,
                 payload
             });
+            this.emit('update');
         });
         state.on('removed', (event) => {
             this.states.delete(stateLabel);
             this.stateLabels.delete(state);
             this.emit('stateRemoved', { state: stateLabel });
+            this.emit('update');
         });
     }
     ;
@@ -568,6 +557,7 @@ class FSM extends events_1.EventEmitter {
                 oldFrom: this.getStateLabel(oldFrom),
                 state: this.getStateLabel(state)
             });
+            this.emit('update');
         });
         transition.on('toStateChanged', (event) => {
             const { oldTo, state } = event;
@@ -576,6 +566,7 @@ class FSM extends events_1.EventEmitter {
                 oldTo: this.getStateLabel(oldTo),
                 state: this.getStateLabel(state)
             });
+            this.emit('update');
         });
         transition.on('payloadChanged', (event) => {
             const { payload } = event;
@@ -583,6 +574,7 @@ class FSM extends events_1.EventEmitter {
                 transition: transitionLabel,
                 payload
             });
+            this.emit('update');
         });
         transition.on('fire', (event) => {
             this.emit('transitionFiredEvent', {
@@ -590,12 +582,14 @@ class FSM extends events_1.EventEmitter {
                 eligible: transition.isEligible(),
                 event: event.event
             });
+            this.emit('update');
         });
         transition.on('aliasChanged', (event) => {
             const { alias } = event;
             this.emit('transitionAliasChanged', {
                 transition: transitionLabel, alias
             });
+            this.emit('update');
         });
         transition.on('removed', (event) => {
             const oldTo = this.getTransitionTo(transitionLabel);
@@ -603,6 +597,7 @@ class FSM extends events_1.EventEmitter {
             this.transitions.delete(transitionLabel);
             this.transitionLabels.delete(transition);
             this.emit('transitionRemoved', { transition: transitionLabel, oldFrom, oldTo });
+            this.emit('update');
         });
     }
     ;

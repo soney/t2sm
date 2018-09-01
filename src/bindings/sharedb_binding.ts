@@ -157,7 +157,6 @@ export class SDBBinding {
         this.fsm.on('transitionRemoved', this.onTransitionRemoved);
         this.fsm.on('activeStateChanged', this.onActiveStateChanged);
         this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
-        this.fsm.on('statePayloadChanged', this.onStatePayloadChanged);
         this.fsm.on('transitionAliasChanged', this.onTransitionAliasChanged);
         this.fsm.on('transitionPayloadChanged', this.onTransitionPayloadChanged);
         this.fsm.on('transitionToStateChanged', this.onTransitionToStateChanged);

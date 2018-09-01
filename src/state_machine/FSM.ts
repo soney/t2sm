@@ -12,11 +12,6 @@ export interface StateRemovedEvent {
     state: string
 };
 
-// export interface StateRenamedEvent {
-//     fromName: string,
-//     toName: string
-// };
-
 export interface TransitionAddedEvent {
     transition: string,
     from: string,
@@ -149,8 +144,8 @@ export class FSM<S,T> extends EventEmitter {
     public setStatePayload(label:string, payload:S):this {
         if(this.hasState(label)) {
             this.getState(label).setPayload(payload);
-            this.emit('statePayloadChanged', {state:label, payload});
-            this.emit('update');
+            // this.emit('statePayloadChanged', {state:label, payload});
+            // this.emit('update');
             return this;
         } else {
             throw new Error(`Could not find state with label ${label}`);
@@ -200,8 +195,8 @@ export class FSM<S,T> extends EventEmitter {
     public setTransitionPayload(label:string, payload:T):this {
         if(this.hasTransition(label)) {
             this.getTransition(label).setPayload(payload);
-            this.emit('transitionPayloadChanged', {transition:label, payload});
-            this.emit('update');
+            // this.emit('transitionPayloadChanged', {transition:label, payload});
+            // this.emit('update');
             return this;
         } else {
             throw new Error(`Could not find transition ${label}`);
@@ -305,24 +300,6 @@ export class FSM<S,T> extends EventEmitter {
         } else {
             throw new Error(`State container does not have a state with label ${label}`);
         }
-    };
-
-    /**
-     * Change the name of a transition
-     * @param fromLabel The old transition label
-     * @param toLabel The new transition label
-     */
-    public renameTransition(fromLabel:string, toLabel:string):this {
-        if(!this.hasTransition(fromLabel)) { throw new Error(`State container does not have a transition with label ${fromLabel}`); }
-        if(this.hasTransition(toLabel)) { throw new Error(`State container already has a transition with label ${toLabel}`); }
-
-        const transition = this.getTransition(fromLabel);
-        this.transitions.delete(fromLabel);
-        this.transitions.set(toLabel, transition);
-        this.transitionLabels.set(transition, toLabel);
-        this.emit('transitionRenamed', {fromName:fromLabel, toName:toLabel});
-        this.emit('update');
-        return this;
     };
 
     /**
@@ -590,7 +567,7 @@ export class FSM<S,T> extends EventEmitter {
         // state.on('not_active', (event: NotActiveEvent) => { });
         state.on('payloadChanged', (event: SPayloadChangedEvent):void => {
             const {payload} = event;
-            this.emit('stateloadChanged', {
+            this.emit('statePayloadChanged', {
                 state: stateLabel,
                 payload
             } as StatePayloadChangedEvent);

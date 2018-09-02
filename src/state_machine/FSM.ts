@@ -83,12 +83,14 @@ export type JSONFSM = {
 };
 
 export class FSM<S,T> extends EventEmitter {
-    protected startState:StartState<S,T>; // The state that will be active on create
+    private startState:StartState<S,T>; // The state that will be active on create
     private activeState:AbstractState<S,T>; // The state that is currently active
-    protected states:Map<string, AbstractState<S,T>> = new Map<string, AbstractState<S,T>>(); // States are indexed by name (string)
-    protected stateLabels:Map<AbstractState<S,T>, string> = new Map<AbstractState<S,T>, string>(); // Map back from states to labels
-    protected transitions:Map<string, Transition<S,T>> = new Map<string, Transition<S,T>>(); // Transitions are indexed by name too
-    protected transitionLabels:Map<Transition<S,T>, string> = new Map<Transition<S,T>, string>(); // Map back from transitions to labels
+    private states:Map<string, AbstractState<S,T>> = new Map<string, AbstractState<S,T>>(); // States are indexed by name (string)
+    private stateLabels:Map<AbstractState<S,T>, string> = new Map<AbstractState<S,T>, string>(); // Map back from states to labels
+    private transitions:Map<string, Transition<S,T>> = new Map<string, Transition<S,T>>(); // Transitions are indexed by name too
+    private transitionLabels:Map<Transition<S,T>, string> = new Map<Transition<S,T>, string>(); // Map back from transitions to labels
+    private statePayloadToString: (p: S) => string = (p: S) => `${p}`;
+    private transitionPayloadToString: (p: T) => string = (p: T) => `${p}`;
     /**
      * Create a new StateContainer
      * @param startStateName The label for the start state
@@ -103,11 +105,18 @@ export class FSM<S,T> extends EventEmitter {
         this.addStateListeners(this.startState);
     };
 
+    public setStatePayloadToString(f: (p: S) => string) {
+        this.statePayloadToString = f;
+    }
+    public setTransitionPayloadToString(f: (p: T) => string) {
+        this.transitionPayloadToString = f;
+    }
+
     /**
      * Get the label of a state
      * @param state The AbstractState object we are searching for
      */
-    protected getStateLabel(state:AbstractState<S,T>):string {
+    private getStateLabel(state:AbstractState<S,T>):string {
         return this.stateLabels.get(state);
     };
     /**
@@ -121,7 +130,7 @@ export class FSM<S,T> extends EventEmitter {
      * @param label The state to get
      * @returns the state object
      */
-    protected getState(label:string):AbstractState<S,T> { return this.states.get(label) as AbstractState<S,T>; };
+    private getState(label:string):AbstractState<S,T> { return this.states.get(label) as AbstractState<S,T>; };
 
     /**
      * Get the payload of a given state
@@ -157,7 +166,7 @@ export class FSM<S,T> extends EventEmitter {
      * @param label The label for the transition
      * @returns the transition object
      */
-    protected getTransition(label:string):Transition<S,T> { return this.transitions.get(label) as Transition<S,T>; };
+    private getTransition(label:string):Transition<S,T> { return this.transitions.get(label) as Transition<S,T>; };
 
     /**
      * Check if this container has a given transition
@@ -170,7 +179,7 @@ export class FSM<S,T> extends EventEmitter {
      * Get the label of a transition
      * @param state The Transition object we are searching for
      */
-    protected getTransitionLabel(transition:Transition<S,T>):string {
+    private getTransitionLabel(transition:Transition<S,T>):string {
         return this.transitionLabels.get(transition);
     };
 
@@ -386,7 +395,7 @@ export class FSM<S,T> extends EventEmitter {
     /**
      * @returns a state name that will be unique for this container
      */
-    protected getUniqueStateLabel():string {
+    private getUniqueStateLabel():string {
         const prefix = 'state_';
         let i = 0;
         while(this.hasState(`${prefix}${i}`)) { i++; }
@@ -396,7 +405,7 @@ export class FSM<S,T> extends EventEmitter {
     /**
      * @returns a transition name that will be unique for this container
      */
-    protected getUniqueTransitionLabel():string {
+    private getUniqueTransitionLabel():string {
         const prefix = 'transition_';
         let i = 0;
         while(this.hasTransition(`${prefix}${i}`)) { i++; }
@@ -514,14 +523,13 @@ export class FSM<S,T> extends EventEmitter {
         };
         let rv:string = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
         this.getStates().forEach((state) => {
-            rv += `${activeState===state?'*':' '}${pad(state+':', stateWidth)} ${this.getStatePayload(state)}\n`;
+            rv += `${activeState===state?'*':' '}${pad(state+':', stateWidth)} ${this.statePayloadToString(this.getStatePayload(state))}\n`;
 
             const outgoingTransitions = this.getOutgoingTransitions(state);
             if(outgoingTransitions.length > 0) {
                 outgoingTransitions.forEach((t) => {
-                    const payload = this.getTransitionPayload(t);
                     rv += pad(`${' '.repeat(tabWidth)} --(${t})--> ${this.getTransitionTo(t)}`, 30);
-                    rv += `: ${this.getTransitionPayload(t)}\n`;
+                    rv += `: ${this.transitionPayloadToString(this.getTransitionPayload(t))}\n`;
                 });
             }
         });

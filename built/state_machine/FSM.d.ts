@@ -1,6 +1,4 @@
 /// <reference types="node" />
-import { AbstractState, StartState } from './State';
-import { Transition } from './Transition';
 import { EventEmitter } from 'events';
 export interface StateAddedEvent {
     state: string;
@@ -70,22 +68,26 @@ export declare type JSONFSM = {
     };
 };
 export declare class FSM<S, T> extends EventEmitter {
-    protected startState: StartState<S, T>;
+    private startState;
     private activeState;
-    protected states: Map<string, AbstractState<S, T>>;
-    protected stateLabels: Map<AbstractState<S, T>, string>;
-    protected transitions: Map<string, Transition<S, T>>;
-    protected transitionLabels: Map<Transition<S, T>, string>;
+    private states;
+    private stateLabels;
+    private transitions;
+    private transitionLabels;
+    private statePayloadToString;
+    private transitionPayloadToString;
     /**
      * Create a new StateContainer
      * @param startStateName The label for the start state
      */
     constructor();
+    setStatePayloadToString(f: (p: S) => string): void;
+    setTransitionPayloadToString(f: (p: T) => string): void;
     /**
      * Get the label of a state
      * @param state The AbstractState object we are searching for
      */
-    protected getStateLabel(state: AbstractState<S, T>): string;
+    private getStateLabel;
     /**
      * Check if a state is in this container
      * @param label The label of the state to check
@@ -97,7 +99,7 @@ export declare class FSM<S, T> extends EventEmitter {
      * @param label The state to get
      * @returns the state object
      */
-    protected getState(label: string): AbstractState<S, T>;
+    private getState;
     /**
      * Get the payload of a given state
      * @param label The label of the state whose payload we are fetching
@@ -115,7 +117,7 @@ export declare class FSM<S, T> extends EventEmitter {
      * @param label The label for the transition
      * @returns the transition object
      */
-    protected getTransition(label: string): Transition<S, T>;
+    private getTransition;
     /**
      * Check if this container has a given transition
      * @param label The label of the transition
@@ -126,7 +128,7 @@ export declare class FSM<S, T> extends EventEmitter {
      * Get the label of a transition
      * @param state The Transition object we are searching for
      */
-    protected getTransitionLabel(transition: Transition<S, T>): string;
+    private getTransitionLabel;
     /**
      * Get the payload of a given transition
      * @param label The label of the transition
@@ -218,11 +220,11 @@ export declare class FSM<S, T> extends EventEmitter {
     /**
      * @returns a state name that will be unique for this container
      */
-    protected getUniqueStateLabel(): string;
+    private getUniqueStateLabel;
     /**
      * @returns a transition name that will be unique for this container
      */
-    protected getUniqueTransitionLabel(): string;
+    private getUniqueTransitionLabel;
     /**
      * @returns the name of the start state
      */

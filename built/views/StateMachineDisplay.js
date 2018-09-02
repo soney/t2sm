@@ -301,7 +301,9 @@ class StateMachineDisplay {
             }
         });
         this.fsm.on('activeStateChanged', (event) => {
-            this.updateStateDisplay(event.oldActiveState, this.options.transitionAnimationDuration / 3);
+            if (event.oldActiveState) {
+                this.updateStateDisplay(event.oldActiveState, this.options.transitionAnimationDuration / 3);
+            }
             this.updateStateDisplay(event.state, 2 * this.options.transitionAnimationDuration / 3);
         });
         this.fsm.on('statePayloadChanged', (event) => {
@@ -329,7 +331,6 @@ class StateMachineDisplay {
             this.updateLayout();
         });
         this.fsm.on('transitionToStateChanged', () => {
-            console.log('a');
             this.updateLayout();
         });
         this.fsm.on('transitionFromStateChanged', () => {

@@ -27,6 +27,8 @@ class FSM extends events_1.EventEmitter {
         this.stateLabels = new Map(); // Map back from states to labels
         this.transitions = new Map(); // Transitions are indexed by name too
         this.transitionLabels = new Map(); // Map back from transitions to labels
+        this.statePayloadToString = (p) => `${p}`;
+        this.transitionPayloadToString = (p) => `${p}`;
         const startStateName = '(start)';
         this.startState = this.activeState = new State_1.StartState();
         this.states.set(startStateName, this.startState);
@@ -35,6 +37,12 @@ class FSM extends events_1.EventEmitter {
         this.addStateListeners(this.startState);
     }
     ;
+    setStatePayloadToString(f) {
+        this.statePayloadToString = f;
+    }
+    setTransitionPayloadToString(f) {
+        this.transitionPayloadToString = f;
+    }
     /**
      * Get the label of a state
      * @param state The AbstractState object we are searching for
@@ -482,13 +490,12 @@ class FSM extends events_1.EventEmitter {
         };
         let rv = `${divider}\n${spaceOut('FSM')}\n${divider}\n`;
         this.getStates().forEach((state) => {
-            rv += `${activeState === state ? '*' : ' '}${pad(state + ':', stateWidth)} ${this.getStatePayload(state)}\n`;
+            rv += `${activeState === state ? '*' : ' '}${pad(state + ':', stateWidth)} ${this.statePayloadToString(this.getStatePayload(state))}\n`;
             const outgoingTransitions = this.getOutgoingTransitions(state);
             if (outgoingTransitions.length > 0) {
                 outgoingTransitions.forEach((t) => {
-                    const payload = this.getTransitionPayload(t);
                     rv += pad(`${' '.repeat(tabWidth)} --(${t})--> ${this.getTransitionTo(t)}`, 30);
-                    rv += `: ${this.getTransitionPayload(t)}\n`;
+                    rv += `: ${this.transitionPayloadToString(this.getTransitionPayload(t))}\n`;
                 });
             }
         });

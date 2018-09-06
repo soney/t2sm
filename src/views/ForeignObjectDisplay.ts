@@ -25,6 +25,7 @@ export class ForeignObjectDisplay extends EventEmitter {
     };
     public getPayload(): any { return this.payload; }
     public setDimensions(width: number, height: number): void {
+        // console.log(width, height);
         this.element.setAttribute('width', `${width}`);
         this.element.setAttribute('height', `${height}`);
         this.emit('setDimensions', {width, height});

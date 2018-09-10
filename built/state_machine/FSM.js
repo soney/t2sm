@@ -657,6 +657,49 @@ class FSM extends events_1.EventEmitter {
         return result;
     }
     ;
+    serialize() {
+        const result = {
+            startState: this.getStartState(),
+            states: {},
+            transitions: {}
+        };
+        const activeState = this.getActiveState();
+        this.getStates().forEach((state) => {
+            result.states[state] = {
+                payload: this.getStatePayload(state),
+                active: activeState === state
+            };
+        });
+        this.getTransitions().forEach((transition) => {
+            result.transitions[transition] = {
+                payload: this.getTransitionPayload(transition),
+                alias: this.getTransitionAlias(transition),
+                from: this.getTransitionFrom(transition),
+                to: this.getTransitionTo(transition),
+            };
+        });
+        return result;
+    }
+    static deserialize(data, fsm = new FSM()) {
+        lodash_1.each(data.states, (state, label) => {
+            const { active, payload } = state;
+            if (label === data.startState) {
+                fsm.setStatePayload(label, payload);
+            }
+            else {
+                fsm.addState(payload, label);
+            }
+            if (active) {
+                fsm.setActiveState(label);
+            }
+        });
+        lodash_1.each(data.transitions, (transition, label) => {
+            const { from, to, payload, alias } = transition;
+            fsm.addTransition(from, to, alias, payload, label);
+        });
+        return fsm;
+    }
+    ;
 }
 exports.FSM = FSM;
 ;

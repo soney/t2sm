@@ -1,7 +1,7 @@
 import {AbstractState, StartState, State, ActiveEvent, NotActiveEvent, SPayloadChangedEvent, SRemovedEvent} from './State';
 import {Transition, FromStateChangedEvent, ToStateChangedEvent, TPayloadChangedEvent, FireEvent, AliasChangedEvent, TRemovedEvent} from './Transition';
 import { EventEmitter } from 'events';
-import {keys, forEach, isString} from 'lodash';
+import {each, keys, forEach, isString} from 'lodash';
 
 export interface StateAddedEvent {
     state: string,
@@ -80,6 +80,24 @@ export type JSONFSM = {
             onEntry?: string[]
         }
     }
+};
+
+export type SerializedState = {
+    payload: any,
+    active: boolean
+};
+
+export type SerializedTransition = {
+    payload: any;
+    alias: string;
+    from: string;
+    to: string;
+};
+
+export type SerializedFSM = {
+    startState: string
+    states: { [name: string]: SerializedState },
+    transitions: { [name: string]: SerializedTransition }
 };
 
 export class FSM<S,T> extends EventEmitter {
@@ -696,5 +714,48 @@ export class FSM<S,T> extends EventEmitter {
             }
         });
         return result;
+    };
+
+    public serialize(): SerializedFSM {
+        const result: SerializedFSM = {
+            startState: this.getStartState(),
+            states: {},
+            transitions: {}
+        };
+        const activeState = this.getActiveState();
+        this.getStates().forEach((state: string) => {
+            result.states[state] = {
+                payload: this.getStatePayload(state),
+                active: activeState === state
+            }
+        });
+        this.getTransitions().forEach((transition: string) => {
+            result.transitions[transition] = {
+                payload: this.getTransitionPayload(transition),
+                alias: this.getTransitionAlias(transition),
+                from: this.getTransitionFrom(transition),
+                to: this.getTransitionTo(transition),
+            }
+        });
+        return result;
+    }
+
+    public static deserialize(data: SerializedFSM, fsm: FSM<any, any> = new FSM<any, any>()): FSM<any, any> {
+        each(data.states, (state, label) => {
+            const { active, payload } = state;
+            if(label === data.startState) {
+                fsm.setStatePayload(label, payload);
+            } else {
+                fsm.addState(payload, label);
+            }
+            if(active) {
+                fsm.setActiveState(label);
+            }
+        });
+        each(data.transitions, (transition, label) => {
+            const { from, to, payload, alias } = transition;
+            fsm.addTransition(from, to, alias, payload, label);
+        });
+        return fsm;
     };
 };

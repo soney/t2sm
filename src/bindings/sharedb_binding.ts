@@ -1,4 +1,4 @@
-import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent} from '../state_machine/FSM';
+import {FSM, StateAddedEvent, StateRemovedEvent, TransitionAddedEvent, TransitionRemovedEvent, TransitionFromStateChangedEvent, TransitionToStateChangedEvent, StatePayloadChangedEvent, TransitionPayloadChangedEvent, TransitionAliasChangedEvent, ActiveStateChangedEvent, SerializedFSM} from '../state_machine/FSM';
 import {each, isEqual, has} from 'lodash';
 import {SDBDoc} from 'sdb-ts';
 
@@ -163,47 +163,17 @@ export class SDBBinding {
         this.fsm.on('transitionFromStateChanged', this.onTransitionFromStateChanged);
     };
     private syncFSMToSDB():void {
-        const data:JSONFSM = {
-            startState: this.fsm.getStartState(),
-            states: {},
-            transitions: {}
-        };
-        this.fsm.getStates().forEach((stateName: string) => {
-            const payload = this.fsm.getStatePayload(stateName);
-            const active = this.fsm.getActiveState() === stateName;
-            data.states[stateName] = { payload, active };
-        });
-        this.fsm.getTransitions().forEach((transitionName: string) => {
-            const from = this.fsm.getTransitionFrom(transitionName);
-            const to = this.fsm.getTransitionTo(transitionName);
-            const payload = this.fsm.getTransitionPayload(transitionName);
-            const alias = this.fsm.getTransitionAlias(transitionName);
-            data.transitions[transitionName] = { from, to, payload, alias };
-        });
+        const data:SerializedFSM = this.fsm.serialize();
 
         this.ignoreSDBChanges = true;
         this.doc.submitObjectReplaceOp(this.path, data);
         this.ignoreSDBChanges = false;
     };
     private syncSDBToFSM():void {
-        const data = this.doc.traverse(this.path) as JSONFSM;
+        const data = this.doc.traverse(this.path) as SerializedFSM;
         if (data) {
             this.ignoreFSMChanges = true;
-            each(data.states, (state, label) => {
-                const { active, payload } = state;
-                if(label === data.startState) {
-                    this.fsm.setStatePayload(label, payload);
-                } else {
-                    this.fsm.addState(payload, label);
-                }
-                if(active) {
-                    this.fsm.setActiveState(label);
-                }
-            });
-            each(data.transitions, (transition, label) => {
-                const { from, to, payload, alias } = transition;
-                this.fsm.addTransition(from, to, alias, payload, label);
-            });
+            FSM.deserialize(data, this.fsm);
             this.ignoreFSMChanges = false;
         }
     };

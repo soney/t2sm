@@ -67,6 +67,25 @@ export declare type JSONFSM = {
         };
     };
 };
+export declare type SerializedState = {
+    payload: any;
+    active: boolean;
+};
+export declare type SerializedTransition = {
+    payload: any;
+    alias: string;
+    from: string;
+    to: string;
+};
+export declare type SerializedFSM = {
+    startState: string;
+    states: {
+        [name: string]: SerializedState;
+    };
+    transitions: {
+        [name: string]: SerializedTransition;
+    };
+};
 export declare class FSM<S, T> extends EventEmitter {
     private startState;
     private activeState;
@@ -289,4 +308,6 @@ export declare class FSM<S, T> extends EventEmitter {
      * Converts the current FSM into a JSON object readable by https://musing-rosalind-2ce8e7.netlify.com
      */
     toJSON(): JSONFSM;
+    serialize(): SerializedFSM;
+    static deserialize(data: SerializedFSM, fsm?: FSM<any, any>): FSM<any, any>;
 }

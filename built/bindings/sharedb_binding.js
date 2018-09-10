@@ -247,23 +247,7 @@ class SDBBinding {
     }
     ;
     syncFSMToSDB() {
-        const data = {
-            startState: this.fsm.getStartState(),
-            states: {},
-            transitions: {}
-        };
-        this.fsm.getStates().forEach((stateName) => {
-            const payload = this.fsm.getStatePayload(stateName);
-            const active = this.fsm.getActiveState() === stateName;
-            data.states[stateName] = { payload, active };
-        });
-        this.fsm.getTransitions().forEach((transitionName) => {
-            const from = this.fsm.getTransitionFrom(transitionName);
-            const to = this.fsm.getTransitionTo(transitionName);
-            const payload = this.fsm.getTransitionPayload(transitionName);
-            const alias = this.fsm.getTransitionAlias(transitionName);
-            data.transitions[transitionName] = { from, to, payload, alias };
-        });
+        const data = this.fsm.serialize();
         this.ignoreSDBChanges = true;
         this.doc.submitObjectReplaceOp(this.path, data);
         this.ignoreSDBChanges = false;
@@ -273,22 +257,7 @@ class SDBBinding {
         const data = this.doc.traverse(this.path);
         if (data) {
             this.ignoreFSMChanges = true;
-            lodash_1.each(data.states, (state, label) => {
-                const { active, payload } = state;
-                if (label === data.startState) {
-                    this.fsm.setStatePayload(label, payload);
-                }
-                else {
-                    this.fsm.addState(payload, label);
-                }
-                if (active) {
-                    this.fsm.setActiveState(label);
-                }
-            });
-            lodash_1.each(data.transitions, (transition, label) => {
-                const { from, to, payload, alias } = transition;
-                this.fsm.addTransition(from, to, alias, payload, label);
-            });
+            FSM_1.FSM.deserialize(data, this.fsm);
             this.ignoreFSMChanges = false;
         }
     }

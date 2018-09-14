@@ -28,5 +28,5 @@ export declare class ForeignObjectDisplay extends EventEmitter {
     getDisplayType(): DISPLAY_TYPE;
     getFSM(): FSM<any, any>;
 }
-export declare function displayName(fod: ForeignObjectDisplay): string;
+export declare const displayName: (fod: ForeignObjectDisplay) => void;
 export declare function displayValue(func: (fod: ForeignObjectDisplay) => string): (fod: ForeignObjectDisplay) => void;

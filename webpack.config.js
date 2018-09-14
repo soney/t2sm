@@ -1,7 +1,10 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: {
+        'main_bundle': './src/index.ts',
+        'fsmDisplay_bundle': './src/views/StateMachineDisplay.ts'
+    },
     devtool: 'inline-source-map',
     mode: "development",
     module: {
@@ -15,7 +18,7 @@ module.exports = {
         extensions: [ '.tsx', '.ts', '.js' ]
     },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'built')
     },
     externals: {

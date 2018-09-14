@@ -14,8 +14,9 @@ export declare class DagreBinding {
     private fsm;
     private stateOptions?;
     private transitionOptions?;
+    private graphOptions;
     private graph;
-    constructor(fsm: FSM<any, any>, stateOptions?: StateOptions, transitionOptions?: TransitionOptions);
+    constructor(fsm: FSM<any, any>, stateOptions?: StateOptions, transitionOptions?: TransitionOptions, graphOptions?: any);
     getGraph(): dagre.graphlib.Graph;
     private onStateAdded;
     private onStateRemoved;

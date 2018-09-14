@@ -25,7 +25,6 @@ export class ForeignObjectDisplay extends EventEmitter {
     };
     public getPayload(): any { return this.payload; }
     public setDimensions(width: number, height: number): void {
-        // console.log(width, height);
         this.element.setAttribute('width', `${width}`);
         this.element.setAttribute('height', `${height}`);
         this.emit('setDimensions', {width, height});
@@ -55,9 +54,14 @@ export class ForeignObjectDisplay extends EventEmitter {
     public getFSM(): FSM<any, any> { return this.fsm; };
 };
 
-export function displayName(fod: ForeignObjectDisplay): string {
-    return fod.getName();
-}
+export const displayName = displayValue((fod: ForeignObjectDisplay): string => {
+    const name = fod.getName();
+    if(name === fod.getFSM().getStartState()) {
+        return '';
+    } else {
+        return name;
+    }
+ });
 
 export function displayValue(func: (fod: ForeignObjectDisplay) => string): (fod: ForeignObjectDisplay) => void {
     return function(fod: ForeignObjectDisplay): void {

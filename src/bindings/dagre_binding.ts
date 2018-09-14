@@ -8,8 +8,8 @@ export type TransitionOptions = ((transition: string) => {[key: string]: any}) |
 export class DagreBinding {
     private graph: dagre.graphlib.Graph = new dagre.graphlib.Graph({ multigraph: true, directed: true });
 
-    public constructor(private fsm:FSM<any, any>, private stateOptions?:StateOptions, private transitionOptions?:TransitionOptions) {
-        this.graph.setGraph({});
+    public constructor(private fsm:FSM<any, any>, private stateOptions?:StateOptions, private transitionOptions?:TransitionOptions, private graphOptions: any = {}) {
+        this.graph.setGraph(graphOptions);
         this.fsm.getStates().forEach((state) => {
             this.graph.setNode(state, this.getStateOptions(state));
         });

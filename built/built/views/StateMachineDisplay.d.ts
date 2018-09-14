@@ -1,4 +1,6 @@
+import * as SVG from 'svg.js';
 import 'svg.pathmorphing.js';
+import * as dagre from 'dagre';
 import { FSM } from '..';
 import { ForeignObjectDisplay } from './ForeignObjectDisplay';
 export declare enum DISPLAY_TYPE {
@@ -6,8 +8,11 @@ export declare enum DISPLAY_TYPE {
     TRANSITION = 1
 }
 export interface SMDOptions {
+    showControls?: boolean;
     animationDuration?: number;
     transitionAnimationDuration?: number;
+    transitionThickness?: number;
+    padding?: number;
 }
 export declare class StateMachineDisplay {
     private fsm;
@@ -20,8 +25,6 @@ export declare class StateMachineDisplay {
     private graph;
     private states;
     private transitions;
-    private stateFODisplays;
-    private transitionFODisplays;
     private fsmState;
     private creatingTransitionFromState;
     private creatingTransitionToState;
@@ -29,7 +32,6 @@ export declare class StateMachineDisplay {
     private modifyingTransition;
     private hoveringState;
     private hoveringTransition;
-    private addStateButton;
     private addTransitionButton;
     private removeStateButton;
     private removeTransitionButton;
@@ -37,14 +39,20 @@ export declare class StateMachineDisplay {
     private startStateDimensions;
     private stateDimensions;
     private transitionLabelDimensions;
-    private colors;
-    private transitionThickness;
+    private addStateButton;
+    colors: {
+        [key: string]: string;
+    };
     private static optionDefaults;
-    private options;
-    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => string | void, options?: SMDOptions);
+    options: SMDOptions;
+    constructor(fsm: FSM<any, any>, element: HTMLElement, getForeignObjectViewport?: (el: ForeignObjectDisplay) => void, options?: SMDOptions);
     addTransition(fromLabel: string, toLabel: string, payload?: any): string;
     private resetLayout;
     private addViewForNewTransitions;
+    getSVG(): SVG.Doc;
+    getFSM(): FSM<any, any>;
+    getGraph(): dagre.graphlib.Graph;
+    getFOVGetter(): (el: ForeignObjectDisplay) => string | void;
     getTransitionColors(transitionName: string): {
         background: string;
         foreground: string;
@@ -55,33 +63,26 @@ export declare class StateMachineDisplay {
     };
     onTransitionFired(transition: string, event: any): void;
     private onIneligibleTransitionFired;
-    animateTransition(transition: string): void;
-    addState(payload?: any): string;
+    addState: (payload?: any) => string;
     private addStateClicked;
     private addTransitionClicked;
     private removeStateClicked;
     private removeTransitionClicked;
-    private addStateListeners;
-    private addTransitionListeners;
     private addViewForNewNodes;
     private removeViewForOldNodes;
     private removeViewForOldTransitions;
+    private mouseoverTransitionGroup;
+    private mouseoutTransitionGroup;
+    private mousedownTransitionGroup;
     private destroyTransitionCreationIntermediateData;
     private updateCreatingTransitionLine;
     private mousemoveWindow;
-    private mouseoverTransitionGroup;
-    private mouseoutTransitionGroup;
-    private mouseupTransitionGroup;
-    private mousedownTransitionGroup;
     private mousedownStateGroup;
-    private updateTransitionDisplay;
-    private updateStateDisplay;
     private mouseoutStateGroup;
     private mouseoverStateGroup;
     private keydownWindow;
     private mouseupWindow;
     private mouseupStateGroup;
-    private getArrowPath;
     private updateLayout;
     private forEachInGroup;
 }

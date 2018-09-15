@@ -202,6 +202,9 @@ export class StateMachineDisplay {
                 transitionDisplay.addListener('fire', () => {
                     this.fsm.fireTransition(name);
                 });
+                transitionDisplay.addListener('dimensionsChanged', () => {
+                    this.updateLayout();
+                });
             }
         });
     }
@@ -296,6 +299,9 @@ export class StateMachineDisplay {
                 });
                 sd.addListener('makeActive', () => {
                     this.fsm.setActiveState(node);
+                });
+                sd.addListener('dimensionsChanged', () => {
+                    this.updateLayout();
                 });
             }
         });

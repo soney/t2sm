@@ -283,7 +283,7 @@ class StateMachineDisplay {
             fill: this.colors.stateBackgroundColor
         });
         this.addStateButton.text('+').center(this.stateDimensions.width / 2, this.stateDimensions.height / 2);
-        this.addStateButton.click(this.addState);
+        this.addStateButton.click(() => this.addState());
         this.addViewForNewNodes();
         this.addViewForNewTransitions();
         this.updateLayout();

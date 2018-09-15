@@ -14,10 +14,10 @@
         const contents = document.getElementById("contents");
         const fsm = new t2sm.FSM();
 
-        // const s1 = fsm.addState();
+        const s1 = fsm.addState();
         // const s2 = fsm.addState();
         // const s3 = fsm.addState();
-        // const st = fsm.addTransition(fsm.getStartState(), s1);
+        const st = fsm.addTransition(fsm.getStartState(), s1);
         // const t12 = fsm.addTransition(s1, s2);
         // const t21 = fsm.addTransition(s2, s1);
         // const t13 = fsm.addTransition(s1, s3);

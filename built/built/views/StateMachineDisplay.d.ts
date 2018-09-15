@@ -40,6 +40,8 @@ export declare class StateMachineDisplay {
     private stateDimensions;
     private transitionLabelDimensions;
     private addStateButton;
+    private addStateRect;
+    private addStateText;
     colors: {
         [key: string]: string;
     };

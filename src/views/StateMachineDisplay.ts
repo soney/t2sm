@@ -63,24 +63,26 @@ export class StateMachineDisplay {
     private stateDimensions: Dimensions = { width: 80, height: 40 };
     private transitionLabelDimensions: Dimensions = {width: 120, height: 30};
     private addStateButton: SVG.G;
+    private addStateRect: SVG.Rect;
+    private addStateText: SVG.Text;
     public colors: {[key: string]: string} = {
-        selectColor: '#002366',
-        selectBackgroundColor: '#AAFFFF',
+        selectColor: '#007bff',
+        selectBackgroundColor: '#b8daff',
         startStateBackgroundColor: '#333',
-        stateBackgroundColor: '#AAA',
-        stateTextColor: '#444',
-        transitionLineColor: '#777',
-        transitionBackgroundColor: '#EEE',
-        creatingTransitionColor: '#F00',
-        activeColor: '#F00',
-        activeBackgroundColor: '#FAA'
+        stateBackgroundColor: '#f8f9fa',
+        stateTextColor: '#1b1e21',
+        transitionLineColor: '#212529',
+        transitionBackgroundColor: '#e2e3e5',
+        creatingTransitionColor: '#007bff',
+        activeColor: '#ffc107',
+        activeBackgroundColor: '#fff3cd'
     };
     private static optionDefaults: SMDOptions  = {
         showControls: true,
         transitionAnimationDuration: 300,
         animationDuration: 140,
-        transitionThickness: 3,
-        padding: 30
+        transitionThickness: 2,
+        padding: 50 
     };
     public options: SMDOptions;
 
@@ -111,10 +113,39 @@ export class StateMachineDisplay {
         this.svg = SVG(this.svgContainer);
 
         this.addStateButton = this.svg.group();
-        this.addStateButton.rect(this.stateDimensions.width, this.stateDimensions.height).attr({
-            fill: this.colors.stateBackgroundColor
+        this.addStateButton.style({
+            cursor: 'pointer'
+        })
+        this.addStateRect = this.addStateButton.rect(this.stateDimensions.width, this.stateDimensions.height).cy(this.stateDimensions.height / 2 + 2).attr({
+            fill: this.colors.stateBackgroundColor,
+            stroke: this.colors.stateTextColor,
+            strokeWidth: this.colors.strokeWidth
         });
-        this.addStateButton.text('+').center(this.stateDimensions.width/2, this.stateDimensions.height/2);
+        this.addStateText = this.addStateButton.text('+').center(this.stateDimensions.width/2, this.stateDimensions.height/2).attr({
+            color: this.colors.stateTextColor
+        }).style({
+            'user-select': 'none'
+        });
+
+        this.addStateButton.mouseover(() => {
+            this.addStateRect.attr({
+                fill: this.colors.selectBackgroundColor,
+                stroke: this.colors.selectColor
+            });
+            this.addStateText.attr({
+                color: this.colors.activeColor
+            });
+        });
+
+        this.addStateButton.mouseout(() => {
+            this.addStateRect.attr({
+                fill: this.colors.stateBackgroundColor,
+                stroke: this.colors.stateTextColor
+            });
+            this.addStateText.attr({
+                color: this.colors.stateTextColor
+            });
+        });
 
         this.addStateButton.click(() => this.addState());
 
@@ -564,6 +595,13 @@ export class StateMachineDisplay {
         this.transitions.forEach((transitionGroup) => {
             transitionGroup.updateLayout();
         });
+        if(this.options.animationDuration > 0) {
+            this.addStateRect.animate(this.options.animationDuration).cx(width/2);
+            this.addStateText.animate(this.options.animationDuration).cx(width/2);
+        } else {
+            this.addStateRect.cx(width/2);
+            this.addStateText.cx(width/2);
+        }
     }
     private forEachInGroup(group: SVG.G, selector: string, fn: (el: SVG.Element) => void): void {
         group.select(selector).each((i: number, members: SVG.Element[]) => {

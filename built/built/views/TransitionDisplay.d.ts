@@ -1,13 +1,10 @@
 import * as SVG from 'svg.js';
 import { StateMachineDisplay } from './StateMachineDisplay';
-import { SVGComponentDisplay } from './ComponentDisplay';
+import { SVGComponentDisplay, DialogButton } from './ComponentDisplay';
 export declare class SVGTransitionDisplay extends SVGComponentDisplay {
     private rect;
     private path;
-    private foreignObjectElement;
-    private removeControlsTimeout;
-    private deleteButton;
-    private fireButton;
+    protected dialogButtons: DialogButton[];
     constructor(stateMachineDisplay: StateMachineDisplay, edge: {
         v: string;
         w: string;
@@ -16,11 +13,6 @@ export declare class SVGTransitionDisplay extends SVGComponentDisplay {
         width: number;
         height: number;
     }, creatingTransitionLine?: SVG.G);
-    private onMouseout;
-    private showControls;
-    private hideControls;
-    private clearRemoveControlsTimeout;
-    private setRemoveControlsTimeout;
     animateFiring(): void;
     animateIneligibleFiring(): void;
     updateColors(): void;

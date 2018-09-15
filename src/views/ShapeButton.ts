@@ -5,26 +5,27 @@ export class SVGShapeButton extends EventEmitter {
     private group: SVG.G;
     private path: SVG.Path;
     private circle: SVG.Circle;
-    public constructor(private svg: SVG.Doc, private pathString: string, private x: number, private y: number, private r: number, private color: string, private activeColor: string, private thickness: number) {
+    public constructor(private svg: SVG.Doc | SVG.G, private pathString: string, private x: number, private y: number, private r: number, private color: string, private backgroundColor: string, private activeColor: string, private activeBackgroundColor: string, private thickness: number) {
         super();
         this.group = this.svg.group();
+        this.circle = this.group.circle(this.r).center(x, y).attr({
+            stroke: color,
+            'stroke-width': thickness,
+            fill: backgroundColor,
+            cursor: 'pointer'
+        });
         this.path = this.group.path(this.pathString).attr({
             stroke: color,
             'stroke-width': thickness,
             fill: 'none',
             cursor: 'pointer'
-        });
-        this.circle = this.group.circle(this.r).center(x, y).attr({
-            stroke: color,
-            'stroke-width': thickness,
-            'fill-opacity': 0.1,
-            fill: color,
-            cursor: 'pointer'
+        }).style({
+            'pointer-events': 'none'
         });
         this.group.mouseover(() => {
+            this.emit('mouseover');
             this.circle.animate(100).attr({
-                'fill-opacity': 0.2,
-                fill: activeColor,
+                fill: activeBackgroundColor,
                 stroke: activeColor
             });
             this.path.animate(100).attr({
@@ -32,9 +33,9 @@ export class SVGShapeButton extends EventEmitter {
             });
         });
         this.group.mouseout(() => {
+            this.emit('mouseout');
             this.circle.animate(100).attr({
-                'fill-opacity': 0.1,
-                fill: color,
+                fill: backgroundColor,
                 stroke: color
             });
             this.path.animate(100).attr({
@@ -79,6 +80,8 @@ export function getAPath(x: number, y: number, width: number, height: number): s
     return `M ${x - width/2} ${y + height/2}
     L ${x} ${y - height/2}
     L ${x + width/2} ${y + height/2}
+    M ${x - width/4} ${y}
+    h ${width/2}
     `;
 }
 export function getFPath(x: number, y: number, width: number, height: number): string {

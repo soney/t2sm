@@ -15,15 +15,15 @@
         const fsm = new t2sm.FSM();
 
         const s1 = fsm.addState();
-        // const s2 = fsm.addState();
+        const s2 = fsm.addState();
         // const s3 = fsm.addState();
         const st = fsm.addTransition(fsm.getStartState(), s1);
-        // const t12 = fsm.addTransition(s1, s2);
-        // const t21 = fsm.addTransition(s2, s1);
+        const t12 = fsm.addTransition(s1, s2);
+        const t21 = fsm.addTransition(s2, s1);
         // const t13 = fsm.addTransition(s1, s3);
-        // const fireStart = fsm.getFireFunction(st);
-        // const firet12 = fsm.getFireFunction(t12);
-        // const firet21 = fsm.getFireFunction(t21);
+        const fireStart = fsm.getFireFunction(st);
+        const firet12 = fsm.getFireFunction(t12);
+        const firet21 = fsm.getFireFunction(t21);
         // const fsm2 = new t2sm.FSM();
         // const contents2 = document.getElementById("contents2");
 
@@ -36,7 +36,7 @@
             body.appendChild(content);
             content.textContent = fod.getName();
             // if(fod.name === "transition_0") {
-                fod.setDimensions(200, 200);
+                // fod.setDimensions(200, 200);
             // }
         }
         new t2sm.StateMachineDisplay(fsm, contents, myDisplay);
@@ -56,11 +56,11 @@
         //     }
         //     fsm2.fireTransition(transition, event);
         // });
-        // fireStart();
-        // setInterval(firet12, 2000);
-        // setTimeout(() => {
-        //     setInterval(firet21, 2000);
-        // }, 1000);
+        fireStart();
+        setInterval(firet12, 2000);
+        setTimeout(() => {
+            setInterval(firet21, 2000);
+        }, 10);
 
         // console.log("Hello world");
     </script>

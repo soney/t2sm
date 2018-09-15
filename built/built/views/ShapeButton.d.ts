@@ -8,12 +8,14 @@ export declare class SVGShapeButton extends EventEmitter {
     private y;
     private r;
     private color;
+    private backgroundColor;
     private activeColor;
+    private activeBackgroundColor;
     private thickness;
     private group;
     private path;
     private circle;
-    constructor(svg: SVG.Doc, pathString: string, x: number, y: number, r: number, color: string, activeColor: string, thickness: number);
+    constructor(svg: SVG.Doc | SVG.G, pathString: string, x: number, y: number, r: number, color: string, backgroundColor: string, activeColor: string, activeBackgroundColor: string, thickness: number);
     remove(): void;
 }
 export declare function getArrowPath(x: number, y: number, width: number, arrowAngle: number, arrowLength: number): string;

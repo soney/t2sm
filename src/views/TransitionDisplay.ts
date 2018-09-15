@@ -4,7 +4,7 @@ import { each, extend, isString } from 'lodash';
 import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay';
 import { DISPLAY_TYPE, StateMachineDisplay } from './StateMachineDisplay';
 import { FSM } from '..';
-import { SVGComponentDisplay } from './ComponentDisplay';
+import { SVGComponentDisplay, DialogButton } from './ComponentDisplay';
 import { SVGShapeButton, getXPath, getFPath } from './ShapeButton';
 
 interface MorphableAnimation extends SVG.Animation {
@@ -14,10 +14,19 @@ interface MorphableAnimation extends SVG.Animation {
 export class SVGTransitionDisplay extends SVGComponentDisplay {
     private rect: SVG.Rect;
     private path: SVG.Path;
-    private foreignObjectElement: SVG.Bare;
-    private removeControlsTimeout: any;
-    private deleteButton: SVGShapeButton;
-    private fireButton: SVGShapeButton;
+
+    protected dialogButtons: DialogButton[] = [{
+            getShape: (x: number, y: number, r: number) => getXPath(x, y, r, 45),
+            callback: () => this.emit('delete'),
+            selectBackgroundColor: '#f8d7da',
+            selectColor: '#dc3545'
+        }, {
+            getShape: (x: number, y: number, r: number) => getFPath(x, y, 2*r/3, 4*r/5),
+            callback: () => this.emit('fire'),
+            selectBackgroundColor: this.stateMachineDisplay.colors.activeBackgroundColor,
+            selectColor: this.stateMachineDisplay.colors.activeColor
+        }
+    ];
 
     public constructor(stateMachineDisplay: StateMachineDisplay, edge: {v: string, w: string, name?: string}, dimensions: {width: number, height: number}, creatingTransitionLine?: SVG.G) {
         super(stateMachineDisplay, edge.name, DISPLAY_TYPE.TRANSITION, dimensions);
@@ -33,7 +42,7 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
         }
 
         this.rect = this.group.rect(this.dimensions.width, this.dimensions.height).fill(this.stateMachineDisplay.colors.transitionBackgroundColor).stroke(this.stateMachineDisplay.colors.transitionLineColor);
-        this.foreignObjectElement = this.group.element('foreignObject');
+        // this.foreignObjectElement = this.group.element('foreignObject');
         // const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, this.foreignObjectElement.node as any, this.name, DISPLAY_TYPE.TRANSITION);
         // console.log(foreignObjectDisplay);
         // foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
@@ -45,70 +54,6 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
         this.foreignObject.front();
         // this.updateLayout();
         this.updateColors();
-        if(this.stateMachineDisplay.options.showControls) {
-            this.group.mouseover(this.showControls);
-            this.group.mouseout(this.onMouseout);
-        }
-    }
-    private onMouseout = (): void => {
-        this.setRemoveControlsTimeout();
-    }
-    private showControls = (): void => {
-        const edge = this.getEdge();
-        const { points, x, y, width, height } = this.graph.edge(edge);
-
-        if(this.deleteButton) {
-            this.deleteButton.remove();
-        }
-        if(this.fireButton) {
-            this.fireButton.remove();
-        }
-        const r = 10;
-        const b1x = x + width/2 + r + 5;
-        const b1y = y - height/2 + r;
-        this.deleteButton = new SVGShapeButton(this.svg, getXPath(b1x, b1y, r, 45), b1x, b1y, 15, '#000', '#F00', 2);
-        const b2x = b1x;
-        const b2y = b1y + 2*r + 1;
-        this.fireButton = new SVGShapeButton(this.svg, getFPath(b2x, b2y, 2*r/3, 4*r/5), b2x, b2y, 15, '#000', '#F00', 2);
-
-        this.deleteButton.addListener('click', () => {
-            this.emit('delete');
-            this.hideControls();
-        });
-        this.deleteButton.addListener('mouseover', () => {
-            this.clearRemoveControlsTimeout();
-        })
-        this.deleteButton.addListener('mouseout', () => {
-            this.setRemoveControlsTimeout();
-        })
-        this.fireButton.addListener('click', () => {
-            this.emit('fire');
-            this.hideControls();
-        });
-        this.fireButton.addListener('mouseover', () => {
-            this.clearRemoveControlsTimeout();
-        })
-        this.fireButton.addListener('mouseout', () => {
-            this.setRemoveControlsTimeout();
-        })
-    };
-
-    private hideControls = (): void => {
-        if(this.deleteButton) {
-            this.deleteButton.remove();
-            this.deleteButton = null;
-        }
-        if(this.fireButton) {
-            this.fireButton.remove();
-            this.fireButton = null;
-        }
-    };
-    private clearRemoveControlsTimeout() {
-        clearTimeout(this.removeControlsTimeout);
-    }
-    private setRemoveControlsTimeout() {
-        this.clearRemoveControlsTimeout();
-        this.removeControlsTimeout = setTimeout(this.hideControls, 1000);
     }
 
     public animateFiring(): void {
@@ -146,7 +91,7 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
         const height = this.rect.height();
         this.rect.animate(25).size(width + 10, height + 10).center(cx, cy);
         this.rect.animate(75).size(width, height).center(cx, cy);
-        setTimeout(() => this.updateLayout(), 110);
+        // setTimeout(() => this.updateLayout(), 110);
     }
 
     public updateColors(): void {
@@ -159,6 +104,7 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
     public getPath(): SVG.Path { return this.path; }
 
     public updateLayout(): void {
+        super.updateLayout();
         const edge = this.getEdge();
         const { points, x, y, width, height } = this.graph.edge(edge);
 

@@ -1,38 +1,25 @@
 import { StateMachineDisplay } from './StateMachineDisplay';
-import { SVGComponentDisplay } from './ComponentDisplay';
+import { SVGComponentDisplay, DialogButton } from './ComponentDisplay';
 export declare class SVGStateDisplay extends SVGComponentDisplay {
     private rect;
-    private deleteButton;
-    private addOutgoingTransitionButton;
-    private makeActiveButton;
-    private removeControlsTimeout;
+    private updateColorTimeout;
+    protected dialogButtons: DialogButton[];
     constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {
         width: number;
         height: number;
     });
-    private clearRemoveControlsTimeout;
-    private setRemoveControlsTimeout;
-    private onMouseout;
-    private showControls;
-    private hideControls;
     private updateStateDisplay;
     updateLayout(): void;
     updateColors(delay?: number): void;
 }
 export declare class SVGStartStateDisplay extends SVGComponentDisplay {
     private circle;
-    private removeControlsTimeout;
-    private addOutgoingTransitionButton;
-    private makeActiveButton;
+    private updateColorTimeout;
+    protected dialogButtons: DialogButton[];
     constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {
         width: number;
         height: number;
     });
-    private clearRemoveControlsTimeout;
-    private setRemoveControlsTimeout;
-    private showControls;
-    private hideControls;
-    private onMouseout;
     private updateStateDisplay;
     updateLayout(): void;
     updateColors(delay?: number): void;

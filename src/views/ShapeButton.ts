@@ -75,3 +75,17 @@ export function getXPath(x: number, y: number, len: number, angle: number): stri
     M ${x + len/2*Math.cos(theta)} ${y - len/2*Math.sin(theta)}
     L ${x - len/2*Math.cos(theta)} ${y + len/2*Math.sin(theta)}`;
 }
+export function getAPath(x: number, y: number, width: number, height: number): string {
+    return `M ${x - width/2} ${y + height/2}
+    L ${x} ${y - height/2}
+    L ${x + width/2} ${y + height/2}
+    `;
+}
+export function getFPath(x: number, y: number, width: number, height: number): string {
+    return `M ${x + width/2} ${y - height/2}
+    h ${-width}
+    v ${height}
+    M ${x+width/2} ${y}
+    h ${-width}
+    `;
+}

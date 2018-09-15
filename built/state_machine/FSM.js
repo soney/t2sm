@@ -586,7 +586,7 @@ class FSM extends events_1.EventEmitter {
         transition.on('fire', (event) => {
             this.emit('transitionFiredEvent', {
                 transition: transitionLabel,
-                eligible: transition.isEligible(),
+                eligible: event.eligible,
                 event: event.event
             });
             this.emit('update');

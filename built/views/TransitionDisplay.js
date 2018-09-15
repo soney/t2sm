@@ -1,7 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-const ForeignObjectDisplay_1 = require("./ForeignObjectDisplay");
 const StateMachineDisplay_1 = require("./StateMachineDisplay");
 const ComponentDisplay_1 = require("./ComponentDisplay");
 const ShapeButton_1 = require("./ShapeButton");
@@ -17,10 +15,16 @@ class SVGTransitionDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             if (this.deleteButton) {
                 this.deleteButton.remove();
             }
+            if (this.fireButton) {
+                this.fireButton.remove();
+            }
             const r = 10;
             const b1x = x + width / 2 + r + 5;
             const b1y = y - height / 2 + r;
             this.deleteButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getXPath(b1x, b1y, r, 45), b1x, b1y, 15, '#000', '#F00', 2);
+            const b2x = b1x;
+            const b2y = b1y + 2 * r + 1;
+            this.fireButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getFPath(b2x, b2y, 2 * r / 3, 4 * r / 5), b2x, b2y, 15, '#000', '#F00', 2);
             this.deleteButton.addListener('click', () => {
                 this.emit('delete');
                 this.hideControls();
@@ -31,11 +35,25 @@ class SVGTransitionDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             this.deleteButton.addListener('mouseout', () => {
                 this.setRemoveControlsTimeout();
             });
+            this.fireButton.addListener('click', () => {
+                this.emit('fire');
+                this.hideControls();
+            });
+            this.fireButton.addListener('mouseover', () => {
+                this.clearRemoveControlsTimeout();
+            });
+            this.fireButton.addListener('mouseout', () => {
+                this.setRemoveControlsTimeout();
+            });
         };
         this.hideControls = () => {
             if (this.deleteButton) {
                 this.deleteButton.remove();
                 this.deleteButton = null;
+            }
+            if (this.fireButton) {
+                this.fireButton.remove();
+                this.fireButton = null;
             }
         };
         if (creatingTransitionLine) {
@@ -51,11 +69,14 @@ class SVGTransitionDisplay extends ComponentDisplay_1.SVGComponentDisplay {
         }
         this.rect = this.group.rect(this.dimensions.width, this.dimensions.height).fill(this.stateMachineDisplay.colors.transitionBackgroundColor).stroke(this.stateMachineDisplay.colors.transitionLineColor);
         this.foreignObjectElement = this.group.element('foreignObject');
-        const foreignObjectDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, this.foreignObjectElement.node, this.name, StateMachineDisplay_1.DISPLAY_TYPE.TRANSITION);
-        foreignObjectDisplay.on('setDimensions', (event) => {
-            const e = this.graph.edge(edge);
-            lodash_1.extend(e, { width: event.width, height: event.height });
-        });
+        // const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, this.foreignObjectElement.node as any, this.name, DISPLAY_TYPE.TRANSITION);
+        // console.log(foreignObjectDisplay);
+        // foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
+        //     console.log(event);
+        //     const edge = this.getEdge();
+        //     const e = this.graph.edge(edge);
+        //     extend(e, {width: event.width, height: event.height});
+        // });
         this.foreignObject.front();
         // this.updateLayout();
         this.updateColors();
@@ -112,15 +133,6 @@ class SVGTransitionDisplay extends ComponentDisplay_1.SVGComponentDisplay {
     }
     getGroup() { return this.group; }
     getPath() { return this.path; }
-    getEdge() {
-        let edge;
-        lodash_1.each(this.graph.edges(), (e) => {
-            if (e.name === this.name) {
-                edge = e;
-            }
-        });
-        return edge;
-    }
     updateLayout() {
         const edge = this.getEdge();
         const { points, x, y, width, height } = this.graph.edge(edge);

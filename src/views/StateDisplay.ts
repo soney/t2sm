@@ -5,12 +5,13 @@ import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay
 import { DISPLAY_TYPE, StateMachineDisplay } from './StateMachineDisplay';
 import { FSM } from '..';
 import { SVGComponentDisplay } from './ComponentDisplay';
-import { SVGShapeButton, getXPath, getArrowPath } from './ShapeButton';
+import { SVGShapeButton, getXPath, getArrowPath, getAPath } from './ShapeButton';
 
 export class SVGStateDisplay extends SVGComponentDisplay {
     private rect: SVG.Rect;
     private deleteButton: SVGShapeButton;
     private addOutgoingTransitionButton: SVGShapeButton;
+    private makeActiveButton: SVGShapeButton;
     private removeControlsTimeout: any;
 
     public constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {width: number, height: number}) {
@@ -44,13 +45,20 @@ export class SVGStateDisplay extends SVGComponentDisplay {
         if(this.addOutgoingTransitionButton) {
             this.addOutgoingTransitionButton.remove();
         }
+        if(this.makeActiveButton) {
+            this.makeActiveButton.remove();
+        }
         const r = 10;
         const b1x = x + width/2 + r + 5;
-        const b1y = y - height/2 + r;
+        const b1y = y - height/2 - r/2;
         this.deleteButton = new SVGShapeButton(this.svg, getXPath(b1x, b1y, r, 45), b1x, b1y, 15, '#000', '#F00', 2);
         const b2x = b1x;
         const b2y = b1y + 2*r + 1;
         this.addOutgoingTransitionButton = new SVGShapeButton(this.svg, getArrowPath(b2x, b2y, r, 45, 5), b2x, b2y, 15, '#000', '#F00', 2);
+
+        const b3x = b2x;
+        const b3y = b2y + 2*r + 1;
+        this.makeActiveButton = new SVGShapeButton(this.svg, getAPath(b3x, b3y, r, r), b3x, b3y, 15, '#000', '#F00', 2);
 
         this.deleteButton.addListener('click', () => {
             this.emit('delete');
@@ -58,6 +66,10 @@ export class SVGStateDisplay extends SVGComponentDisplay {
         });
         this.addOutgoingTransitionButton.addListener('click', () => {
             this.emit('addOutgoingTransition');
+            this.hideControls();
+        });
+        this.makeActiveButton.addListener('click', () => {
+            this.emit('makeActive');
             this.hideControls();
         });
         this.deleteButton.addListener('mouseover', () => {
@@ -72,6 +84,12 @@ export class SVGStateDisplay extends SVGComponentDisplay {
         this.addOutgoingTransitionButton.addListener('mouseout', () => {
             this.setRemoveControlsTimeout();
         })
+        this.makeActiveButton.addListener('mouseover', () => {
+            this.clearRemoveControlsTimeout();
+        })
+        this.makeActiveButton.addListener('mouseout', () => {
+            this.setRemoveControlsTimeout();
+        })
     };
 
     private hideControls = (): void => {
@@ -82,6 +100,10 @@ export class SVGStateDisplay extends SVGComponentDisplay {
         if(this.addOutgoingTransitionButton) {
             this.addOutgoingTransitionButton.remove();
             this.addOutgoingTransitionButton = null;
+        }
+        if(this.makeActiveButton) {
+            this.makeActiveButton.remove();
+            this.makeActiveButton = null;
         }
     };
     private updateStateDisplay(): void {
@@ -119,6 +141,7 @@ export class SVGStartStateDisplay extends SVGComponentDisplay {
     private circle: SVG.Circle;
     private removeControlsTimeout: any;
     private addOutgoingTransitionButton: SVGShapeButton;
+    private makeActiveButton: SVGShapeButton;
 
     public constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {width: number, height: number}) {
         super(stateMachineDisplay, node, DISPLAY_TYPE.STATE, dimensions);
@@ -144,12 +167,22 @@ export class SVGStartStateDisplay extends SVGComponentDisplay {
         if(this.addOutgoingTransitionButton) {
             this.addOutgoingTransitionButton.remove();
         }
+        if(this.makeActiveButton) {
+            this.makeActiveButton.remove();
+        }
         const r = 10;
         const b1x = x + width/2 + r + 5;
-        const b1y = y - height/2 + r;
+        const b1y = y - height/2 - r/2;
         this.addOutgoingTransitionButton = new SVGShapeButton(this.svg, getArrowPath(b1x, b1y, r, 45, 5), b1x, b1y, 15, '#000', '#F00', 2);
+        const b2x = b1x;
+        const b2y = b1y + height * 2;
+        this.makeActiveButton = new SVGShapeButton(this.svg, getAPath(b2x, b2y, r, r), b2x, b2y, 15, '#000', '#F00', 2);
         this.addOutgoingTransitionButton.addListener('click', () => {
             this.emit('addOutgoingTransition');
+            this.hideControls();
+        });
+        this.makeActiveButton.addListener('click', () => {
+            this.emit('makeActive');
             this.hideControls();
         });
         this.addOutgoingTransitionButton.addListener('mouseover', () => {
@@ -158,12 +191,22 @@ export class SVGStartStateDisplay extends SVGComponentDisplay {
         this.addOutgoingTransitionButton.addListener('mouseout', () => {
             this.setRemoveControlsTimeout();
         })
+        this.makeActiveButton.addListener('mouseover', () => {
+            this.clearRemoveControlsTimeout();
+        })
+        this.makeActiveButton.addListener('mouseout', () => {
+            this.setRemoveControlsTimeout();
+        })
     };
 
     private hideControls = (): void => {
         if(this.addOutgoingTransitionButton) {
             this.addOutgoingTransitionButton.remove();
             this.addOutgoingTransitionButton = null;
+        }
+        if(this.makeActiveButton) {
+            this.makeActiveButton.remove();
+            this.makeActiveButton = null;
         }
     };
     private onMouseout = (): void => {

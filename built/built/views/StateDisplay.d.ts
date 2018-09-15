@@ -4,6 +4,7 @@ export declare class SVGStateDisplay extends SVGComponentDisplay {
     private rect;
     private deleteButton;
     private addOutgoingTransitionButton;
+    private makeActiveButton;
     private removeControlsTimeout;
     constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {
         width: number;
@@ -22,6 +23,7 @@ export declare class SVGStartStateDisplay extends SVGComponentDisplay {
     private circle;
     private removeControlsTimeout;
     private addOutgoingTransitionButton;
+    private makeActiveButton;
     constructor(stateMachineDisplay: StateMachineDisplay, node: string, dimensions: {
         width: number;
         height: number;

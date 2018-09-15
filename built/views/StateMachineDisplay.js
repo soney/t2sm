@@ -27,7 +27,6 @@ var DISPLAY_TYPE;
     DISPLAY_TYPE[DISPLAY_TYPE["TRANSITION"] = 1] = "TRANSITION";
 })(DISPLAY_TYPE = exports.DISPLAY_TYPE || (exports.DISPLAY_TYPE = {}));
 ;
-const ADD_STATE_LABEL = 'ADDSTATE';
 class StateMachineDisplay {
     constructor(fsm, element, getForeignObjectViewport = ForeignObjectDisplay_1.displayName, options) {
         this.fsm = fsm;
@@ -279,12 +278,11 @@ class StateMachineDisplay {
         this.element.appendChild(this.header);
         this.element.appendChild(this.svgContainer);
         this.svg = SVG(this.svgContainer);
-        this.graph.setNode(ADD_STATE_LABEL, lodash_1.clone(this.stateDimensions));
         this.addStateButton = this.svg.group();
-        this.addStateButton.rect().attr({
+        this.addStateButton.rect(this.stateDimensions.width, this.stateDimensions.height).attr({
             fill: this.colors.stateBackgroundColor
         });
-        this.addStateButton.text('+');
+        this.addStateButton.text('+').center(this.stateDimensions.width / 2, this.stateDimensions.height / 2);
         this.addStateButton.click(this.addState);
         this.addViewForNewNodes();
         this.addViewForNewTransitions();
@@ -360,6 +358,9 @@ class StateMachineDisplay {
                 transitionDisplay.addListener('delete', () => {
                     this.fsm.removeTransition(name);
                 });
+                transitionDisplay.addListener('fire', () => {
+                    this.fsm.fireTransition(name);
+                });
             }
         });
     }
@@ -405,7 +406,7 @@ class StateMachineDisplay {
     }
     addViewForNewNodes() {
         this.graph.nodes().forEach((node) => {
-            if (!this.states.has(node) && node !== ADD_STATE_LABEL) {
+            if (!this.states.has(node)) {
                 if (node === this.fsm.getStartState()) {
                     const stateDisplay = new StateDisplay_1.SVGStartStateDisplay(this, node, this.stateDimensions);
                     this.states.set(node, stateDisplay);
@@ -427,6 +428,9 @@ class StateMachineDisplay {
                     this.creatingTransitionFromState = node;
                     this.creatingTransitionLine = this.svg.group();
                     this.creatingTransitionLine.path('').stroke({ color: this.colors.creatingTransitionColor, width: this.options.transitionThickness }).fill('none').addClass('nopointer');
+                });
+                sd.addListener('makeActive', () => {
+                    this.fsm.setActiveState(node);
                 });
             }
         });
@@ -491,25 +495,6 @@ class StateMachineDisplay {
         this.transitions.forEach((transitionGroup) => {
             transitionGroup.updateLayout();
         });
-        const addStateInfo = this.graph.node(ADD_STATE_LABEL);
-        this.forEachInGroup(this.addStateButton, 'rect', (r) => {
-            r.size(addStateInfo.width, addStateInfo.height);
-            if (this.options.animationDuration > 0) {
-                r.animate(this.options.animationDuration).center(addStateInfo.x, addStateInfo.y);
-            }
-            else {
-                r.center(addStateInfo.x, addStateInfo.y);
-            }
-        });
-        this.forEachInGroup(this.addStateButton, 'text', (t) => {
-            if (this.options.animationDuration > 0) {
-                t.animate(this.options.animationDuration).center(addStateInfo.x, addStateInfo.y);
-            }
-            else {
-                t.center(addStateInfo.x, addStateInfo.y);
-            }
-        });
-        this.graph.setNode(ADD_STATE_LABEL, this.stateDimensions);
     }
     forEachInGroup(group, selector, fn) {
         group.select(selector).each((i, members) => {

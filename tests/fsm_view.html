@@ -24,19 +24,22 @@
         // const fireStart = fsm.getFireFunction(st);
         // const firet12 = fsm.getFireFunction(t12);
         // const firet21 = fsm.getFireFunction(t21);
-        new t2sm.StateMachineDisplay(fsm, contents);
         // const fsm2 = new t2sm.FSM();
         // const contents2 = document.getElementById("contents2");
 
-        // function myDisplay(fod) {
-        //     const body = document.createElement('body');
-        //     const content = document.createElement('div');
-        //     const element = fod.getElement();
-        //     element.appendChild(body);
-        //     body.setAttribute('style', 'font-family: Helvetica, Arial, Sans-Serif;')
-        //     body.appendChild(content);
-        //     content.textContent = fod.getName();
-        // }
+        function myDisplay(fod) {
+            const body = document.createElement('body');
+            const content = document.createElement('div');
+            const element = fod.getElement();
+            element.appendChild(body);
+            body.setAttribute('style', 'font-family: Helvetica, Arial, Sans-Serif;')
+            body.appendChild(content);
+            content.textContent = fod.getName();
+            if(fod.name === "transition_0") {
+                fod.setDimensions(200, 200);
+            }
+        }
+        new t2sm.StateMachineDisplay(fsm, contents, myDisplay);
         // new t2sm.StateMachineDisplay(fsm2, contents2, myDisplay);
         // fsm.on('transitionFiredEvent', (event) => {
         //     const {transition} = event;

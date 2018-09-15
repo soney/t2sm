@@ -16,6 +16,7 @@ export interface FireEvent {
     event: any;
     transition: Transition<any, any>;
     source: any;
+    eligible: boolean;
 }
 export interface AliasChangedEvent {
     alias: string;

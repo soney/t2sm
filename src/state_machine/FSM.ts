@@ -642,7 +642,7 @@ export class FSM<S,T> extends EventEmitter {
         transition.on('fire', (event: FireEvent):void => {
             this.emit('transitionFiredEvent', {
                 transition: transitionLabel,
-                eligible: transition.isEligible(),
+                eligible: event.eligible,
                 event: event.event
             } as TransitionFiredEvent);
             this.emit('update');

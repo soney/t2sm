@@ -18,7 +18,8 @@ export interface ToStateChangedEvent {
 export interface FireEvent {
     event: any,
     transition: Transition<any, any>,
-    source: any
+    source: any,
+    eligible: boolean
 };
 
 export interface AliasChangedEvent {
@@ -97,7 +98,7 @@ export class Transition<S, T> extends EventEmitter {
      */
     public fire(event?:any, source?:any):void {
         this.emit('fire', {
-            transition: this, event, source
+            transition: this, event, source, eligible: this.isEligible()
         } as FireEvent);
     };
 

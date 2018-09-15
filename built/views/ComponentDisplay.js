@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const lodash_1 = require("lodash");
 const ForeignObjectDisplay_1 = require("./ForeignObjectDisplay");
+const StateMachineDisplay_1 = require("./StateMachineDisplay");
 class SVGComponentDisplay extends events_1.EventEmitter {
     constructor(stateMachineDisplay, name, displayType, dimensions) {
         super();
@@ -17,13 +18,31 @@ class SVGComponentDisplay extends events_1.EventEmitter {
         this.foElement = this.foreignObject.node;
         this.foDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, this.foElement, name, displayType);
         this.foDisplay.on('setDimensions', (event) => {
-            const e = this.graph.node(name);
+            let entity;
+            let e;
+            if (displayType === StateMachineDisplay_1.DISPLAY_TYPE.TRANSITION) {
+                entity = this.getEdge();
+                e = this.graph.edge(entity);
+            }
+            else {
+                entity = this.name;
+                e = this.graph.node(entity);
+            }
             lodash_1.extend(e, { width: event.width, height: event.height });
             this.emit('dimensionsChanged');
         });
         this.addListeners();
         const getForeignObjectViewport = this.stateMachineDisplay.getFOVGetter();
         getForeignObjectViewport(this.foDisplay);
+    }
+    getEdge() {
+        let edge;
+        lodash_1.each(this.graph.edges(), (e) => {
+            if (e.name === this.name) {
+                edge = e;
+            }
+        });
+        return edge;
     }
     remove() {
         this.group.remove();

@@ -5,7 +5,7 @@ import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay
 import { DISPLAY_TYPE, StateMachineDisplay } from './StateMachineDisplay';
 import { FSM } from '..';
 import { SVGComponentDisplay } from './ComponentDisplay';
-import { SVGShapeButton, getXPath } from './ShapeButton';
+import { SVGShapeButton, getXPath, getFPath } from './ShapeButton';
 
 interface MorphableAnimation extends SVG.Animation {
     plot: (key: string) => this;
@@ -17,6 +17,7 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
     private foreignObjectElement: SVG.Bare;
     private removeControlsTimeout: any;
     private deleteButton: SVGShapeButton;
+    private fireButton: SVGShapeButton;
 
     public constructor(stateMachineDisplay: StateMachineDisplay, edge: {v: string, w: string, name?: string}, dimensions: {width: number, height: number}, creatingTransitionLine?: SVG.G) {
         super(stateMachineDisplay, edge.name, DISPLAY_TYPE.TRANSITION, dimensions);
@@ -33,11 +34,14 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
 
         this.rect = this.group.rect(this.dimensions.width, this.dimensions.height).fill(this.stateMachineDisplay.colors.transitionBackgroundColor).stroke(this.stateMachineDisplay.colors.transitionLineColor);
         this.foreignObjectElement = this.group.element('foreignObject');
-        const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, this.foreignObjectElement.node as any, this.name, DISPLAY_TYPE.TRANSITION);
-        foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
-            const e = this.graph.edge(edge);
-            extend(e, {width: event.width, height: event.height});
-        });
+        // const foreignObjectDisplay = new ForeignObjectDisplay(this.fsm, this.foreignObjectElement.node as any, this.name, DISPLAY_TYPE.TRANSITION);
+        // console.log(foreignObjectDisplay);
+        // foreignObjectDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
+        //     console.log(event);
+        //     const edge = this.getEdge();
+        //     const e = this.graph.edge(edge);
+        //     extend(e, {width: event.width, height: event.height});
+        // });
         this.foreignObject.front();
         // this.updateLayout();
         this.updateColors();
@@ -56,10 +60,17 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
         if(this.deleteButton) {
             this.deleteButton.remove();
         }
+        if(this.fireButton) {
+            this.fireButton.remove();
+        }
         const r = 10;
         const b1x = x + width/2 + r + 5;
         const b1y = y - height/2 + r;
         this.deleteButton = new SVGShapeButton(this.svg, getXPath(b1x, b1y, r, 45), b1x, b1y, 15, '#000', '#F00', 2);
+        const b2x = b1x;
+        const b2y = b1y + 2*r + 1;
+        this.fireButton = new SVGShapeButton(this.svg, getFPath(b2x, b2y, 2*r/3, 4*r/5), b2x, b2y, 15, '#000', '#F00', 2);
+
         this.deleteButton.addListener('click', () => {
             this.emit('delete');
             this.hideControls();
@@ -70,12 +81,26 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
         this.deleteButton.addListener('mouseout', () => {
             this.setRemoveControlsTimeout();
         })
+        this.fireButton.addListener('click', () => {
+            this.emit('fire');
+            this.hideControls();
+        });
+        this.fireButton.addListener('mouseover', () => {
+            this.clearRemoveControlsTimeout();
+        })
+        this.fireButton.addListener('mouseout', () => {
+            this.setRemoveControlsTimeout();
+        })
     };
 
     private hideControls = (): void => {
         if(this.deleteButton) {
             this.deleteButton.remove();
             this.deleteButton = null;
+        }
+        if(this.fireButton) {
+            this.fireButton.remove();
+            this.fireButton = null;
         }
     };
     private clearRemoveControlsTimeout() {
@@ -132,16 +157,6 @@ export class SVGTransitionDisplay extends SVGComponentDisplay {
 
     public getGroup(): SVG.G { return this.group; }
     public getPath(): SVG.Path { return this.path; }
-
-    private getEdge(): any {
-        let edge;
-        each(this.graph.edges(), (e) => {
-            if (e.name === this.name) {
-                edge = e;
-            }
-        });
-        return edge;
-    }
 
     public updateLayout(): void {
         const edge = this.getEdge();

@@ -81,4 +81,20 @@ function getXPath(x, y, len, angle) {
     L ${x - len / 2 * Math.cos(theta)} ${y + len / 2 * Math.sin(theta)}`;
 }
 exports.getXPath = getXPath;
+function getAPath(x, y, width, height) {
+    return `M ${x - width / 2} ${y + height / 2}
+    L ${x} ${y - height / 2}
+    L ${x + width / 2} ${y + height / 2}
+    `;
+}
+exports.getAPath = getAPath;
+function getFPath(x, y, width, height) {
+    return `M ${x + width / 2} ${y - height / 2}
+    h ${-width}
+    v ${height}
+    M ${x + width / 2} ${y}
+    h ${-width}
+    `;
+}
+exports.getFPath = getFPath;
 //# sourceMappingURL=ShapeButton.js.map

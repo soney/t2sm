@@ -1,6 +1,6 @@
 import * as SVG from 'svg.js';
 import { EventEmitter } from "events";
-import { extend, isString } from 'lodash';
+import { each, extend, isString } from 'lodash';
 import { ForeignObjectDisplay, SetDimensionsEvent } from './ForeignObjectDisplay';
 import { DISPLAY_TYPE, StateMachineDisplay } from './StateMachineDisplay';
 import { FSM } from '..';
@@ -27,7 +27,15 @@ export abstract class SVGComponentDisplay extends EventEmitter {
         this.foElement = this.foreignObject.node as any;
         this.foDisplay = new ForeignObjectDisplay(this.fsm, this.foElement, name, displayType);
         this.foDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
-            const e = this.graph.node(name);
+            let entity;
+            let e;
+            if(displayType === DISPLAY_TYPE.TRANSITION) {
+                entity = this.getEdge();
+                e = this.graph.edge(entity);
+            } else {
+                entity = this.name;
+                e = this.graph.node(entity);
+            }
             extend(e, {width: event.width, height: event.height});
             this.emit('dimensionsChanged');
         });
@@ -36,6 +44,16 @@ export abstract class SVGComponentDisplay extends EventEmitter {
         const getForeignObjectViewport = this.stateMachineDisplay.getFOVGetter();
         getForeignObjectViewport(this.foDisplay);
     }
+    protected getEdge(): any {
+        let edge;
+        each(this.graph.edges(), (e) => {
+            if (e.name === this.name) {
+                edge = e;
+            }
+        });
+        return edge;
+    }
+
 
     public remove(): void {
         this.group.remove();

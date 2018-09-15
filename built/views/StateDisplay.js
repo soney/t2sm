@@ -17,19 +17,29 @@ class SVGStateDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             if (this.addOutgoingTransitionButton) {
                 this.addOutgoingTransitionButton.remove();
             }
+            if (this.makeActiveButton) {
+                this.makeActiveButton.remove();
+            }
             const r = 10;
             const b1x = x + width / 2 + r + 5;
-            const b1y = y - height / 2 + r;
+            const b1y = y - height / 2 - r / 2;
             this.deleteButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getXPath(b1x, b1y, r, 45), b1x, b1y, 15, '#000', '#F00', 2);
             const b2x = b1x;
             const b2y = b1y + 2 * r + 1;
             this.addOutgoingTransitionButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getArrowPath(b2x, b2y, r, 45, 5), b2x, b2y, 15, '#000', '#F00', 2);
+            const b3x = b2x;
+            const b3y = b2y + 2 * r + 1;
+            this.makeActiveButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getAPath(b3x, b3y, r, r), b3x, b3y, 15, '#000', '#F00', 2);
             this.deleteButton.addListener('click', () => {
                 this.emit('delete');
                 this.hideControls();
             });
             this.addOutgoingTransitionButton.addListener('click', () => {
                 this.emit('addOutgoingTransition');
+                this.hideControls();
+            });
+            this.makeActiveButton.addListener('click', () => {
+                this.emit('makeActive');
                 this.hideControls();
             });
             this.deleteButton.addListener('mouseover', () => {
@@ -44,6 +54,12 @@ class SVGStateDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             this.addOutgoingTransitionButton.addListener('mouseout', () => {
                 this.setRemoveControlsTimeout();
             });
+            this.makeActiveButton.addListener('mouseover', () => {
+                this.clearRemoveControlsTimeout();
+            });
+            this.makeActiveButton.addListener('mouseout', () => {
+                this.setRemoveControlsTimeout();
+            });
         };
         this.hideControls = () => {
             if (this.deleteButton) {
@@ -53,6 +69,10 @@ class SVGStateDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             if (this.addOutgoingTransitionButton) {
                 this.addOutgoingTransitionButton.remove();
                 this.addOutgoingTransitionButton = null;
+            }
+            if (this.makeActiveButton) {
+                this.makeActiveButton.remove();
+                this.makeActiveButton = null;
             }
         };
         this.rect = this.group.rect(dimensions.width, dimensions.height);
@@ -111,12 +131,22 @@ class SVGStartStateDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             if (this.addOutgoingTransitionButton) {
                 this.addOutgoingTransitionButton.remove();
             }
+            if (this.makeActiveButton) {
+                this.makeActiveButton.remove();
+            }
             const r = 10;
             const b1x = x + width / 2 + r + 5;
-            const b1y = y - height / 2 + r;
+            const b1y = y - height / 2 - r / 2;
             this.addOutgoingTransitionButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getArrowPath(b1x, b1y, r, 45, 5), b1x, b1y, 15, '#000', '#F00', 2);
+            const b2x = b1x;
+            const b2y = b1y + height * 2;
+            this.makeActiveButton = new ShapeButton_1.SVGShapeButton(this.svg, ShapeButton_1.getAPath(b2x, b2y, r, r), b2x, b2y, 15, '#000', '#F00', 2);
             this.addOutgoingTransitionButton.addListener('click', () => {
                 this.emit('addOutgoingTransition');
+                this.hideControls();
+            });
+            this.makeActiveButton.addListener('click', () => {
+                this.emit('makeActive');
                 this.hideControls();
             });
             this.addOutgoingTransitionButton.addListener('mouseover', () => {
@@ -125,11 +155,21 @@ class SVGStartStateDisplay extends ComponentDisplay_1.SVGComponentDisplay {
             this.addOutgoingTransitionButton.addListener('mouseout', () => {
                 this.setRemoveControlsTimeout();
             });
+            this.makeActiveButton.addListener('mouseover', () => {
+                this.clearRemoveControlsTimeout();
+            });
+            this.makeActiveButton.addListener('mouseout', () => {
+                this.setRemoveControlsTimeout();
+            });
         };
         this.hideControls = () => {
             if (this.addOutgoingTransitionButton) {
                 this.addOutgoingTransitionButton.remove();
                 this.addOutgoingTransitionButton = null;
+            }
+            if (this.makeActiveButton) {
+                this.makeActiveButton.remove();
+                this.makeActiveButton = null;
             }
         };
         this.onMouseout = () => {

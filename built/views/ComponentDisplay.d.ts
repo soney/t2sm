@@ -22,6 +22,7 @@ export declare abstract class SVGComponentDisplay extends EventEmitter {
         width: number;
         height: number;
     });
+    protected getEdge(): any;
     remove(): void;
     getForeignObjectDisplay(): ForeignObjectDisplay;
     private addListeners;

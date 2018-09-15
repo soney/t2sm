@@ -18,3 +18,5 @@ export declare class SVGShapeButton extends EventEmitter {
 }
 export declare function getArrowPath(x: number, y: number, width: number, arrowAngle: number, arrowLength: number): string;
 export declare function getXPath(x: number, y: number, len: number, angle: number): string;
+export declare function getAPath(x: number, y: number, width: number, height: number): string;
+export declare function getFPath(x: number, y: number, width: number, height: number): string;

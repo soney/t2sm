@@ -7,6 +7,7 @@ export declare class SVGTransitionDisplay extends SVGComponentDisplay {
     private foreignObjectElement;
     private removeControlsTimeout;
     private deleteButton;
+    private fireButton;
     constructor(stateMachineDisplay: StateMachineDisplay, edge: {
         v: string;
         w: string;
@@ -25,7 +26,6 @@ export declare class SVGTransitionDisplay extends SVGComponentDisplay {
     updateColors(): void;
     getGroup(): SVG.G;
     getPath(): SVG.Path;
-    private getEdge;
     updateLayout(): void;
     static getArrowPath(sndLstPnt: {
         x: number;

@@ -1,6 +1,6 @@
 {
   "name": "t2sm",
-  "version": "0.1.3",
+  "version": "0.1.4-beta",
   "description": "Trace 2 State Machine",
   "main": "built/index.js",
   "Private": "true",

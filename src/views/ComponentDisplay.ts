@@ -37,8 +37,7 @@ export abstract class SVGComponentDisplay extends EventEmitter {
         this.group = this.svg.group();
 
         this.foreignObject = this.group.element('foreignObject').center(this.svg.width()/2, dimensions.height/2);
-        this.foElement = this.foreignObject.node as any;
-        this.foDisplay = new ForeignObjectDisplay(this.fsm, this.foElement, name, displayType);
+        this.foDisplay = new ForeignObjectDisplay(this.fsm, this.foreignObject, name, displayType, dimensions);
         this.foDisplay.on('setDimensions', (event: SetDimensionsEvent) => {
             const e = this.getDimensions();
             extend(e, {width: event.width, height: event.height});

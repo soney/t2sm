@@ -1,3 +1,4 @@
+import * as SVG from 'svg.js';
 import { EventEmitter } from "events";
 import { DISPLAY_TYPE } from "./StateMachineDisplay";
 import { FSM } from "..";
@@ -8,8 +9,15 @@ export interface SetDimensionsEvent {
 
 export class ForeignObjectDisplay extends EventEmitter {
     private payload: any;
-    public constructor(private fsm: FSM<any, any>, private element: SVGForeignObjectElement, private name: string, private displayType: DISPLAY_TYPE) {
+    private element: SVGForeignObjectElement;
+    private shownWidth: number;
+    private shownHeight: number;
+
+    public constructor(private fsm: FSM<any, any>, private foreignObject: SVG.Bare, private name: string, private displayType: DISPLAY_TYPE, initialDimensions: { width: number, height: number }) {
         super();
+        this.element = this.foreignObject.node as any;
+        this.shownWidth = initialDimensions.width;
+        this.shownHeight = initialDimensions.height;
         this.initialize();
     }
     protected initialize(): void {
@@ -19,15 +27,31 @@ export class ForeignObjectDisplay extends EventEmitter {
             this.payload = this.fsm.getTransitionPayload(this.name);
         }
     }
+    public hide(): void {
+        if(this.displayType === DISPLAY_TYPE.TRANSITION) {
+            this.setDimensions(0, 0, false);
+        } else {
+            this.setDimensions(1, 1, false);
+        }
+        this.foreignObject.hide();
+    }
+    public show(): void {
+        this.foreignObject.show();
+        this.setDimensions(this.shownWidth, this.shownHeight);
+    }
     public setPayload(payload: any): void {
         this.payload = payload;
         this.emit('setPayload', payload);
     };
     public getPayload(): any { return this.payload; }
-    public setDimensions(width: number, height: number): void {
+    public setDimensions(width: number, height: number, saveAsLast: boolean = true): void {
         this.element.setAttribute('width', `${width}`);
         this.element.setAttribute('height', `${height}`);
         this.emit('setDimensions', {width, height});
+        if (saveAsLast) {
+            this.shownWidth = width;
+            this.shownHeight = height;
+        }
     }
     public mouseEntered(): void {
         this.emit('mouseenter', { fod: this });

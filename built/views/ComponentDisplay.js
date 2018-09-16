@@ -52,8 +52,7 @@ class SVGComponentDisplay extends events_1.EventEmitter {
         this.graph = this.stateMachineDisplay.getGraph();
         this.group = this.svg.group();
         this.foreignObject = this.group.element('foreignObject').center(this.svg.width() / 2, dimensions.height / 2);
-        this.foElement = this.foreignObject.node;
-        this.foDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, this.foElement, name, displayType);
+        this.foDisplay = new ForeignObjectDisplay_1.ForeignObjectDisplay(this.fsm, this.foreignObject, name, displayType, dimensions);
         this.foDisplay.on('setDimensions', (event) => {
             const e = this.getDimensions();
             lodash_1.extend(e, { width: event.width, height: event.height });

@@ -3,12 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const StateMachineDisplay_1 = require("./StateMachineDisplay");
 class ForeignObjectDisplay extends events_1.EventEmitter {
-    constructor(fsm, element, name, displayType) {
+    constructor(fsm, foreignObject, name, displayType, initialDimensions) {
         super();
         this.fsm = fsm;
-        this.element = element;
+        this.foreignObject = foreignObject;
         this.name = name;
         this.displayType = displayType;
+        this.element = this.foreignObject.node;
+        this.shownWidth = initialDimensions.width;
+        this.shownHeight = initialDimensions.height;
         this.initialize();
     }
     initialize() {
@@ -19,16 +22,33 @@ class ForeignObjectDisplay extends events_1.EventEmitter {
             this.payload = this.fsm.getTransitionPayload(this.name);
         }
     }
+    hide() {
+        if (this.displayType === StateMachineDisplay_1.DISPLAY_TYPE.TRANSITION) {
+            this.setDimensions(0, 0, false);
+        }
+        else {
+            this.setDimensions(1, 1, false);
+        }
+        this.foreignObject.hide();
+    }
+    show() {
+        this.foreignObject.show();
+        this.setDimensions(this.shownWidth, this.shownHeight);
+    }
     setPayload(payload) {
         this.payload = payload;
         this.emit('setPayload', payload);
     }
     ;
     getPayload() { return this.payload; }
-    setDimensions(width, height) {
+    setDimensions(width, height, saveAsLast = true) {
         this.element.setAttribute('width', `${width}`);
         this.element.setAttribute('height', `${height}`);
         this.emit('setDimensions', { width, height });
+        if (saveAsLast) {
+            this.shownWidth = width;
+            this.shownHeight = height;
+        }
     }
     mouseEntered() {
         this.emit('mouseenter', { fod: this });

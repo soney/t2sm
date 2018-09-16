@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import * as SVG from 'svg.js';
 import { EventEmitter } from "events";
 import { DISPLAY_TYPE } from "./StateMachineDisplay";
 import { FSM } from "..";
@@ -8,15 +9,23 @@ export interface SetDimensionsEvent {
 }
 export declare class ForeignObjectDisplay extends EventEmitter {
     private fsm;
-    private element;
+    private foreignObject;
     private name;
     private displayType;
     private payload;
-    constructor(fsm: FSM<any, any>, element: SVGForeignObjectElement, name: string, displayType: DISPLAY_TYPE);
+    private element;
+    private shownWidth;
+    private shownHeight;
+    constructor(fsm: FSM<any, any>, foreignObject: SVG.Bare, name: string, displayType: DISPLAY_TYPE, initialDimensions: {
+        width: number;
+        height: number;
+    });
     protected initialize(): void;
+    hide(): void;
+    show(): void;
     setPayload(payload: any): void;
     getPayload(): any;
-    setDimensions(width: number, height: number): void;
+    setDimensions(width: number, height: number, saveAsLast?: boolean): void;
     mouseEntered(): void;
     mouseLeft(): void;
     stateActive(): void;

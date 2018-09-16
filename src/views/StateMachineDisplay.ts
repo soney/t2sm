@@ -173,14 +173,20 @@ export class StateMachineDisplay {
             stateDisplay.updateColors(2*this.options.transitionAnimationDuration/3);
         });
         this.fsm.on('statePayloadChanged', (event: StatePayloadChangedEvent) => {
-            const sd = this.states.get(event.state);
-            const fod = sd.getForeignObjectDisplay();
-            fod.setPayload(event.payload);
+            const { state } = event;
+            if(this.states.has(state)) {
+                const sd = this.states.get(state);
+                const fod = sd.getForeignObjectDisplay();
+                fod.setPayload(event.payload);
+            }
         });
         this.fsm.on('transitionPayloadChanged', (event: TransitionPayloadChangedEvent) => {
-            const td = this.transitions.get(event.transition);
-            const fod = td.getForeignObjectDisplay();
-            fod.setPayload(event.payload);
+            const { transition } = event;
+            if(this.transitions.has(transition)) {
+                const td = this.transitions.get(transition);
+                const fod = td.getForeignObjectDisplay();
+                fod.setPayload(event.payload);
+            }
         });
         this.fsm.on('stateAdded', () => {
             this.addViewForNewNodes();

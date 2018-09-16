@@ -443,8 +443,10 @@ class FSM extends events_1.EventEmitter {
         if (!this.hasState(toState)) {
             throw new Error(`State container does not have a state with label ${toState}`);
         }
-        const transition = this.getTransition(label);
-        transition.setToState(this.getState(toState));
+        if (this.getTransitionTo(label) !== toState) {
+            const transition = this.getTransition(label);
+            transition.setToState(this.getState(toState));
+        }
         return this;
     }
     ;
@@ -460,8 +462,10 @@ class FSM extends events_1.EventEmitter {
         if (!this.hasState(fromState)) {
             throw new Error(`State container does not have a state with label ${fromState}`);
         }
-        const transition = this.getTransition(label);
-        transition.setFromState(this.getState(fromState));
+        if (this.getTransitionFrom(label) !== fromState) {
+            const transition = this.getTransition(label);
+            transition.setFromState(this.getState(fromState));
+        }
         return this;
     }
     ;

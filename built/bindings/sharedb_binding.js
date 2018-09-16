@@ -260,6 +260,9 @@ class SDBBinding {
             FSM_1.FSM.deserialize(data, this.fsm);
             this.ignoreFSMChanges = false;
         }
+        else {
+            this.syncFSMToSDB();
+        }
     }
     ;
 }

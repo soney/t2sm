@@ -175,6 +175,8 @@ export class SDBBinding {
             this.ignoreFSMChanges = true;
             FSM.deserialize(data, this.fsm);
             this.ignoreFSMChanges = false;
+        } else {
+            this.syncFSMToSDB();
         }
     };
     private onStateAdded = (event:StateAddedEvent):void => {

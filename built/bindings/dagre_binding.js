@@ -30,16 +30,18 @@ class DagreBinding {
             const name = event.transition;
             const v = oldFrom;
             const w = this.fsm.getTransitionTo(name);
+            const oldData = this.graph.edge({ name, v, w });
             this.graph.removeEdge({ name, v, w });
-            this.graph.setEdge(this.fsm.getTransitionFrom(name), w, this.getTransitionOptions(name), name);
+            this.graph.setEdge(this.fsm.getTransitionFrom(name), w, oldData, name);
         };
         this.onTransitionToStateChanged = (event) => {
             const { oldTo } = event;
             const name = event.transition;
             const v = this.fsm.getTransitionFrom(name);
             const w = oldTo;
+            const oldData = this.graph.edge({ name, v, w });
             this.graph.removeEdge({ name, v, w });
-            this.graph.setEdge(v, this.fsm.getTransitionTo(name), this.getTransitionOptions(name), name);
+            this.graph.setEdge(v, this.fsm.getTransitionTo(name), oldData, name);
         };
         this.graph.setGraph(graphOptions);
         this.fsm.getStates().forEach((state) => {

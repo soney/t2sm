@@ -499,8 +499,10 @@ export class FSM<S,T> extends EventEmitter {
     public setTransitionTo(label:string, toState:string):this {
         if(!this.hasTransition(label)) { throw new Error(`State container does not have a transition with label ${label}`); }
         if(!this.hasState(toState)) { throw new Error(`State container does not have a state with label ${toState}`); }
-        const transition = this.getTransition(label);
-        transition.setToState(this.getState(toState));
+        if(this.getTransitionTo(label) !== toState) {
+            const transition = this.getTransition(label);
+            transition.setToState(this.getState(toState));
+        }
         return this;
     };
 
@@ -512,8 +514,10 @@ export class FSM<S,T> extends EventEmitter {
     public setTransitionFrom(label:string, fromState:string):this {
         if(!this.hasTransition(label)) { throw new Error(`State container does not have a transition with label ${label}`); }
         if(!this.hasState(fromState)) { throw new Error(`State container does not have a state with label ${fromState}`); }
-        const transition = this.getTransition(label);
-        transition.setFromState(this.getState(fromState));
+        if(this.getTransitionFrom(label) !== fromState) {
+            const transition = this.getTransition(label);
+            transition.setFromState(this.getState(fromState));
+        }
         return this;
     };
 
